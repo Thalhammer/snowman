@@ -78,9 +78,11 @@ TEST(ClassifyTest, ClassifySamples) {
 }
 
 TEST(ClassifyTest, ClassifySamplesAlma) {
-    ASSERT_TRUE(file_exists(root + "resources/models/Alma.pmdl"))
-        << "Missing private model, this does not mean, that private models dont work,"
-        << " just that my model is not present!";
+    auto model_exists = file_exists(root + "resources/models/Alma.pmdl");
+    if(!model_exists) {
+        GTEST_WARN("Missing private model, this does not mean, that private models dont work, just that my model is not present!");
+        return;
+    }
     
 	snowboy::Vector::ResetAllocStats();
 	snowboy::Matrix::ResetAllocStats();
@@ -108,7 +110,7 @@ TEST(ClassifyTest, ClassifySamplesAlma) {
 	std::cout << "\n";
 }
 
-TEST(DISABLED_ClassifyTest, ClassifySamplesReset) {
+TEST(ClassifyTest, ClassifySamplesReset) {
 	snowboy::SnowboyDetect detector(root + "resources/common.res", root + "resources/models/snowboy.umdl");
 	detector.SetSensitivity("0.5");
 	detector.SetAudioGain(1.0);
