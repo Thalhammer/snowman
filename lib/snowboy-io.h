@@ -40,14 +40,14 @@ namespace snowboy {
 
 	class Input {
 		std::ifstream m_stream;
-        bool m_is_binary;
+		bool m_is_binary;
 
 	public:
 		Input(const std::string& filename);
 		std::istream* Stream();
 		~Input();
 
-        bool is_binary() const noexcept { return m_is_binary; }
+		bool is_binary() const noexcept { return m_is_binary; }
 
 		void ParseFilename(const std::string& filename, std::string* real_name, std::streampos* offset) const;
 	};

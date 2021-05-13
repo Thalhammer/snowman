@@ -31,7 +31,7 @@ namespace snowboy {
 		int sampleRate;
 		bool applyFrontend;
 
-        void Register(const std::string& prefix, OptionsItf* opts);
+		void Register(const std::string& prefix, OptionsItf* opts);
 	};
 	struct PipelineVad : PipelineItf {
 		bool m_isInitialized;
@@ -57,8 +57,8 @@ namespace snowboy {
 		std::unique_ptr<RawNnetVadStreamOptions> m_rawNnetVadStreamOptions;
 		std::unique_ptr<VadStateStreamOptions> m_vadStateStream2Options;
 		std::vector<FrameInfo> m_eavesdropStreamFrameInfoVector;
-        bool field_xd0;
-        bool field_xd1;
+		bool field_xd0;
+		bool field_xd1;
 
 		virtual void RegisterOptions(const std::string& prefix, OptionsItf* opts) override;
 		virtual int GetPipelineSampleRate() const override;

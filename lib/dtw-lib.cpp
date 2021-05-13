@@ -19,7 +19,7 @@ namespace snowboy {
 	}
 
 	void SlidingDtw::UpdateDistance(int param_1, const MatrixBase& param_2) {
-        // TODO: This seems to generate the right results but I have no fucking clue whats going on
+		// TODO: This seems to generate the right results but I have no fucking clue whats going on
 		for (auto iVar25 = param_2.m_rows - param_1; iVar25 < param_2.m_rows; iVar25++) {
 			int local_b0, local_ac;
 			ComputeBandBoundary(iVar25, &local_b0, &local_ac);

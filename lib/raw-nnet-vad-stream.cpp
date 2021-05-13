@@ -1,17 +1,16 @@
+#include <frame-info.h>
+#include <iostream>
 #include <nnet-lib.h>
 #include <raw-nnet-vad-stream.h>
 #include <snowboy-debug.h>
 #include <snowboy-io.h>
 #include <snowboy-options.h>
-#include <iostream>
-#include <frame-info.h>
 
 namespace snowboy {
-	void RawNnetVadStreamOptions::Register(const std::string &prefix, OptionsItf *opts)
-	{
-	    opts->Register(prefix, "non-voice-index", "Index of the non-voice label in the neural network model output.", &non_voice_index);
-	    opts->Register(prefix, "non-voice-threshold", "Frames with non-voice probability higher than the given threshold will be treated as a non-voice frame.", &non_voice_threshold);
-	    opts->Register(prefix, "model-filename", "Filename of the neural network VAD model.", &model_filename);
+	void RawNnetVadStreamOptions::Register(const std::string& prefix, OptionsItf* opts) {
+		opts->Register(prefix, "non-voice-index", "Index of the non-voice label in the neural network model output.", &non_voice_index);
+		opts->Register(prefix, "non-voice-threshold", "Frames with non-voice probability higher than the given threshold will be treated as a non-voice frame.", &non_voice_threshold);
+		opts->Register(prefix, "model-filename", "Filename of the neural network VAD model.", &model_filename);
 	}
 
 	RawNnetVadStream::RawNnetVadStream(const RawNnetVadStreamOptions& options) {
@@ -68,12 +67,13 @@ namespace snowboy {
 			m_fieldx30.Resize(m.m_rows - nnet_output.m_rows, m.m_cols, MatrixResizeType::kUndefined);
 			m_fieldx30.CopyFromMat(m.RowRange(nnet_output.m_rows, m.m_cols - nnet_output.m_rows), MatrixTransposeType::kNoTrans);
 		}
-        for(int r = 0; r < nnet_output.m_rows; r++) {
-            auto f = nnet_output.m_data[r * nnet_output.m_stride + m_options.non_voice_index];
-            if(f <= m_options.non_voice_threshold) {
-                info->at(r).flags |= 0x1;
-            } else info->at(r).flags &= ~0x1;
-        }
+		for (int r = 0; r < nnet_output.m_rows; r++) {
+			auto f = nnet_output.m_data[r * nnet_output.m_stride + m_options.non_voice_index];
+			if (f <= m_options.non_voice_threshold) {
+				info->at(r).flags |= 0x1;
+			} else
+				info->at(r).flags &= ~0x1;
+		}
 		return sig;
 	}
 

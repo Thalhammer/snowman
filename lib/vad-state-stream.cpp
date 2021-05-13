@@ -45,9 +45,9 @@ namespace snowboy {
 
 	int VadStateStream::ProcessDataAndInfo(const MatrixBase& param_1, const std::vector<FrameInfo>& param_2, Matrix* param_3, std::vector<FrameInfo>* param_4) {
 		// TODO: The jumps in this function most likely where no jumps in the original,
-        // TODO: but I could not figure out a nice loop condition for them, so they stay for now
-        // TODO: Ideas are obviously welcome ;)
-        auto rows = m_someMatrix.m_rows + param_1.m_rows;
+		// TODO: but I could not figure out a nice loop condition for them, so they stay for now
+		// TODO: Ideas are obviously welcome ;)
+		auto rows = m_someMatrix.m_rows + param_1.m_rows;
 		if (rows == 0) {
 			param_3->Resize(0, 0);
 			param_4->clear();
@@ -124,10 +124,10 @@ namespace snowboy {
 				lVar9 = iVar12 + -1;
 				// Returns with cleanup and output clear
 				if ((tinfo[lVar9].flags & 1) == 0) {
-                    param_3->Resize(0, 0);
-		            param_4->clear();
-                    goto LAB_0016b940;
-                }
+					param_3->Resize(0, 0);
+					param_4->clear();
+					goto LAB_0016b940;
+				}
 				if ((local_c8 & 4) == 0) {
 					/* try { // try from 0016badb to 0016bb8f has its CatchHandler @ 0016c1d5 */
 					param_3->Resize(iVar12, local_b8.m_cols);
@@ -212,14 +212,13 @@ namespace snowboy {
 				}
 			}
 		}
-        return local_c8;
+		return local_c8;
 	}
 
 	VadStateStream::VadStateStream(const VadStateStreamOptions& options)
-        : m_options{options}, field_x28{std::max(0, m_options.extra_frame_adjust + m_options.min_voice_frames)},
-            field_x2c{UINT32_MAX}, field_x30{0}, m_vadstate{new VadState({m_options.min_non_voice_frames, m_options.min_voice_frames})},
-            field_xa0{1}, field_xa4{2}
-    {}
+		: m_options{options}, field_x28{std::max(0, m_options.extra_frame_adjust + m_options.min_voice_frames)},
+		  field_x2c{UINT32_MAX}, field_x30{0}, m_vadstate{new VadState({m_options.min_non_voice_frames, m_options.min_voice_frames})},
+		  field_xa0{1}, field_xa4{2} {}
 
 	int VadStateStream::Read(Matrix* mat, std::vector<FrameInfo>* info) {
 		if (field_xa0 != 1) {
@@ -252,8 +251,8 @@ namespace snowboy {
 		if ((uVar6 & 0x18) != 0) {
 			m_vadstate->Reset();
 		}
-        auto uVar5 = ProcessDataAndInfo(local_b8, local_98, mat, info);
-        if (uVar6 == 1) {
+		auto uVar5 = ProcessDataAndInfo(local_b8, local_98, mat, info);
+		if (uVar6 == 1) {
 			uVar6 |= uVar5;
 		} else {
 			if (m_someMatrix.m_rows < 1) {

@@ -7,13 +7,13 @@
 
 namespace snowboy {
 	void FramerStreamOptions::Register(const std::string& prefix, OptionsItf* opts) {
-	    opts->Register(prefix, "sample-rate", "Sampling rate.", &sample_rate);
-	    opts->Register(prefix, "frame-length", "Frame length in milliseconds.", &frame_length_ms);
-	    opts->Register(prefix, "frame-shift", "Frame shift in milliseconds.", &frame_shift_ms);
-	    opts->Register(prefix, "dither-coeff", "Dithering coefficient, 0 means no dithering at all.", &dither_coeff);
-	    opts->Register(prefix, "preemphasis-coeff", "Pre-emphasis coefficient.", &preemphasis_coeff);
-	    opts->Register(prefix, "subtract-mean", "If true, subtract mean from each frame.", &subtract_mean);
-	    opts->Register(prefix, "window-type", "Type of window to use, candidates are: hamming|hanning|rectangular|povey.", &window_type);
+		opts->Register(prefix, "sample-rate", "Sampling rate.", &sample_rate);
+		opts->Register(prefix, "frame-length", "Frame length in milliseconds.", &frame_length_ms);
+		opts->Register(prefix, "frame-shift", "Frame shift in milliseconds.", &frame_shift_ms);
+		opts->Register(prefix, "dither-coeff", "Dithering coefficient, 0 means no dithering at all.", &dither_coeff);
+		opts->Register(prefix, "preemphasis-coeff", "Pre-emphasis coefficient.", &preemphasis_coeff);
+		opts->Register(prefix, "subtract-mean", "If true, subtract mean from each frame.", &subtract_mean);
+		opts->Register(prefix, "window-type", "Type of window to use, candidates are: hamming|hanning|rectangular|povey.", &window_type);
 	}
 
 	FramerStream::FramerStream(const FramerStreamOptions& options)

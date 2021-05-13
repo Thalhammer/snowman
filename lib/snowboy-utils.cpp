@@ -110,20 +110,20 @@ namespace snowboy {
 		free(ptr);
 	}
 
-    template<>
+	template <>
 	void SplitStringToIntegers(const std::string& s1, const std::string& s2, std::vector<int>* out) {
-        std::vector<std::string> parts;
-        SplitStringToVector(s1, s2, &parts);
-        out->resize(parts.size());
-        for(size_t i = 0; i<parts.size(); i++) {
-            out->at(i) = ConvertStringToIntegerOrFloat<int>(parts[i]);
-        }
-    }
+		std::vector<std::string> parts;
+		SplitStringToVector(s1, s2, &parts);
+		out->resize(parts.size());
+		for (size_t i = 0; i < parts.size(); i++) {
+			out->at(i) = ConvertStringToIntegerOrFloat<int>(parts[i]);
+		}
+	}
 
-    template<>
+	template <>
 	void SplitStringToIntegers(const std::string& s1, const char* s2, std::vector<int>* out) {
-        SplitStringToIntegers(s1, std::string{s2}, out);
-    }
+		SplitStringToIntegers(s1, std::string{s2}, out);
+	}
 
 	void SplitStringToFloats(const std::string& s1, const std::string& s2, std::vector<float>* out) {
 		std::vector<std::string> parts;

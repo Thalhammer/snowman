@@ -1,10 +1,10 @@
 #pragma once
 #include <cmath>
 #include <cstdint>
+#include <iosfwd>
 #include <matrix-wrapper.h>
 #include <vector-wrapper.h>
 #include <vector>
-#include <iosfwd>
 
 namespace snowboy {
 	struct MatrixBase;
@@ -15,9 +15,9 @@ namespace snowboy {
 		int32_t m_first_offset;
 		int32_t m_last_offset;
 		std::vector<int32_t> m_offsets;
-        friend std::ostream& operator<<(std::ostream& os, const ChunkInfo& e);
-	public:
+		friend std::ostream& operator<<(std::ostream& os, const ChunkInfo& e);
 
+	public:
 		ChunkInfo() // default constructor we assume this object will not be used
 			: m_feat_dim(0), m_num_chunks(0),
 			  m_first_offset(0), m_last_offset(0),
@@ -56,7 +56,7 @@ namespace snowboy {
 		}
 	};
 	static_assert(sizeof(ChunkInfo) == 0x28);
-    std::ostream& operator<<(std::ostream& os, const ChunkInfo& e);
+	std::ostream& operator<<(std::ostream& os, const ChunkInfo& e);
 
 	class Component {
 	public:

@@ -19,7 +19,7 @@ namespace snowboy {
 	struct RawNnetVadStream : StreamItf {
 		RawNnetVadStreamOptions m_options;
 		std::unique_ptr<Nnet> m_nnet;
-        // TODO: Do we need this ?
+		// TODO: Do we need this ?
 		Matrix m_fieldx30;
 
 		RawNnetVadStream(const RawNnetVadStreamOptions& options);

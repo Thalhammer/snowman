@@ -54,12 +54,12 @@ TEST(ClassifyTest, ClassifySamples) {
 	snowboy::Vector::ResetAllocStats();
 	snowboy::Matrix::ResetAllocStats();
 	bool skipped_all = true;
-    for (auto& e : sample_map) {
-        if(!file_exists(root + "audio_samples/" + e.first)) {
-            GTEST_WARN("Skiping %s because audio file is missing!", e.first.c_str());
-            continue;
-        }
-        skipped_all = false;
+	for (auto& e : sample_map) {
+		if (!file_exists(root + "audio_samples/" + e.first)) {
+			GTEST_WARN("Skiping %s because audio file is missing!", e.first.c_str());
+			continue;
+		}
+		skipped_all = false;
 		auto data = read_sample_file(root + "audio_samples/" + e.first);
 		// Initializes Snowboy detector.
 		snowboy::SnowboyDetect detector(root + "resources/common.res", root + "resources/models/snowboy.umdl");
@@ -70,7 +70,7 @@ TEST(ClassifyTest, ClassifySamples) {
 		int result = detector.RunDetection(data.data(), data.size());
 		ASSERT_EQ(result, e.second) << "Failed to correctly classify sample " << e.first;
 	}
-    ASSERT_FALSE(skipped_all);
+	ASSERT_FALSE(skipped_all);
 	snowboy::Vector::PrintAllocStats(std::cout);
 	std::cout << "\n";
 	snowboy::Matrix::PrintAllocStats(std::cout);
@@ -78,21 +78,21 @@ TEST(ClassifyTest, ClassifySamples) {
 }
 
 TEST(ClassifyTest, ClassifySamplesAlma) {
-    auto model_exists = file_exists(root + "resources/models/Alma.pmdl");
-    if(!model_exists) {
-        GTEST_WARN("Missing private model, this does not mean, that private models dont work, just that my model is not present!");
-        return;
-    }
-    
+	auto model_exists = file_exists(root + "resources/models/Alma.pmdl");
+	if (!model_exists) {
+		GTEST_WARN("Missing private model, this does not mean, that private models dont work, just that my model is not present!");
+		return;
+	}
+
 	snowboy::Vector::ResetAllocStats();
 	snowboy::Matrix::ResetAllocStats();
-    bool skipped_all = true;
+	bool skipped_all = true;
 	for (auto& e : sample_map_pmdl) {
-        if(!file_exists(root + "audio_samples/" + e.first)) {
-            GTEST_WARN("Skiping %s because audio file is missing!", e.first.c_str());
-            continue;
-        }
-        skipped_all = false;
+		if (!file_exists(root + "audio_samples/" + e.first)) {
+			GTEST_WARN("Skiping %s because audio file is missing!", e.first.c_str());
+			continue;
+		}
+		skipped_all = false;
 		auto data = read_sample_file(root + "audio_samples/" + e.first);
 		// Initializes Snowboy detector.
 		snowboy::SnowboyDetect detector(root + "resources/common.res", root + "resources/models/Alma.pmdl");
@@ -103,7 +103,7 @@ TEST(ClassifyTest, ClassifySamplesAlma) {
 		int result = detector.RunDetection(data.data(), data.size());
 		ASSERT_EQ(result, e.second) << "Failed to correctly classify sample " << e.first;
 	}
-    ASSERT_FALSE(skipped_all);
+	ASSERT_FALSE(skipped_all);
 	snowboy::Vector::PrintAllocStats(std::cout);
 	std::cout << "\n";
 	snowboy::Matrix::PrintAllocStats(std::cout);
@@ -116,43 +116,43 @@ TEST(ClassifyTest, ClassifySamplesReset) {
 	detector.SetAudioGain(1.0);
 	detector.ApplyFrontend(false);
 
-    bool skipped_all = true;
+	bool skipped_all = true;
 	for (auto& e : sample_map) {
-        if(!file_exists(root + "audio_samples/" + e.first)) {
-            GTEST_WARN("Skiping %s because audio file is missing!", e.first.c_str());
-            continue;
-        }
-        skipped_all = false;
+		if (!file_exists(root + "audio_samples/" + e.first)) {
+			GTEST_WARN("Skiping %s because audio file is missing!", e.first.c_str());
+			continue;
+		}
+		skipped_all = false;
 		auto data = read_sample_file(root + "audio_samples/" + e.first);
 		int result = detector.RunDetection(data.data(), data.size());
 		ASSERT_EQ(result, e.second) << "Failed to correctly classify sample " << e.first;
 		ASSERT_TRUE(detector.Reset());
 	}
-    ASSERT_FALSE(skipped_all);
+	ASSERT_FALSE(skipped_all);
 }
 
 TEST(ClassifyTest, LoadModels) {
-    bool skipped_all = true;
+	bool skipped_all = true;
 	for (auto& e : model_map) {
-        if(!file_exists(root + "resources/models/" + e)) {
-            GTEST_WARN("Skiping %s because model is missing!", e.c_str());
-            continue;
-        }
-        skipped_all = false;
+		if (!file_exists(root + "resources/models/" + e)) {
+			GTEST_WARN("Skiping %s because model is missing!", e.c_str());
+			continue;
+		}
+		skipped_all = false;
 		snowboy::SnowboyDetect detector(root + "resources/common.res", root + "resources/models/" + e);
 		detector.SetAudioGain(1.0);
 		detector.ApplyFrontend(false);
 
 		for (auto& e : sample_map) {
-            if(!file_exists(root + "audio_samples/" + e.first)) {
-                GTEST_WARN("Skiping %s because audio file is missing!", e.first.c_str());
-                continue;
-            }
+			if (!file_exists(root + "audio_samples/" + e.first)) {
+				GTEST_WARN("Skiping %s because audio file is missing!", e.first.c_str());
+				continue;
+			}
 			auto data = read_sample_file(root + "audio_samples/" + e.first);
 			detector.RunDetection(data.data(), data.size());
 			//ASSERT_EQ(result, e.second) << "Failed to correctly classify sample " << e.first;
 			ASSERT_TRUE(detector.Reset());
 		}
 	}
-    ASSERT_FALSE(skipped_all);
+	ASSERT_FALSE(skipped_all);
 }

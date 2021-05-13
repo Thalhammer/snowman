@@ -4,27 +4,27 @@
 #include <string>
 
 namespace snowboy {
-    int global_snowboy_verbose_level = 0;
+	int global_snowboy_verbose_level = 0;
 
 	std::string GetStackTrace() {
-        std::string res{"\n[stack trace: ]\n"};
-        void* buffer[50];
-        auto nptrs = backtrace(buffer, sizeof(buffer)/sizeof(buffer[0]));
-        auto symbols = backtrace_symbols(buffer, nptrs);
+		std::string res{"\n[stack trace: ]\n"};
+		void* buffer[50];
+		auto nptrs = backtrace(buffer, sizeof(buffer) / sizeof(buffer[0]));
+		auto symbols = backtrace_symbols(buffer, nptrs);
 
-        for(int i=0; i<nptrs; i++) {
-            res += symbols[i];
-            res += "\n";
-        }
+		for (int i = 0; i < nptrs; i++) {
+			res += symbols[i];
+			res += "\n";
+		}
 
-        free(symbols);
+		free(symbols);
 
-        return res;
-    }
+		return res;
+	}
 
 	void SnowboyAssertFailure(int line, const std::string& file, const std::string& func, const std::string& cond) {
-	    snowboy::MySnowboyLogMsg msg { line, file, func, snowboy::SnowboyLogType::ASSERT_FAIL, 0 };
-	    msg << cond;
+		snowboy::MySnowboyLogMsg msg{line, file, func, snowboy::SnowboyLogType::ASSERT_FAIL, 0};
+		msg << cond;
 	}
 
 	MySnowboyLogMsg::MySnowboyLogMsg(int line, const std::string& file, const std::string& function, const SnowboyLogType& type, int)

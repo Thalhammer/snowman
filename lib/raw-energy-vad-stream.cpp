@@ -1,11 +1,11 @@
 #include <cmath>
 #include <frame-info.h>
+#include <iostream>
 #include <limits>
 #include <raw-energy-vad-stream.h>
 #include <snowboy-debug.h>
 #include <snowboy-options.h>
 #include <vector-wrapper.h>
-#include <iostream>
 
 namespace snowboy {
 	void RawEnergyVadStreamOptions::Register(const std::string& prefix, OptionsItf* opts) {

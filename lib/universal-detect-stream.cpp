@@ -204,7 +204,7 @@ namespace snowboy {
 
 	float UniversalDetectStream::HotwordDtwSearch(int, int) const {
 		SNOWBOY_ERROR() << "Not implemented";
-        return 0.0f;
+		return 0.0f;
 		// TODO:: This is unused in all models I have, but we should still implement it at some point
 	}
 
@@ -220,13 +220,13 @@ namespace snowboy {
 
 	float UniversalDetectStream::HotwordPiecewiseSearch(int, int) const {
 		SNOWBOY_ERROR() << "Not implemented";
-        return 0.0f;
+		return 0.0f;
 		// TODO:: This is unused in all models I have, but we should still implement it at some point
 	}
 
 	float UniversalDetectStream::HotwordViterbiSearch(int param_1, int param_2) const {
 		return HotwordNaiveSearch(param_1, param_2);
-        // TODO: Implement Viterbi search
+		// TODO: Implement Viterbi search
 		std::vector<float> x;
 		x.resize(field_x88[param_1][param_2].size(), -std::numeric_limits<float>::max());
 		x[0] = 0.0f;
@@ -247,40 +247,39 @@ namespace snowboy {
 				}
 			}
 			if (!x.empty()) {
-                
 			}
-            i++;
+			i++;
 		} while (true);
 		// TODO: Implement Viterbi search
 	}
 
 	float UniversalDetectStream::HotwordViterbiSearch(int, int, int, const PieceInfo&) const {
 		SNOWBOY_ERROR() << "Not implemented";
-        return 0.0f;
+		return 0.0f;
 		// TODO:: This is unused in all models I have, but we should still implement it at some point
 	}
 
 	float UniversalDetectStream::HotwordViterbiSearchReduplication(int, int, int) {
 		SNOWBOY_ERROR() << "Not implemented";
-        return 0.0f;
+		return 0.0f;
 		// TODO:: This is unused in all models I have, but we should still implement it at some point
 	}
 
 	float UniversalDetectStream::HotwordViterbiSearchSoftFloor(int, int) const {
 		SNOWBOY_ERROR() << "Not implemented";
-        return 0.0f;
+		return 0.0f;
 		// TODO:: This is unused in all models I have, but we should still implement it at some point
 	}
 
 	float UniversalDetectStream::HotwordViterbiSearchTraceback(int, int) const {
 		SNOWBOY_ERROR() << "Not implemented";
-        return 0.0f;
+		return 0.0f;
 		// TODO:: This is unused in all models I have, but we should still implement it at some point
 	}
 
 	float UniversalDetectStream::HotwordViterbiSearchTracebackLog(int param_1, int param_2) const {
-        // TODO: Implement this
-        return HotwordNaiveSearch(param_1, param_2);
+		// TODO: Implement this
+		return HotwordNaiveSearch(param_1, param_2);
 	}
 
 	int UniversalDetectStream::NumHotwords(int model_id) const {

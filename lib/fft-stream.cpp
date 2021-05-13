@@ -17,8 +17,8 @@ namespace snowboy {
 		FftOptions options;
 		options.field_x00 = true;
 		options.num_fft_points = num_points;
-        // TODO: We haven't reversed srfft yet and fft should give the same result (but slower)
-        m_options.method = "fft";
+		// TODO: We haven't reversed srfft yet and fft should give the same result (but slower)
+		m_options.method = "fft";
 		if (m_options.method == "fft") {
 			// Never used in any of my models
 			m_fft.reset(new Fft(options));
