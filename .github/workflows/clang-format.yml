@@ -5,7 +5,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: RafikFarhad/clang-format-github-action@v1
+      - uses: HorstBaerbel/action-clang-format@1.4
+        # These are optional (defaults displayed)
         with:
-          style: file
-          sources: "lib/**/*.h,lib/**/*.c,lib/**/*.cpp,test/**/*.h,test/**/*.c,test/**/*.cpp,lib/*.h,lib/*.c,lib/*.cpp,test/*.h,test/*.c,test/*.cpp"
+          scandir: '.'
+          excludedirs: 'build'
+          extensions: 'c,h,C,H,cpp,hpp,cc,hh,c++,h++,cxx,hxx'
+          style: 'file'
