@@ -1,4 +1,6 @@
+extern "C" {
 #include <cblas.h>
+}
 #include <cmath>
 #include <cstring>
 #include <limits>
