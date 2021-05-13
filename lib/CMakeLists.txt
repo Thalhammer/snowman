@@ -40,7 +40,7 @@ add_library(snowboy_reimpl
 )
 target_include_directories(snowboy_reimpl PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_directories(snowboy_reimpl PRIVATE /usr/lib/atlas-base)
-target_link_libraries(snowboy_reimpl PUBLIC dl m rt pthread f77blas cblas lapack_atlas atlas cblas)
+target_link_libraries(snowboy_reimpl dl m rt pthread f77blas cblas lapack_atlas atlas)
 
 file(TOUCH ${CMAKE_CURRENT_BINARY_DIR}/dummy.cpp)
 add_library(snowboy ${CMAKE_CURRENT_BINARY_DIR}/dummy.cpp)

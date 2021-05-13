@@ -1,4 +1,7 @@
+extern "C"
+{
 #include <cblas.h>
+}
 #include <cstring>
 #include <iostream>
 #include <matrix-wrapper.h>
@@ -131,22 +134,22 @@ namespace snowboy {
 
 	bool MatrixBase::IsDiagonal(float) const {
 		SNOWBOY_ERROR() << "Not implemented";
-        return false;
+		return false;
 	}
 
 	bool MatrixBase::IsSymmetric(float) const {
 		SNOWBOY_ERROR() << "Not implemented";
-        return false;
+		return false;
 	}
 
 	bool MatrixBase::IsUnit(float) const {
 		SNOWBOY_ERROR() << "Not implemented";
-        return false;
+		return false;
 	}
 
 	bool MatrixBase::IsZero(float cutoff) const {
 		SNOWBOY_ERROR() << "Not implemented";
-        return false;
+		return false;
 	}
 
 	void MatrixBase::MulColsVec(const VectorBase& param_1) {
@@ -245,8 +248,8 @@ namespace snowboy {
 		}
 	}
 
-    static size_t allocs = 0;
-    static size_t frees = 0;
+	static size_t allocs = 0;
+	static size_t frees = 0;
 
 	void Matrix::Resize(int rows, int cols, MatrixResizeType resize) {
 		// TODO: Smarter alloc similar to vector
@@ -291,27 +294,27 @@ namespace snowboy {
 			m_cols = 0;
 			throw std::bad_alloc();
 		}
-        allocs++;
+		allocs++;
 	}
 
 	void Matrix::ReleaseMatrixMemory() {
 		if (m_data) {
-            SnowboyMemalignFree(m_data);
-            frees++;
-        }
+			SnowboyMemalignFree(m_data);
+			frees++;
+		}
 		m_rows = 0;
 		m_stride = 0;
 		m_cols = 0;
 	}
 
-    void Matrix::PrintAllocStats(std::ostream& out) {
-        out << "allocs=" << allocs << " frees=" << frees;
-    }
+	void Matrix::PrintAllocStats(std::ostream& out) {
+		out << "allocs=" << allocs << " frees=" << frees;
+	}
 
-    void Matrix::ResetAllocStats() {
-        allocs = 0;
-        frees = 0;
-    }
+	void Matrix::ResetAllocStats() {
+		allocs = 0;
+		frees = 0;
+	}
 
 	Matrix& Matrix::operator=(const Matrix& other) {
 		Resize(other.m_rows, other.m_cols, MatrixResizeType::kUndefined);
