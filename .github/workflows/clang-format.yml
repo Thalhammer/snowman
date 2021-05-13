@@ -1,0 +1,11 @@
+name: Clang Format Checker
+on: [push]
+jobs:
+  clang-format-checking:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: RafikFarhad/clang-format-github-action@v1
+        with:
+          style: file
+          sources: "lib/**/*.h,lib/**/*.c,lib/**/*.cpp,test/**/*.h,test/**/*.c,test/**/*.cpp"
