@@ -71,7 +71,7 @@ namespace snowboy {
 		m_rawNnetVadStream.reset(new RawNnetVadStream{*m_rawNnetVadStreamOptions});
 		m_eavesdropStream.reset(new EavesdropStream{nullptr, &m_eavesdropStreamFrameInfoVector});
 		m_vadStateStream2.reset(new VadStateStream{*m_vadStateStream2Options});
-		
+
 		m_gainControlStream->Connect(m_interceptStream.get());
 		if (!field_xd1) {
 			m_framerStream->Connect(m_gainControlStream.get());
@@ -218,8 +218,8 @@ namespace snowboy {
 			if ((tres & 8) != 0) {
 				field_xd0 = true;
 			}
-            if((tres & 0x20) != 0) break;
-		} while(true);
+			if ((tres & 0x20) != 0) break;
+		} while (true);
 		return this->field_xd0 ? -2 : 0;
 	}
 

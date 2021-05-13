@@ -94,7 +94,7 @@ std::vector<short> read_sample_file(const std::string& filename) {
 }
 
 bool file_exists(const std::string& name) {
-    struct stat buffer;
+	struct stat buffer;
 	return stat(name.c_str(), &buffer) == 0;
 }
 

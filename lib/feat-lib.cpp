@@ -6,14 +6,14 @@
 
 namespace snowboy {
 	void MelFilterBankOptions::Register(const std::string& prefix, OptionsItf* opts) {
-	    opts->Register(prefix, "num-bins", "Number of triangular bins.", &num_bins);
-	    opts->Register(prefix, "num-fft-points", "Number of FFT points.", &num_fft_points);
-	    opts->Register(prefix, "sample-rate", "Sampling rate.", &sample_rate);
-	    opts->Register(prefix, "low-frequency", "Lowest frequency for triangular bins.", &low_frequency);
-	    opts->Register(prefix, "high-frequency", "Highest frequency for triangular bins.", &high_frequency);
-	    opts->Register(prefix, "vtln-low-frequency", "Lower inflection point for the warping function.", &vtln_low_frequency);
-	    opts->Register(prefix, "vtln-high-frequency", "Higher inflection point of the warping function.", &vtln_high_frequency);
-	    opts->Register(prefix, "vtln-warping-factor", "VTLN warping factor.", &vtln_warping_factor);
+		opts->Register(prefix, "num-bins", "Number of triangular bins.", &num_bins);
+		opts->Register(prefix, "num-fft-points", "Number of FFT points.", &num_fft_points);
+		opts->Register(prefix, "sample-rate", "Sampling rate.", &sample_rate);
+		opts->Register(prefix, "low-frequency", "Lowest frequency for triangular bins.", &low_frequency);
+		opts->Register(prefix, "high-frequency", "Highest frequency for triangular bins.", &high_frequency);
+		opts->Register(prefix, "vtln-low-frequency", "Lower inflection point for the warping function.", &vtln_low_frequency);
+		opts->Register(prefix, "vtln-high-frequency", "Higher inflection point of the warping function.", &vtln_high_frequency);
+		opts->Register(prefix, "vtln-warping-factor", "VTLN warping factor.", &vtln_warping_factor);
 	}
 
 	MelFilterBank::MelFilterBank(const MelFilterBankOptions& options) {

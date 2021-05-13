@@ -46,8 +46,8 @@ namespace snowboy {
 	struct Vector : VectorBase {
 		Vector() {}
 		Vector(const VectorBase& other) {
-		    Resize(other.m_size, MatrixResizeType::kUndefined);
-		    CopyFromVec(other);
+			Resize(other.m_size, MatrixResizeType::kUndefined);
+			CopyFromVec(other);
 		}
 		Vector(Vector&& other) {
 			m_size = other.m_size;
@@ -73,8 +73,8 @@ namespace snowboy {
 		void Swap(Vector* other);
 		void RemoveElement(int index);
 
-        static void PrintAllocStats(std::ostream&);
-        static void ResetAllocStats();
+		static void PrintAllocStats(std::ostream&);
+		static void ResetAllocStats();
 	};
 	struct SubVector : VectorBase {
 		SubVector(const VectorBase& parent, int, int);

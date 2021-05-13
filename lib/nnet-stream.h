@@ -1,14 +1,14 @@
 #pragma once
 #include <memory>
-#include <string>
 #include <stream-itf.h>
+#include <string>
 
 namespace snowboy {
 	struct OptionsItf;
 	struct Nnet;
 	struct NnetStreamOptions {
 		std::string model_filename;
-        bool pad_context;
+		bool pad_context;
 		void Register(const std::string&, OptionsItf*);
 	};
 	static_assert(sizeof(NnetStreamOptions) == 0x10);

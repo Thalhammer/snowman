@@ -106,8 +106,8 @@ namespace snowboy {
 		std::vector<int> field_x138;
 		std::vector<int> field_x150;
 
-        bool field_x168 = false;
-        bool field_x169 = false;
+		bool field_x168 = false;
+		bool field_x169 = false;
 		char data2[6];
 	};
 	static_assert(sizeof(PipelineDetect) == 368);

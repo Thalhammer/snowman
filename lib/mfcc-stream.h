@@ -11,7 +11,7 @@ namespace snowboy {
 		bool use_energy;
 		float cepstral_lifter;
 
-        void Register(const std::string& prefix, OptionsItf* opts);
+		void Register(const std::string& prefix, OptionsItf* opts);
 	};
 	static_assert(sizeof(MfccStreamOptions) == 0x2c);
 	struct MfccStream : StreamItf {
@@ -28,8 +28,8 @@ namespace snowboy {
 		virtual bool Reset() override;
 		virtual std::string Name() const override;
 		virtual ~MfccStream();
-        void InitMelFilterBank(int);
-        void ComputeMfcc(const VectorBase&, SubVector*) const;
+		void InitMelFilterBank(int);
+		void ComputeMfcc(const VectorBase&, SubVector*) const;
 	};
 	static_assert(sizeof(MfccStream) == 0x80);
 } // namespace snowboy

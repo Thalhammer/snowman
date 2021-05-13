@@ -18,13 +18,13 @@ namespace snowboy {
 	void FilterConfigString(bool, const std::string& prefix, std::string* config_str);
 	void* SnowboyMemalign(ulong align, ulong size);
 	void SnowboyMemalignFree(void* ptr);
-    template<typename T>
+	template <typename T>
 	void SplitStringToIntegers(const std::string& s1, const std::string& s2, std::vector<T>* out);
-    template<typename T>
+	template <typename T>
 	void SplitStringToIntegers(const std::string& s1, const char* s2, std::vector<T>* out);
-    template<>
+	template <>
 	void SplitStringToIntegers(const std::string& s1, const std::string& s2, std::vector<int>* out);
-    template<>
+	template <>
 	void SplitStringToIntegers(const std::string& s1, const char* s2, std::vector<int>* out);
 	void SplitStringToFloats(const std::string& s1, const std::string& s2, std::vector<float>* out);
 	void SplitStringToFloats(const std::string& s1, const char* s2, std::vector<float>* out);

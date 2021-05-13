@@ -300,7 +300,9 @@ static __inline uint32_t __clz_uint32(uint32_t v) {
 		0,
 		0,
 	};
-	return word > 0xffffff ? byte_to_unary_table[v >> 24] : word > 0xffff ? byte_to_unary_table[v >> 16] + 8 : word > 0xff ? byte_to_unary_table[v >> 8] + 16 : byte_to_unary_table[v] + 24;
+	return word > 0xffffff ? byte_to_unary_table[v >> 24] : word > 0xffff ? byte_to_unary_table[v >> 16] + 8
+														: word > 0xff	  ? byte_to_unary_table[v >> 8] + 16
+																		  : byte_to_unary_table[v] + 24;
 #endif
 }
 
@@ -657,14 +659,10 @@ extern "C"
 						qr32 = ((int32_t)frfi[2 * i]) * (1 << CFFTSFT);
 						qi32 = ((int32_t)frfi[2 * i + 1]) * (1 << CFFTSFT);
 
-						frfi[2 * j] = (int16_t)(
-							(qr32 - tr32 + CFFTRND2) >> (1 + CFFTSFT));
-						frfi[2 * j + 1] = (int16_t)(
-							(qi32 - ti32 + CFFTRND2) >> (1 + CFFTSFT));
-						frfi[2 * i] = (int16_t)(
-							(qr32 + tr32 + CFFTRND2) >> (1 + CFFTSFT));
-						frfi[2 * i + 1] = (int16_t)(
-							(qi32 + ti32 + CFFTRND2) >> (1 + CFFTSFT));
+						frfi[2 * j] = (int16_t)((qr32 - tr32 + CFFTRND2) >> (1 + CFFTSFT));
+						frfi[2 * j + 1] = (int16_t)((qi32 - ti32 + CFFTRND2) >> (1 + CFFTSFT));
+						frfi[2 * i] = (int16_t)((qr32 + tr32 + CFFTRND2) >> (1 + CFFTSFT));
+						frfi[2 * i + 1] = (int16_t)((qi32 + ti32 + CFFTRND2) >> (1 + CFFTSFT));
 					}
 				}
 
@@ -775,14 +773,10 @@ extern "C"
 						qr32 = ((int32_t)frfi[2 * i]) * (1 << CIFFTSFT);
 						qi32 = ((int32_t)frfi[2 * i + 1]) * (1 << CIFFTSFT);
 
-						frfi[2 * j] = (int16_t)(
-							(qr32 - tr32 + round2) >> (shift + CIFFTSFT));
-						frfi[2 * j + 1] = (int16_t)(
-							(qi32 - ti32 + round2) >> (shift + CIFFTSFT));
-						frfi[2 * i] = (int16_t)(
-							(qr32 + tr32 + round2) >> (shift + CIFFTSFT));
-						frfi[2 * i + 1] = (int16_t)(
-							(qi32 + ti32 + round2) >> (shift + CIFFTSFT));
+						frfi[2 * j] = (int16_t)((qr32 - tr32 + round2) >> (shift + CIFFTSFT));
+						frfi[2 * j + 1] = (int16_t)((qi32 - ti32 + round2) >> (shift + CIFFTSFT));
+						frfi[2 * i] = (int16_t)((qr32 + tr32 + round2) >> (shift + CIFFTSFT));
+						frfi[2 * i + 1] = (int16_t)((qi32 + ti32 + round2) >> (shift + CIFFTSFT));
 					}
 				}
 			}

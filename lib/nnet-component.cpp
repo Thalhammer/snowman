@@ -1,8 +1,8 @@
 #include <matrix-wrapper.h>
 #include <nnet-component.h>
+#include <ostream>
 #include <snowboy-debug.h>
 #include <snowboy-io.h>
-#include <ostream>
 
 namespace snowboy {
 
@@ -53,19 +53,19 @@ namespace snowboy {
 		SNOWBOY_ASSERT(NumRows() % m_num_chunks == 0);
 	}
 
-    std::ostream& operator<<(std::ostream& os, const ChunkInfo& e) {
-        os << "{.m_feat_dim=" << e.m_feat_dim
-            << ", .m_num_chunks=" << e.m_num_chunks
-            << ", .m_first_offset=" << e.m_first_offset
-            << ", .m_last_offset=" << e.m_last_offset
-            << ", .m_offsets={ ";
-        for(auto it = e.m_offsets.begin(); it != e.m_offsets.end(); it++) {
-            if(it != e.m_offsets.end()) os << ", ";
-            os << *it;
-        }
-        os << " }}";
-        return os;
-    }
+	std::ostream& operator<<(std::ostream& os, const ChunkInfo& e) {
+		os << "{.m_feat_dim=" << e.m_feat_dim
+		   << ", .m_num_chunks=" << e.m_num_chunks
+		   << ", .m_first_offset=" << e.m_first_offset
+		   << ", .m_last_offset=" << e.m_last_offset
+		   << ", .m_offsets={ ";
+		for (auto it = e.m_offsets.begin(); it != e.m_offsets.end(); it++) {
+			if (it != e.m_offsets.end()) os << ", ";
+			os << *it;
+		}
+		os << " }}";
+		return os;
+	}
 
 	int32_t Component::Index() const {
 		return m_index;
@@ -104,12 +104,12 @@ namespace snowboy {
 	Component* Component::ReadNew(bool binary, std::istream* is) {
 		std::string token;
 		ReadToken(binary, &token, is);
-        if(token.size() <= 2) {
-            SNOWBOY_ERROR() << "Invalid component token " << token;
+		if (token.size() <= 2) {
+			SNOWBOY_ERROR() << "Invalid component token " << token;
 			return nullptr;
-        }
-        // Remove leading < and following >
-        token = token.substr(1, token.size() - 2);
+		}
+		// Remove leading < and following >
+		token = token.substr(1, token.size() - 2);
 		auto ptr = NewComponentOfType(token);
 		if (ptr == nullptr)
 		{
@@ -306,23 +306,23 @@ namespace snowboy {
 			{
 				out->m_data[out->m_stride * r] = 1.0;
 			} else {
-                // TODO: I did my best but between here
-                auto ptr = out->m_data + (out->m_stride * r);
-                float x = 0.0;
-                auto ptr2 = ptr;
-                for(auto& idx_vec : m_indices) {
-                    ptr2++;
-                    auto f = *ptr2;
-                    for(auto idx : idx_vec) {
-                        auto v = in.m_data[in.m_stride*r + idx];
-                        f += v;
-                        x += v;
-                    }
-                    *ptr2 = f;
-                }
-                out->m_data[out->m_stride * r] = 1.0 - x;
-                // TODO: and here are probably a number of bugs
-            }
+				// TODO: I did my best but between here
+				auto ptr = out->m_data + (out->m_stride * r);
+				float x = 0.0;
+				auto ptr2 = ptr;
+				for (auto& idx_vec : m_indices) {
+					ptr2++;
+					auto f = *ptr2;
+					for (auto idx : idx_vec) {
+						auto v = in.m_data[in.m_stride * r + idx];
+						f += v;
+						x += v;
+					}
+					*ptr2 = f;
+				}
+				out->m_data[out->m_stride * r] = 1.0 - x;
+				// TODO: and here are probably a number of bugs
+			}
 		}
 	}
 

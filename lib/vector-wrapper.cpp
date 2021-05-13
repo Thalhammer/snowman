@@ -1,15 +1,16 @@
-extern "C" {
+extern "C"
+{
 #include <cblas.h>
 }
 #include <cmath>
 #include <cstring>
+#include <iostream>
 #include <limits>
 #include <matrix-wrapper.h>
 #include <random>
 #include <snowboy-debug.h>
 #include <snowboy-io.h>
 #include <vector-wrapper.h>
-#include <iostream>
 
 // TODO: This should be detected by cmake instead of just assuming linux has it
 #ifdef __linux__
@@ -30,12 +31,12 @@ namespace snowboy {
 
 	void VectorBase::AddDiagMat2(float param_1, const MatrixBase& param_2, MatrixTransposeType param_3, float param_4) {
 		if (param_3 == MatrixTransposeType::kNoTrans) {
-            auto ptr = param_2.m_data;
+			auto ptr = param_2.m_data;
 			for (int i = 0; i < m_size; i++) {
 				auto fVar1 = m_data[i];
 				auto fVar7 = cblas_sdot(param_2.m_cols, ptr, 1, ptr, 1);
 				m_data[i] = fVar7 * param_1 + param_4 * fVar1;
-                ptr += param_2.m_stride;
+				ptr += param_2.m_stride;
 			}
 		} else {
 			for (int i = 0; i < m_size; i++) {
@@ -300,14 +301,14 @@ namespace snowboy {
 		if (!*os) SNOWBOY_ERROR() << "Failed to write Vector to stream.";
 	}
 
-    static size_t allocs = 0;
-    static size_t frees = 0;
+	static size_t allocs = 0;
+	static size_t frees = 0;
 	void Vector::Resize(int size, MatrixResizeType resize) {
 		if (size <= m_size) {
 			m_size = size;
 			if (resize == MatrixResizeType::kSetZero) Set(0.0f);
 		} else {
-            // The new size is larger than we currently are, so we need to reallocate.
+			// The new size is larger than we currently are, so we need to reallocate.
 #if HAS_MALLOC_USABLE_SIZE
 			auto usable = malloc_usable_size(m_data);
 			if (usable >= size * sizeof(float)) {
@@ -325,10 +326,10 @@ namespace snowboy {
 				if (ptr == nullptr) throw std::bad_alloc();
 				if (ptr != m_data && (reinterpret_cast<uintptr_t>(ptr) % 16) != 0) {
 					// realloc moved the data but the new buffer is not aligned correctly
-                    allocs++;
-                    frees++;
+					allocs++;
+					frees++;
 					free(ptr);
-                    allocs++;
+					allocs++;
 					ptr = static_cast<float*>(SnowboyMemalign(16, size * sizeof(float)));
 					if (ptr == nullptr) throw std::bad_alloc();
 					memcpy(ptr, m_data, sizeof(float) * m_size);
@@ -336,23 +337,23 @@ namespace snowboy {
 				m_data = ptr;
 				memset(&m_data[m_size], 0, (size - m_size) * sizeof(float));
 			} else if (resize == MatrixResizeType::kSetZero) {
-                allocs++;
+				allocs++;
 				auto ptr = static_cast<float*>(SnowboyMemalign(16, size * sizeof(float)));
 				if (ptr == nullptr) throw std::bad_alloc();
-                if(m_data) {
-                    frees++;
-				    free(m_data);
-                }
+				if (m_data) {
+					frees++;
+					free(m_data);
+				}
 				memset(ptr, 0, size * sizeof(float));
 				m_data = ptr;
 			} else {
-                allocs++;
+				allocs++;
 				auto ptr = static_cast<float*>(SnowboyMemalign(16, size * sizeof(float)));
 				if (ptr == nullptr) throw std::bad_alloc();
-                if(m_data) {
-                    frees++;
-				    free(m_data);
-                }
+				if (m_data) {
+					frees++;
+					free(m_data);
+				}
 				m_data = ptr;
 			}
 			m_size = size;
@@ -365,7 +366,7 @@ namespace snowboy {
 		} else {
 			m_data = static_cast<float*>(SnowboyMemalign(16, size << 2));
 			if (m_data == nullptr) throw std::bad_alloc();
-            allocs++;
+			allocs++;
 		}
 		m_size = size;
 	}
@@ -373,8 +374,8 @@ namespace snowboy {
 	void Vector::ReleaseVectorMemory() {
 		if (m_data) {
 			SnowboyMemalignFree(m_data);
-            frees++;
-        }
+			frees++;
+		}
 		m_data = nullptr;
 		m_size = 0;
 	}
@@ -393,7 +394,7 @@ namespace snowboy {
 
 	void Vector::Read(bool binary, bool add, std::istream* is) {
 		if (!binary) {
-            SNOWBOY_ERROR() << "Not implemented";
+			SNOWBOY_ERROR() << "Not implemented";
 			ExpectToken(binary, "[", is);
 			uint32_t i = 0;
 			auto s = m_size;
@@ -468,14 +469,14 @@ namespace snowboy {
 		m_size--;
 	}
 
-    void Vector::PrintAllocStats(std::ostream& out) {
-        out << "allocs=" << allocs << " frees=" << frees;
-    }
+	void Vector::PrintAllocStats(std::ostream& out) {
+		out << "allocs=" << allocs << " frees=" << frees;
+	}
 
-    void Vector::ResetAllocStats() {
-        allocs = 0;
-        frees = 0;
-    }
+	void Vector::ResetAllocStats() {
+		allocs = 0;
+		frees = 0;
+	}
 
 	SubVector::SubVector(const VectorBase& parent, int offset, int size) {
 		m_data = parent.m_data + offset;

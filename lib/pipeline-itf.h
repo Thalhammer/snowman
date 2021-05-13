@@ -11,7 +11,7 @@ namespace snowboy {
 		virtual std::string Name() const = 0;
 		virtual std::string OptionPrefix() const = 0;
 		virtual ~PipelineItf();
-        
+
 		bool m_isInitialized = false;
 	};
 } // namespace snowboy
