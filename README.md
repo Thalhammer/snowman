@@ -15,7 +15,7 @@ The original was licensed under Apache, so this is as well.
 Please just dont use as a voice interface for Skynet.
 
 ### Feature support
-In the default build configuration it should be a drop in replacement for the original snowboy library, however it does not implement everything the original library did. The most important differences are:#
+In the default build configuration it should be a drop in replacement for the original snowboy library, however it does not implement everything the original library did. The most important differences are:
 
 - **Missing frontend processing.**\
   I do not implement any automatic gain control or noise suppression (both where part of the library if you enabled "ApplyFrontend"), so make sure you have a good audio source until it is implemented. Voice Activity Detection (VAD) does work however.
