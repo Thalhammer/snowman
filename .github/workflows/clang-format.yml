@@ -5,10 +5,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: HorstBaerbel/action-clang-format@1.4
-        # These are optional (defaults displayed)
+      - uses: DoozyX/clang-format-lint-action@v0.12
         with:
-          scandir: '.'
-          excludedirs: 'build'
-          extensions: 'c,h,C,H,cpp,hpp,cc,hh,c++,h++,cxx,hxx'
-          style: 'file'
+          source: 'lib test'
+          extensions: 'h,cpp,c'
+          clangFormatVersion: 12
+          inplace: True
+      - uses: EndBug/add-and-commit@v4
+        with:
+          author_name: Clang Robot
+          author_email: robot@example.com
+          message: 'Committing clang-format changes'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
