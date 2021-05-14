@@ -3,7 +3,6 @@ extern "C"
 #include <cblas.h>
 }
 #include <cstring>
-#include <iostream>
 #include <matrix-wrapper.h>
 #include <snowboy-debug.h>
 #include <snowboy-io.h>

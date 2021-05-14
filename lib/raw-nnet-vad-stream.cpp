@@ -1,5 +1,4 @@
 #include <frame-info.h>
-#include <iostream>
 #include <nnet-lib.h>
 #include <raw-nnet-vad-stream.h>
 #include <snowboy-debug.h>

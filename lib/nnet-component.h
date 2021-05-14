@@ -46,10 +46,10 @@ namespace snowboy {
 		void Check() const;
 
 		// Not in snowboy
-		int32_t NumRows() const { return m_num_chunks * (!m_offsets.empty() ? m_offsets.size() : m_last_offset - m_first_offset + 1); }
+		int32_t NumRows() const { return m_num_chunks * ChunkSize(); }
 		int32_t NumCols() const { return m_feat_dim; }
 		int32_t NumChunks() const { return m_num_chunks; }
-		int32_t ChunkSize() const { return NumRows() / m_num_chunks; }
+		int32_t ChunkSize() const { return !m_offsets.empty() ? m_offsets.size() : (m_last_offset - m_first_offset + 1); }
 		void MakeOffsetsContiguous() {
 			m_offsets.clear();
 			Check();

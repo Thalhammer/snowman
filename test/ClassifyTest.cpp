@@ -68,7 +68,7 @@ TEST(ClassifyTest, ClassifySamples) {
 		detector.ApplyFrontend(false);
 
 		int result = detector.RunDetection(data.data(), data.size());
-		ASSERT_EQ(result, e.second) << "Failed to correctly classify sample " << e.first;
+		EXPECT_EQ(result, e.second) << "Failed to correctly classify sample " << e.first;
 	}
 	ASSERT_FALSE(skipped_all);
 	snowboy::Vector::PrintAllocStats(std::cout);
@@ -101,7 +101,7 @@ TEST(ClassifyTest, ClassifySamplesAlma) {
 		detector.ApplyFrontend(false);
 
 		int result = detector.RunDetection(data.data(), data.size());
-		ASSERT_EQ(result, e.second) << "Failed to correctly classify sample " << e.first;
+		EXPECT_EQ(result, e.second) << "Failed to correctly classify sample " << e.first;
 	}
 	ASSERT_FALSE(skipped_all);
 	snowboy::Vector::PrintAllocStats(std::cout);
@@ -125,7 +125,7 @@ TEST(ClassifyTest, ClassifySamplesReset) {
 		skipped_all = false;
 		auto data = read_sample_file(root + "audio_samples/" + e.first);
 		int result = detector.RunDetection(data.data(), data.size());
-		ASSERT_EQ(result, e.second) << "Failed to correctly classify sample " << e.first;
+		EXPECT_EQ(result, e.second) << "Failed to correctly classify sample " << e.first;
 		ASSERT_TRUE(detector.Reset());
 	}
 	ASSERT_FALSE(skipped_all);

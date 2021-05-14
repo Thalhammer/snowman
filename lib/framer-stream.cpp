@@ -17,12 +17,10 @@ namespace snowboy {
 	}
 
 	FramerStream::FramerStream(const FramerStreamOptions& options)
-		: m_sample_rate{options.sample_rate}, m_frame_length_ms{options.frame_length_ms}, m_frame_shift_ms{options.frame_shift_ms},
-		  m_dither_coeff{options.dither_coeff}, m_preemphasis_coeff{options.preemphasis_coeff}, m_subtract_mean{options.subtract_mean},
-		  m_window_type{options.window_type} {
-		const auto frames_per_ms = static_cast<double>(m_sample_rate) * 0.001;
-		this->m_frame_length_samples = this->m_frame_length_ms * frames_per_ms;
-		this->m_frame_shift_samples = this->m_frame_shift_ms * frames_per_ms;
+		: m_options{options} {
+		const auto frames_per_ms = static_cast<double>(m_options.sample_rate) * 0.001;
+		this->m_frame_length_samples = this->m_options.frame_length_ms * frames_per_ms;
+		this->m_frame_shift_samples = this->m_options.frame_shift_ms * frames_per_ms;
 		CreateWindow();
 		this->field_x38 = 1;
 	}
@@ -31,27 +29,27 @@ namespace snowboy {
 		auto len = this->m_frame_length_samples;
 		this->m_window.Resize(len);
 		auto data = this->m_window.m_data;
-		if (m_window_type == "hamming") {
+		if (m_options.window_type == "hamming") {
 			for (size_t i = 0; i < len; i++) {
 				data[i] = 0.54 - 0.46 * cos((M_2_PI * i) / (len - 1));
 			}
-		} else if (m_window_type == "hanning") {
+		} else if (m_options.window_type == "hanning") {
 			for (size_t i = 0; i < len; i++) {
 				data[i] = (1.0 - cos((M_2_PI * i) / (len - 1))) * 0.5;
 			}
-		} else if (m_window_type == "rectangular") {
+		} else if (m_options.window_type == "rectangular") {
 			// TODO: Implement this correctly. Snowboy does not seem to follow the plain implementation on wikipedia
 			for (size_t i = 0; i < len; i++) {
 				data[i] = 1.0;
 			}
-		} else if (m_window_type == "povey") {
+		} else if (m_options.window_type == "povey") {
 			for (size_t i = 0; i < len; i++) {
 				auto v = cos((M_2_PI * (i + 1)) / (len - 1));
 				v = pow((1.0 - v) * 0.5, 0.85);
 				data[i] = v;
 			}
 		} else {
-			SNOWBOY_ERROR() << "Window type " << m_window_type << " is not defined";
+			SNOWBOY_ERROR() << "Window type " << m_options.window_type << " is not defined";
 		}
 	}
 
@@ -64,22 +62,22 @@ namespace snowboy {
 		for (int currentFrame = 0; currentFrame < nframes; currentFrame++) {
 			SubVector sub{*mat, currentFrame};
 			sub.CopyFromVec(data.Range(this->m_frame_shift_samples * currentFrame, this->m_frame_length_samples));
-			if (this->m_dither_coeff != 0.0 && sub.m_size > 0) {
+			if (this->m_options.dither_coeff != 0.0 && sub.m_size > 0) {
 				auto data = sub.m_data;
 				for (size_t i = 0; i < sub.m_size; i++) {
-					data[i] += dist(gen) * this->m_dither_coeff;
+					data[i] += dist(gen) * this->m_options.dither_coeff;
 				}
 			}
-			if (this->m_subtract_mean) {
+			if (this->m_options.subtract_mean) {
 				auto sum = sub.Sum();
 				sub.Add(-sum / sub.m_size);
 			}
-			if (this->m_preemphasis_coeff != 0.0) {
+			if (this->m_options.preemphasis_coeff != 0.0) {
 				auto data = sub.m_data;
 				for (size_t i = sub.m_size - 1; i > 0; i--) {
-					data[i] -= this->m_preemphasis_coeff * data[i - 1];
+					data[i] -= this->m_options.preemphasis_coeff * data[i - 1];
 				}
-				data[0] -= this->m_preemphasis_coeff * data[0];
+				data[0] -= this->m_options.preemphasis_coeff * data[0];
 			}
 			sub.MulElements(this->m_window);
 		}

@@ -1,8 +1,6 @@
 #pragma once
-#include <pipeline-detect.h>
 
 namespace snowboy {
-	using unknown_return = void;
 
 	struct WaveHeader {
 		char chunkID[4] = {'R', 'I', 'F', 'F'};

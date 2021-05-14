@@ -20,7 +20,6 @@ namespace snowboy {
 		return (1 << nbits) - 1;
 	}
 
-	// Those seem to be unused...
 	void ReadRawWaveFromString(const WaveHeader& hdr, const std::string& data, Matrix* data_out) {
 		// Note: Not 100% sure about this stuff...
 		data_out->Resize(hdr.wChannels, data.size() / hdr.wBlockAlign);

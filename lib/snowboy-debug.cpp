@@ -51,8 +51,8 @@ namespace snowboy {
 	}
 
 	MySnowboyLogMsg::~MySnowboyLogMsg() noexcept(false) {
-		std::cout << m_stream.str();
-		if (m_type == SnowboyLogType::ERROR)
+		std::cout << m_stream.str() << std::endl;
+		if (m_type == SnowboyLogType::ERROR || m_type == SnowboyLogType::ASSERT_FAIL)
 		{
 			m_stream << GetStackTrace();
 			// TODO: This isnt normally allowed....

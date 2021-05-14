@@ -2,7 +2,7 @@
 #include <stdexcept>
 #include <sys/stat.h>
 
-std::vector<short> read_sample_file(const std::string& filename) {
+std::vector<short> read_sample_file(const std::string& filename, bool treat_wave) {
 
 	struct wavHeader { //44 byte HEADER only
 		char RIFF[4];
@@ -54,15 +54,15 @@ std::vector<short> read_sample_file(const std::string& filename) {
 				perror("Bad WAV header !");
 			}
 		}
-		if (fread(&wavhdr->datasize, 4, 1, fi) != 4) throw std::runtime_error("fread failed");
+		if (fread(&wavhdr->datasize, 1, 4, fi) != 4) throw std::runtime_error("fread failed");
 	};
 
-	bool isWav = (filename.size() > 4 && filename.rfind(".wav") != filename.size() - 4);
+	bool isWav = treat_wave || (filename.size() > 4 && filename.rfind(".wav") == filename.size() - 4);
 
 	FILE* f = fopen(filename.c_str(), "rb");
 	if (f == NULL)
 	{
-		perror("Error opening file");
+		throw std::runtime_error("Error opening file");
 		return {};
 	}
 

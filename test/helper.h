@@ -9,6 +9,6 @@ void GTEST_WARN(const std::string& fmt, Args... args) {
 	testing::internal::ColoredPrintf(testing::internal::COLOR_YELLOW, msg.c_str(), std::forward<Args>(args)...);
 }
 
-std::vector<short> read_sample_file(const std::string& filename);
+std::vector<short> read_sample_file(const std::string& filename, bool treat_wave = false);
 bool file_exists(const std::string& name);
 std::string detect_project_root();

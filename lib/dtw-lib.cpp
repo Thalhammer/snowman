@@ -1,5 +1,4 @@
 #include <dtw-lib.h>
-#include <iostream>
 #include <limits>
 #include <matrix-wrapper.h>
 #include <snowboy-debug.h>

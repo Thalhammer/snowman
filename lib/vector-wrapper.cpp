@@ -4,7 +4,6 @@ extern "C"
 }
 #include <cmath>
 #include <cstring>
-#include <iostream>
 #include <limits>
 #include <matrix-wrapper.h>
 #include <random>
