@@ -4,6 +4,7 @@
 #include <pipeline-vad.h>
 #include <snowboy-debug.h>
 #include <snowboy-detect.h>
+#include <pipeline-detect.h>
 #include <types.h>
 
 namespace snowboy {
