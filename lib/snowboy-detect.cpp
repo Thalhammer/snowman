@@ -3,6 +3,7 @@
 #include <memory>
 #include <pipeline-detect.h>
 #include <pipeline-personal-enroll.h>
+#include <pipeline-template-cut.h>
 #include <pipeline-vad.h>
 #include <snowboy-debug.h>
 #include <snowboy-detect.h>
@@ -352,4 +353,49 @@ namespace snowboy {
 	}
 
 	SnowboyPersonalEnroll::~SnowboyPersonalEnroll() {}
+
+#if 0
+	SnowboyTemplateCut::SnowboyTemplateCut(const std::string& resource_filename) {
+        PipelineTemplateCutOptions options {};
+        options.sample_rate = 16000;
+        options.min_non_voice_frames = 20;
+        options.min_voice_frames = 20;
+        options.bg_energy_threshold = 2.0f;
+        cut_pipeline_.reset(new PipelineTemplateCut{options});
+        cut_pipeline_->SetResource(resource_filename);
+        cut_pipeline_->Init();
+        wave_header_.reset(new WaveHeader{});
+        wave_header_->dwSamplesPerSec = cut_pipeline_->GetPipelineSampleRate();
+	}
+
+	std::string SnowboyTemplateCut::CutTemplate(const std::string& data) {
+        if((data.size() % wave_header_->wBlockAlign) != 0) return {};
+        Matrix mat_data, mat_out;
+        ReadRawWaveFromString(*wave_header_, data, &mat_data);
+        auto res = cut_pipeline_->CutTemplate(mat_data, &mat_out);
+        std::string ret{};
+        if((res & 2) == 0) WriteRawWaveToString(*wave_header_, mat_out, &ret);
+        return ret;
+	}
+
+	bool SnowboyTemplateCut::Reset() {
+        cut_pipeline_->Reset();
+        return true;
+	}
+
+	int SnowboyTemplateCut::SampleRate() const {
+        return wave_header_->dwSamplesPerSec;
+	}
+
+	int SnowboyTemplateCut::NumChannels() const {
+        return wave_header_->wChannels;
+	}
+
+	int SnowboyTemplateCut::BitsPerSample() const {
+        return wave_header_->wBitsPerSample;
+	}
+
+	SnowboyTemplateCut::~SnowboyTemplateCut() {}
+#endif
+
 } // namespace snowboy

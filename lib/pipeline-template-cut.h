@@ -1,0 +1,65 @@
+#pragma once
+#include <matrix-wrapper.h>
+#include <memory>
+#include <pipeline-itf.h>
+
+namespace snowboy {
+	struct MatrixBase;
+	struct FrameInfo;
+
+	struct InterceptStream;
+	struct FramerStream;
+	struct EavesdropStream;
+	struct FftStream;
+	struct MfccStream;
+	struct RawNnetVadStream;
+
+	struct FramerStreamOptions;
+	struct FftStreamOptions;
+	struct MfccStreamOptions;
+	struct RawNnetVadStreamOptions;
+
+	struct PipelineTemplateCutOptions {
+		int sample_rate;
+		int min_non_voice_frames;
+		int min_voice_frames;
+		float bg_energy_threshold;
+
+		void Register(const std::string& prefix, OptionsItf* opts);
+	};
+	static_assert(sizeof(PipelineTemplateCutOptions) == 0x10);
+	struct PipelineTemplateCut : PipelineItf {
+		std::unique_ptr<InterceptStream> m_interceptStream;
+		std::unique_ptr<FramerStream> m_framerStream;
+		std::unique_ptr<EavesdropStream> m_eavesdropStream;
+		std::unique_ptr<FftStream> m_fftStream;
+		std::unique_ptr<MfccStream> m_mfccStream;
+		std::unique_ptr<RawNnetVadStream> m_nnetStream;
+
+		PipelineTemplateCutOptions m_pipelineTemplateCutOptions;
+		std::unique_ptr<FramerStreamOptions> m_framerStreamOptions;
+		int field_x58;
+		float field_x5c;
+		float field_x60;
+		bool field_x64;
+		std::string field_x68;
+		std::unique_ptr<FftStreamOptions> m_fftStreamOptions;
+		std::unique_ptr<MfccStreamOptions> m_mfccStreamOptions;
+		std::unique_ptr<RawNnetVadStreamOptions> m_nnetStreamOptions;
+		Matrix m_eavesdropMatrix;
+
+		virtual void RegisterOptions(const std::string& prefix, OptionsItf* opts) override;
+		virtual int GetPipelineSampleRate() const override;
+		virtual bool Init() override;
+		virtual bool Reset() override;
+		virtual std::string Name() const override;
+		virtual std::string OptionPrefix() const override;
+		virtual ~PipelineTemplateCut();
+
+		PipelineTemplateCut(const PipelineTemplateCutOptions& options);
+
+		int CutTemplate(const MatrixBase& in, Matrix* out);
+		void ComputeTemplateBoundary(const MatrixBase&, const std::vector<FrameInfo>&, int*, int*) const;
+	};
+	static_assert(sizeof(PipelineTemplateCut) == 0xa0);
+} // namespace snowboy

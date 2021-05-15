@@ -9,6 +9,7 @@ namespace snowboy {
 	struct PipelineDetect;
 	struct PipelineVad;
 	struct PipelinePersonalEnroll;
+	struct PipelineTemplateCut;
 	struct MatrixBase;
 
 	////////////////////////////////////////////////////////////////////////////////
@@ -273,6 +274,26 @@ namespace snowboy {
 		int RunEnrollment(const MatrixBase&);
 		std::unique_ptr<WaveHeader> wave_header_;
 		std::unique_ptr<PipelinePersonalEnroll> enroll_pipeline_;
+	};
+
+	// TODO: This is untested
+	class SnowboyTemplateCut {
+	public:
+		SnowboyTemplateCut(const std::string& resource_filename);
+
+		std::string CutTemplate(const std::string& data);
+
+		bool Reset();
+
+		int SampleRate() const;
+		int NumChannels() const;
+		int BitsPerSample() const;
+
+		~SnowboyTemplateCut();
+
+	public:
+		std::unique_ptr<WaveHeader> wave_header_;
+		std::unique_ptr<PipelineTemplateCut> cut_pipeline_;
 	};
 
 } // namespace snowboy
