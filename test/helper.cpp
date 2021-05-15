@@ -1,4 +1,8 @@
+#include <fstream>
 #include <helper.h>
+#include <openssl/crypto.h>
+#include <openssl/md5.h>
+#include <sstream>
 #include <stdexcept>
 #include <sys/stat.h>
 
@@ -105,4 +109,21 @@ std::string detect_project_root() {
 		prefix += "../";
 	}
 	return "";
+}
+
+std::string read_file(const std::string& file) {
+	std::ifstream f{file, std::ios::binary};
+	std::stringstream content;
+	content << f.rdbuf();
+	return content.str();
+}
+
+std::string md5sum_file(const std::string& file) {
+	auto content = read_file(file);
+	unsigned char hash[MD5_DIGEST_LENGTH];
+	MD5(reinterpret_cast<const unsigned char*>(content.data()), content.size(), hash);
+	auto ptr = OPENSSL_buf2hexstr(hash, MD5_DIGEST_LENGTH);
+	std::string res = ptr;
+	OPENSSL_free(ptr);
+	return res;
 }

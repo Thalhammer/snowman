@@ -70,12 +70,11 @@ namespace snowboy {
 			m_unprocessed_buffer.Resize(0, 0);
 		} else {
 			m_is_first_chunk = 0;
-			auto left_ctx = LeftContext();
 			if (m_pad_input) {
-				if (left_ctx > 0) {
-					m_input_data.Resize(input.m_rows + left_ctx, input.m_cols);
-					m_input_data.RowRange(0, left_ctx).CopyRowsFromVec(SubVector{input, 0});
-					m_input_data.RowRange(left_ctx, input.m_rows).CopyFromMat(input, MatrixTransposeType::kNoTrans);
+				if (m_left_context > 0) {
+					m_input_data.Resize(input.m_rows + m_left_context, input.m_cols);
+					m_input_data.RowRange(0, m_left_context).CopyRowsFromVec(SubVector{input, 0});
+					m_input_data.RowRange(m_left_context, input.m_rows).CopyFromMat(input, MatrixTransposeType::kNoTrans);
 				} else {
 					m_input_data.Resize(input.m_rows, input.m_cols);
 					m_input_data.CopyFromMat(input, MatrixTransposeType::kNoTrans);
@@ -86,7 +85,7 @@ namespace snowboy {
 			}
 		}
 		auto num_effective_input_rows = field_xa ? (m_input_data.m_rows + LeftContext() + RightContext()) : m_input_data.m_rows;
-		if (num_effective_input_rows > LeftContext() + RightContext()) {
+		if (num_effective_input_rows > m_left_context + m_right_context) {
 			if (field_x18 != num_effective_input_rows) {
 				ComputeChunkInfo(num_effective_input_rows, 1);
 				field_x18 = num_effective_input_rows;
@@ -104,8 +103,8 @@ namespace snowboy {
 		for (auto& frame : b) {
 			field_x20.push_back(frame);
 		}
-		if (field_xc == 0 && m_pad_input == 0 && output->m_rows > 0) {
-			for (int i = 0; i < LeftContext(); i++) {
+		if (field_xc == 0 && m_pad_input == 0 && input.m_rows > 0) {
+			for (int i = 0; i < m_left_context; i++) {
 				field_x20.pop_front();
 			}
 			field_xc = 1;
@@ -119,12 +118,12 @@ namespace snowboy {
 
 	// Note: Adopted from kaldi
 	void Nnet::ComputeChunkInfo(int input_chunk_size, int num_chunks) {
-		const auto output_chunk_size = (input_chunk_size - LeftContext()) - RightContext();
+		const auto output_chunk_size = (input_chunk_size - m_left_context) - m_right_context;
 		SNOWBOY_ASSERT(output_chunk_size > 0);
 		std::vector<int> current_output_inds;
 		current_output_inds.resize(output_chunk_size);
 		for (size_t i = 0; i < output_chunk_size; i++)
-			current_output_inds[i] = i + LeftContext();
+			current_output_inds[i] = i + m_left_context;
 
 		// indexes for last component is empty, since the last component's chunk is
 		// always contiguous
@@ -185,21 +184,27 @@ namespace snowboy {
 			Compute(param_1, param_2, param_3, param_4);
 
 		auto uVar10 = m_unprocessed_buffer.m_rows;
-		auto num_effective_input_rows = (field_xa ? LeftContext() + RightContext() : 0) + m_unprocessed_buffer.m_rows;
+		auto num_effective_input_rows_new = (field_xa ? LeftContext() + RightContext() : 0) + m_unprocessed_buffer.m_rows;
+
 		if (m_pad_input && field_b8.m_size > 0) {
 			auto t = RightContext();
-			num_effective_input_rows += t;
+			num_effective_input_rows_new += t;
 			uVar10 += t;
 		}
-		if (LeftContext() + RightContext() < num_effective_input_rows) {
+
+		if (LeftContext() + RightContext() < num_effective_input_rows_new) {
 			m_input_data.Resize(uVar10, InputDim());
 			if (m_unprocessed_buffer.m_rows > 0) {
 				m_input_data.RowRange(0, m_unprocessed_buffer.m_rows).CopyFromMat(m_unprocessed_buffer, MatrixTransposeType::kNoTrans);
 			}
+			assert(m_right_context == RightContext());
 			if (m_pad_input && 0 < RightContext()) {
 				m_input_data.RowRange(m_unprocessed_buffer.m_rows, RightContext()).CopyRowsFromVec(field_b8);
 			}
-			ComputeChunkInfo(num_effective_input_rows, 1);
+			if (num_effective_input_rows_new != field_x18) {
+				ComputeChunkInfo(num_effective_input_rows_new, 1);
+				field_x18 = num_effective_input_rows_new;
+			}
 			Propagate();
 			if (m_output_data.m_rows > 0) {
 				if (param_3->m_rows != 0) {
@@ -213,7 +218,10 @@ namespace snowboy {
 		}
 
 		param_4->resize(param_3->m_rows);
-		field_x20.resize(param_4->size());
+		for (auto uVar7 = param_4->size() - field_x20.size(); uVar7 < param_4->size(); uVar7++) {
+			param_4->at(uVar7) = field_x20.front();
+			field_x20.pop_front();
+		}
 		ResetComputation();
 	}
 

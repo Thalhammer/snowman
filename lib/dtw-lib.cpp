@@ -177,110 +177,139 @@ namespace snowboy {
 
 	float DtwAlign(DistanceType param_1, const MatrixBase& param_2, const MatrixBase& param_3, std::vector<std::vector<int>>* param_4) {
 		// TODO: Clean up this function
-		if (param_2.m_rows == 0) {
-			if (param_4 != nullptr) param_4->clear();
-		} else {
-			if (param_4 != nullptr) param_4->resize(param_2.m_rows);
-			if (param_3.m_rows != 0) {
-				Matrix local_1f8;
-				local_1f8.Resize(param_2.m_rows, param_3.m_rows);
-				for (auto row = 0; row < local_1f8.m_rows; row++) {
-					for (auto col = 0; col < (int)local_1f8.m_cols; col++) {
-						if (param_1 == DistanceType::cosine) {
-							auto fVar18 = SubVector{param_2, row}.CosineDistance(SubVector{param_3, col});
-							local_1f8.m_data[(row * local_1f8.m_stride) + col] = fVar18;
-						} else if (param_1 == DistanceType::euclidean) {
-							auto fVar18 = SubVector{param_2, row}.EuclideanDistance(SubVector{param_3, col});
-							local_1f8.m_data[(row * local_1f8.m_stride) + col] = fVar18;
-						} else {
-							SNOWBOY_ERROR() << "Unknown distance type: " << param_1;
-						}
-					}
-				}
-				Matrix local_1d8;
-				local_1d8.Resize(param_2.m_rows, param_3.m_rows);
-				for (auto row = 0; row != local_1d8.m_rows; row++) {
-					if (0 < local_1d8.m_cols) {
-						if (row == 0) {
-							for (auto col = 0; col < (int)local_1d8.m_cols; col++) {
-								if (col == 0 || row == 0) {
-									local_1d8.m_data[col] = local_1f8.m_data[col];
-								} else {
-									auto fVar18 = local_1d8.m_data[(row - 1) * local_1d8.m_stride + col];
-									auto fVar1 = local_1d8.m_data[row * local_1d8.m_stride + col - 1];
-									if (fVar1 <= fVar18) {
-										fVar18 = fVar1;
-									}
-									fVar1 = local_1d8.m_data[(row - 1) * local_1d8.m_stride + col + -1];
-									if (fVar1 <= fVar18) {
-										fVar18 = fVar1;
-									}
-									local_1d8.m_data[row * local_1d8.m_stride + col] = fVar18 + local_1f8.m_data[row * local_1f8.m_stride + col];
-								}
-							}
-						} else {
-							for (auto col = 0; col < (int)local_1d8.m_cols; col++) {
-								if (col == 0 || row == 0) {
-									if (col == 0) {
-										col = 1;
-										local_1d8.m_data[row * local_1d8.m_stride] = local_1f8.m_data[row * local_1f8.m_stride] + local_1d8.m_data[row * local_1d8.m_stride - local_1d8.m_stride];
-										if ((int)local_1d8.m_cols < 2) break;
-										continue;
-									}
-								} else {
-									auto fVar18 = std::min(std::min(local_1d8.m_data[(row - 1) * local_1d8.m_stride + col],
-																	local_1d8.m_data[row * local_1d8.m_stride + col - 1]),
-														   local_1d8.m_data[(row - 1) * local_1d8.m_stride + col - 1]);
-									local_1d8.m_data[row * local_1d8.m_stride + col] = fVar18 + local_1f8.m_data[row * local_1f8.m_stride + col];
-								}
-							}
-						}
-					}
-				}
-				auto local_228 = -1;
-				int iVar11 = local_1d8.m_rows - 1;
-				SubVector{local_1d8, iVar11}.Min(&local_228);
-				auto fVar16 = local_1d8.m_data[local_1d8.m_stride * iVar11 + local_228];
-				if (param_4 != nullptr) {
-					while (iVar11 != 0) {
-						while (true) {
-							param_4->at(iVar11).push_back(local_228);
-							if (0 < local_228) break;
-							iVar11 += -1;
-							if (iVar11 == 0) goto LAB_00186f7d;
-						}
-						auto fVar18 = local_1d8.m_data[(long)(local_1d8.m_stride * iVar11) + (long)local_228] - local_1f8.m_data[(long)local_228 + (long)(local_1f8.m_stride * iVar11)];
-						float pfVar8[3] = {fVar18, fVar18, fVar18};
-						auto iVar13 = iVar11 + -1;
-						auto iVar15 = iVar13 * local_1d8.m_stride;
-						auto iVar14 = local_228 + -1;
-						auto fVar17 = (float)((uint)(fVar18 - local_1d8.m_data[(long)iVar15 + (long)iVar14]) & 0x7fffffff);
-						*pfVar8 = fVar17;
-						pfVar8[1] = (float)((uint)(fVar18 - local_1d8.m_data[(long)iVar14 + (long)(local_1d8.m_stride + iVar15)]) & 0x7fffffff);
-						fVar18 = (float)((uint)(fVar18 - local_1d8.m_data[(long)iVar15 + (long)local_228]) & 0x7fffffff);
-						auto pfVar9 = pfVar8 + 1;
-						if (fVar17 <= pfVar8[1]) {
-							pfVar9 = pfVar8;
-						}
-						pfVar8[2] = fVar18;
-						if (fVar18 < *pfVar9) {
-							pfVar9 = pfVar8 + 2;
-						}
-						auto iVar10 = (int)((long)((long)pfVar9 - (long)pfVar8) >> 2);
-						iVar15 = iVar13;
-						if (((iVar10 != 0) && (iVar15 = iVar11, iVar10 != 1)) && (iVar14 = local_228, iVar10 == 2)) {
-							iVar15 = iVar13;
-						}
-						local_228 = iVar14;
-						iVar11 = iVar15;
-					}
-				LAB_00186f7d:
-					auto pvVar2 = param_4->begin();
-					pvVar2->push_back(local_228);
-				}
-				return fVar16 / param_2.m_rows;
-			}
+		if (param_4 != nullptr) param_4->resize(param_2.m_rows);
+		if (param_2.m_rows == 0 || param_3.m_rows == 0) {
 			return std::numeric_limits<float>::max();
 		}
+
+		Matrix local_1f8;
+		local_1f8.Resize(param_2.m_rows, param_3.m_rows);
+		for (auto row = 0; row < local_1f8.m_rows; row++) {
+			for (auto col = 0; col < (int)local_1f8.m_cols; col++) {
+				if (param_1 == DistanceType::cosine) {
+					auto fVar18 = SubVector{param_2, row}.CosineDistance(SubVector{param_3, col});
+					local_1f8.m_data[(row * local_1f8.m_stride) + col] = fVar18;
+				} else if (param_1 == DistanceType::euclidean) {
+					auto fVar18 = SubVector{param_2, row}.EuclideanDistance(SubVector{param_3, col});
+					local_1f8.m_data[(row * local_1f8.m_stride) + col] = fVar18;
+				} else {
+					SNOWBOY_ERROR() << "Unknown distance type: " << param_1;
+				}
+			}
+		}
+		Matrix local_1d8;
+		local_1d8.Resize(param_2.m_rows, param_3.m_rows);
+		for (auto row = 0; row != local_1d8.m_rows; row++) {
+			const int iVar7 = (int(row) - 1) * (int)local_1d8.m_stride;
+			const int iVar14 = row * local_1f8.m_stride;
+			const int local_284 = row * local_1f8.m_stride;
+			const int iVar11 = row * local_1d8.m_stride;
+			const int iVar15 = row * local_1d8.m_stride;
+			if (0 < local_1d8.m_cols) {
+				auto pfVar9 = local_1d8.m_data + (long)iVar7 + -1;
+				auto pfVar8 = local_1d8.m_data + (long)iVar11 + -1;
+				if (row == 0) {
+					auto lVar12 = 0;
+					do {
+						while (((int)lVar12 == 0 || (row == 0))) {
+							pfVar9 = pfVar9 + 1;
+							local_1d8.m_data[lVar12] = local_1f8.m_data[lVar12];
+							lVar12 += 1;
+							pfVar8 = pfVar8 + 1;
+							if (local_1d8.m_cols <= (int)lVar12) goto LAB_00186e9d;
+						}
+						auto fVar16 = pfVar9[1];
+						if (*pfVar8 <= pfVar9[1]) {
+							fVar16 = *pfVar8;
+						}
+						if (*pfVar9 <= fVar16) {
+							fVar16 = *pfVar9;
+						}
+						auto lVar6 = iVar14 + lVar12;
+						lVar12 += 1;
+						pfVar8[1] = fVar16 + local_1f8.m_data[lVar6];
+						pfVar9 = pfVar9 + 1;
+						pfVar8 = pfVar8 + 1;
+					} while ((int)lVar12 < local_1d8.m_cols);
+				} else {
+					auto lVar12 = 0;
+					do {
+						if (((int)lVar12 == 0) || (row == 0)) {
+							if ((int)lVar12 == 0) {
+								local_1d8.m_data[iVar15] = local_1f8.m_data[local_284] + local_1d8.m_data[iVar15 - local_1d8.m_stride];
+							}
+						} else {
+							auto fVar16 = pfVar9[1];
+							if (*pfVar8 <= pfVar9[1]) {
+								fVar16 = *pfVar8;
+							}
+							if (*pfVar9 <= fVar16) {
+								fVar16 = *pfVar9;
+							}
+							pfVar8[1] = fVar16 + local_1f8.m_data[iVar14 + lVar12];
+						}
+						lVar12 += 1;
+						pfVar9 = pfVar9 + 1;
+						pfVar8 = pfVar8 + 1;
+					} while ((int)lVar12 < local_1d8.m_cols);
+				}
+			}
+		LAB_00186e9d:
+			[]() {}(); // TODO: This is just here cause for some reason a label directly before the closing bracket does not work
+		}
+		auto local_228 = -1;
+		int iVar11 = local_1d8.m_rows - 1;
+		SubVector{local_1d8, iVar11}.Min(&local_228);
+		auto fVar16 = local_1d8.m_data[local_1d8.m_stride * iVar11 + local_228];
+		if (param_4 != nullptr) {
+			while (iVar11 != 0) {
+				// TODO: This is wrong
+				// If I look at the code it should only be
+				// param_4->at(iVar11).push_back(local_228);
+				// But that produces different results from what it should
+				if (param_4->at(iVar11).empty())
+					param_4->at(iVar11).push_back(local_228);
+				else
+					param_4->at(iVar11).at(0) = local_228;
+				if (0 >= local_228) {
+					iVar11--;
+					continue;
+				}
+				auto fVar18 = local_1d8.m_data[local_1d8.m_stride * iVar11 + local_228] - local_1f8.m_data[local_1f8.m_stride * iVar11 + local_228];
+				float pfVar8[3] = {fVar18, fVar18, fVar18};
+				pfVar8[0] = std::abs(fVar18 - local_1d8.m_data[(iVar11 + -1) * local_1d8.m_stride + (local_228 - 1)]);
+				pfVar8[1] = std::abs(fVar18 - local_1d8.m_data[(local_228 - 1) + iVar11 * local_1d8.m_stride]);
+				pfVar8[2] = std::abs(fVar18 - local_1d8.m_data[(iVar11 + -1) * local_1d8.m_stride + local_228]);
+				auto pfVar9 = pfVar8 + 1;
+				if (pfVar8[0] <= pfVar8[1]) {
+					pfVar9 = pfVar8;
+				}
+				if (pfVar8[2] < *pfVar9) {
+					pfVar9 = pfVar8 + 2;
+				}
+				auto iVar10 = (int)((long)((long)pfVar9 - (long)pfVar8) >> 2);
+				if (iVar10 != 0) {
+					if (iVar10 == 1) {
+						local_228 -= 1;
+					} else {
+						if (iVar10 == 2) {
+							iVar11 = iVar11 + -1;
+						}
+					}
+				} else {
+					local_228 -= 1;
+					iVar11 = iVar11 + -1;
+				}
+			}
+			// TODO: This is wrong
+			// If I look at the code it should only be
+			// param_4->at(0).push_back(local_228);
+			// But that produces different results from what it should
+			if (param_4->at(0).empty())
+				param_4->at(0).push_back(local_228);
+			else
+				param_4->at(0).at(0) = local_228;
+		}
+		return fVar16 / param_2.m_rows;
 	}
 } // namespace snowboy
