@@ -40,5 +40,5 @@ namespace snowboy {
 	};
 	static_assert(sizeof(SlidingDtw) == 0x78);
 
-	void DtwAlign(DistanceType, const MatrixBase&, const MatrixBase&, std::vector<std::vector<int>>*);
+	float DtwAlign(DistanceType, const MatrixBase&, const MatrixBase&, std::vector<std::vector<int>>*);
 } // namespace snowboy

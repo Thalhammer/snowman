@@ -175,7 +175,7 @@ namespace snowboy {
 
 	SlidingDtw::~SlidingDtw() {}
 
-	void DtwAlign(DistanceType param_1, const MatrixBase& param_2, const MatrixBase& param_3, std::vector<std::vector<int>>* param_4) {
+	float DtwAlign(DistanceType param_1, const MatrixBase& param_2, const MatrixBase& param_3, std::vector<std::vector<int>>* param_4) {
 		// TODO: Clean up this function
 		if (param_2.m_rows == 0) {
 			if (param_4 != nullptr) param_4->clear();
@@ -237,50 +237,50 @@ namespace snowboy {
 						}
 					}
 				}
-				auto local_21c = -1;
-				int iVar10 = local_1d8.m_rows - 1;
-				SubVector{local_1d8, iVar10}.Min(&local_21c);
+				auto local_228 = -1;
+				int iVar11 = local_1d8.m_rows - 1;
+				SubVector{local_1d8, iVar11}.Min(&local_228);
+				auto fVar16 = local_1d8.m_data[local_1d8.m_stride * iVar11 + local_228];
 				if (param_4 != nullptr) {
-					while (iVar10 != 0) {
+					while (iVar11 != 0) {
 						while (true) {
-							auto pvVar2 = param_4->begin() + iVar10;
-							pvVar2->push_back(local_21c);
-							if (0 < local_21c) break;
-							iVar10 += -1;
-							if (iVar10 == 0) break;
+							param_4->at(iVar11).push_back(local_228);
+							if (0 < local_228) break;
+							iVar11 += -1;
+							if (iVar11 == 0) goto LAB_00186f7d;
 						}
-						auto fVar18 = local_1d8.m_data[local_1d8.m_stride * iVar10 + local_21c] - local_1f8.m_data[local_21c + local_1f8.m_stride * iVar10];
-						auto pfVar8 = new float[3];
-						auto iVar11 = iVar10 + -1;
-						*pfVar8 = fVar18;
-						pfVar8[1] = fVar18;
-						auto iVar15 = iVar11 * local_1d8.m_stride;
-						auto iVar12 = local_21c + -1;
+						auto fVar18 = local_1d8.m_data[(long)(local_1d8.m_stride * iVar11) + (long)local_228] - local_1f8.m_data[(long)local_228 + (long)(local_1f8.m_stride * iVar11)];
+						float pfVar8[3] = {fVar18, fVar18, fVar18};
+						auto iVar13 = iVar11 + -1;
+						auto iVar15 = iVar13 * local_1d8.m_stride;
+						auto iVar14 = local_228 + -1;
+						auto fVar17 = (float)((uint)(fVar18 - local_1d8.m_data[(long)iVar15 + (long)iVar14]) & 0x7fffffff);
+						*pfVar8 = fVar17;
+						pfVar8[1] = (float)((uint)(fVar18 - local_1d8.m_data[(long)iVar14 + (long)(local_1d8.m_stride + iVar15)]) & 0x7fffffff);
+						fVar18 = (float)((uint)(fVar18 - local_1d8.m_data[(long)iVar15 + (long)local_228]) & 0x7fffffff);
+						auto pfVar9 = pfVar8 + 1;
+						if (fVar17 <= pfVar8[1]) {
+							pfVar9 = pfVar8;
+						}
 						pfVar8[2] = fVar18;
-						*pfVar8 = (float)((uint)(fVar18 - local_1d8.m_data[(long)iVar15 + (long)iVar12]) & 0x7fffffff);
-						pfVar8[1] = (float)((uint)(fVar18 - local_1d8.m_data[(long)(int)(iVar15 + local_1d8.m_stride) + (long)iVar12]) & 0x7fffffff);
-						pfVar8[2] = (float)((uint)(fVar18 - local_1d8.m_data[(long)iVar15 + (long)local_21c]) & 0x7fffffff);
-						auto pfVar9 = pfVar8;
-						auto pfVar13 = pfVar8;
-						while (pfVar9 = pfVar9 + 1, pfVar9 != pfVar8 + 3) {
-							if (*pfVar9 <= *pfVar13 && *pfVar13 != *pfVar9) {
-								pfVar13 = pfVar9;
-							}
+						if (fVar18 < *pfVar9) {
+							pfVar9 = pfVar8 + 2;
 						}
-						auto iVar17 = (int)((long)((long)pfVar13 - (long)pfVar8) >> 2);
-						iVar15 = iVar11;
-						if (((iVar17 != 0) && (iVar15 = iVar10, iVar17 != 1)) && (iVar12 = local_21c, iVar17 == 2)) {
-							iVar15 = iVar11;
+						auto iVar10 = (int)((long)((long)pfVar9 - (long)pfVar8) >> 2);
+						iVar15 = iVar13;
+						if (((iVar10 != 0) && (iVar15 = iVar11, iVar10 != 1)) && (iVar14 = local_228, iVar10 == 2)) {
+							iVar15 = iVar13;
 						}
-						local_21c = iVar12;
-						iVar10 = iVar15;
-						delete pfVar8;
+						local_228 = iVar14;
+						iVar11 = iVar15;
 					}
+				LAB_00186f7d:
 					auto pvVar2 = param_4->begin();
-					pvVar2->push_back(local_21c);
+					pvVar2->push_back(local_228);
 				}
+				return fVar16 / param_2.m_rows;
 			}
+			return std::numeric_limits<float>::max();
 		}
 	}
-
 } // namespace snowboy

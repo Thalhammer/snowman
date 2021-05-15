@@ -1,6 +1,9 @@
+#include <cassert>
+#include <limits>
 #include <snowboy-debug.h>
 #include <snowboy-io.h>
 #include <template-container.h>
+#include <vector-wrapper.h>
 
 namespace snowboy {
 	TemplateContainer::TemplateContainer() {
@@ -66,11 +69,62 @@ namespace snowboy {
 		m_templates.erase(m_templates.begin() + index);
 	}
 
-	// TODO: I haven't found time to reverse this yet, but its not referenced by the detection
-	// TODO: part of snowboy anyway.
-	//void TemplateContainer::CombineTemplates(DistanceType distance) {
-	//    // TODO
+	//size_t hash(const snowboy::MatrixBase& b) {
+	//	std::hash<int> h;
+	//	size_t res = 0;
+	//	for (int r = 0; r < b.m_rows; r++) {
+	//		for (int c = 0; c < b.m_cols; c++) {
+	//			res += h(b.m_data[r * b.m_stride + c] * 1000);
+	//		}
+	//	}
+	//	return res;
 	//}
+	//
+	void TemplateContainer::CombineTemplates(DistanceType distance) {
+		if (m_templates.size() < 2) return;
+		auto fVar1 = std::numeric_limits<float>::max();
+		auto local_88 = 0;
+		for (auto uVar13 = 0; uVar13 < m_templates.size(); uVar13++) {
+			auto sum = 0.0;
+			for (auto uVar19 = 0; uVar19 < m_templates.size(); uVar19++) {
+				if (uVar13 != uVar19) {
+					auto fVar21 = snowboy::DtwAlign(distance, m_templates[uVar13], m_templates[uVar19], nullptr);
+					sum += fVar21;
+				}
+			}
+			if (sum < fVar1) {
+				local_88 = uVar13;
+				fVar1 = sum;
+			}
+		}
+		std::vector<int> local_a0;
+		local_a0.resize(m_templates[local_88].m_rows, 1); // Not sure if int
+
+		if (m_templates.size() != 0) {
+			auto local_90 = 0;
+			do {
+				if (local_88 != (int)local_90) {
+					std::vector<std::vector<int>> local_58;
+					snowboy::DtwAlign(distance, m_templates[local_88], m_templates[local_90], &local_58);
+					for (auto local_a8 = 0; local_a8 < m_templates[local_88].m_rows; local_a8 += 1) {
+						if (local_58[local_a8].size() != 0) {
+							SubVector{m_templates[local_88], local_a8}.Scale(local_a0[local_a8]);
+							for (auto uVar10 = 0; uVar10 < local_58[local_a8].size(); uVar10++) {
+								SubVector{m_templates[local_88], local_a8}.AddVec(1.0, SubVector{m_templates[local_90], local_58[local_a8][uVar10]});
+							}
+							local_a0[local_a8] += local_58[local_a8].size();
+							SubVector{m_templates[local_88], local_a8}.Scale(1.0f / (float)(local_a0[local_a8]));
+						}
+					}
+				}
+				local_90 += 1;
+			} while (local_90 < m_templates.size());
+		}
+		if (local_88 != 0) {
+			m_templates[0] = m_templates[local_88];
+		}
+		m_templates.resize(1);
+	}
 
 	void TemplateContainer::Clear() {
 		m_templates.clear();

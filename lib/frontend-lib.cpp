@@ -300,9 +300,7 @@ static __inline uint32_t __clz_uint32(uint32_t v) {
 		0,
 		0,
 	};
-	return word > 0xffffff ? byte_to_unary_table[v >> 24] : word > 0xffff ? byte_to_unary_table[v >> 16] + 8
-														: word > 0xff	  ? byte_to_unary_table[v >> 8] + 16
-																		  : byte_to_unary_table[v] + 24;
+	return word > 0xffffff ? byte_to_unary_table[v >> 24] : word > 0xffff ? byte_to_unary_table[v >> 16] + 8 : word > 0xff ? byte_to_unary_table[v >> 8] + 16 : byte_to_unary_table[v] + 24;
 #endif
 }
 
