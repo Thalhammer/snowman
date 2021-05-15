@@ -1,21 +1,21 @@
-# TODOs
+# TODO file for Snowman
 
-While the core should be functional, theres still a lot to do.
+While the core should be functional, there's still a lot to do.
 
-### Library
+## Library
 
 - [ ] Fix TODOs and "Not implemented" in code.
 - [ ] Reverse training part
 - [ ] Improve API and modernize code
-- [ ] Performance improvements (Memory allocation!)
-- [ ] Modernize model fileformat (Protobuf ?)
-- [ ] Prebuilds for common plattforms ?
+- [ ] Performance improvements (memory allocation!)
+- [ ] Modernize model file format (Protobuf?)
+- [ ] Prebuilds for common plattforms?
 
-### Other
+## Other
 
-- [ ] Provide Website/API for hotword training (for non technical users)
+- [ ] Provide Website/API for hotword training (for non-technical users)
 - [ ] Allow training with more than 3 samples
 - [ ] Allow training with false positives
 
-### Outlook
-- [ ] Maybe implement speaker ID since we already do most of the work required for it ?
+## Outlook
+- [ ] Maybe implement speaker ID since we already do most of the work required for it?
