@@ -21,24 +21,24 @@ won't light your PC on fire.
 
 ### Feature support
 
-In the default build configuration, it should be a drop in replacement for the original snowboy
+In the default build configuration, it should be a drop-in replacement for the original snowboy
 library. However, it does not implement everything the original library did. The most important
 differences are the following:
 
 - **Missing frontend processing**:
-  I do not implement any automatic gain control or noise suppression (both where part of the
+  I do not implement any automatic gain control or noise suppression (both were part of the
   library if you enabled "ApplyFrontend"), so make sure you have a good audio source until it
   is implemented. Voice Activity Detection (VAD) does work, however.
 
 - **Missing support for some hotword search algorithms**:
   There are multiple hotword search algorithms used by universal models. I have only implemented
-  "Naive" so far and added asserts to those that are completely unused and redirect used ones to
+  "Naive" so far and added asserts to those that are completely unused and redirected used ones to
   the Naive method, which seems to work fine. However, we should probably implement all of them at
   some point.
 
 - **Split Radix FFT**:
   There were two supported FFT modes, normal FFT and split radix FFT. So far I have only implemented
-  normal FFT yet and hardcoded SRFFT models to normal FFT. From my understanding, the result should
+  normal FFT and hardcoded SRFFT models to use normal FFT. From my understanding, the result should
   be identical, but split radix FFT might have better performance.
 
 - **PipelineVAD**:
@@ -52,18 +52,18 @@ differences are the following:
 - **Personal model training**:
   With the takeover by [seasalt.ai](https://github.com/seasalt-ai/snowboy), a library containing
   code to train personal models was also released. I have not reversed it yet, but I took a quick
-  look at it and it uses most of the same backend code, so it should be fairly simple to implement.
+  look and it uses most of the same backend code, so it should be fairly simple to implement.
   However, I need to set up a test environment for it first, so give it some time. Until then you
-  can train models using the official docker container.
+  can train models using the official Docker container.
 
 ### Universal models
 
 Existing universal models should work out of the box and perform similarly to the original library.
 Since they are designed to work with "ApplyFrontend" disabled, the missing AGC/NoiseSuppression
-should not affect those.
+should not have an effect.
 
 New universal models should be doable in theory. However, I don't know enough about neural networks
-to do so. If you do, **please** reach out to me. Another issue is the lack of way to gather samples.
+to do so. If you do, **please** reach out to me. Another issue is the lack of a way to gather samples.
 In the future I might build a website similar to the original kitt.ai website where people can train
 their personal models using a nice UI, as well as an option to share audio samples for building
 universal models, but this is still in the far future.
