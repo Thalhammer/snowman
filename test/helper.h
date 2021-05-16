@@ -24,7 +24,7 @@ inline size_t hash(const snowboy::MatrixBase& b) {
 	size_t res = 0;
 	for (int r = 0; r < b.m_rows; r++) {
 		for (int c = 0; c < b.m_cols; c++) {
-			res += h(b.m_data[r * b.m_stride + c] * 1000);
+			res += h(b.m_data[r * b.m_stride + c] * 10000);
 		}
 	}
 	return res;

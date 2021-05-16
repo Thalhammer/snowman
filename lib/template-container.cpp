@@ -69,17 +69,6 @@ namespace snowboy {
 		m_templates.erase(m_templates.begin() + index);
 	}
 
-	//size_t hash(const snowboy::MatrixBase& b) {
-	//	std::hash<int> h;
-	//	size_t res = 0;
-	//	for (int r = 0; r < b.m_rows; r++) {
-	//		for (int c = 0; c < b.m_cols; c++) {
-	//			res += h(b.m_data[r * b.m_stride + c] * 1000);
-	//		}
-	//	}
-	//	return res;
-	//}
-	//
 	void TemplateContainer::CombineTemplates(DistanceType distance) {
 		if (m_templates.size() < 2) return;
 		auto fVar1 = std::numeric_limits<float>::max();
@@ -88,8 +77,7 @@ namespace snowboy {
 			auto sum = 0.0;
 			for (auto uVar19 = 0; uVar19 < m_templates.size(); uVar19++) {
 				if (uVar13 != uVar19) {
-					auto fVar21 = snowboy::DtwAlign(distance, m_templates[uVar13], m_templates[uVar19], nullptr);
-					sum += fVar21;
+					sum += snowboy::DtwAlign(distance, m_templates[uVar13], m_templates[uVar19], nullptr);
 				}
 			}
 			if (sum < fVar1) {

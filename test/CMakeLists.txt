@@ -4,6 +4,7 @@ include(GoogleTest)
 add_executable(snowboy-test
     helper.cpp
     ClassifyTest.cpp
+    EnrollTest.cpp
     DtwTest.cpp
     CutTest.cpp
 )
