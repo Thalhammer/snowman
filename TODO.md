@@ -5,7 +5,6 @@ While the core should be functional, theres still a lot to do.
 ### Library
 
 - [ ] Fix TODOs and "Not implemented" in code.
-- [ ] Reverse training part
 - [ ] Improve API and modernize code
 - [ ] Performance improvements (Memory allocation!)
 - [ ] Modernize model fileformat (Protobuf ?)
