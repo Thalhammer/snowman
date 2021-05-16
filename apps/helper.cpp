@@ -1,7 +1,5 @@
 #include <fstream>
 #include <helper.h>
-#include <openssl/crypto.h>
-#include <openssl/md5.h>
 #include <sstream>
 #include <stdexcept>
 #include <sys/stat.h>
@@ -97,14 +95,6 @@ std::vector<short> read_sample_file(const std::string& filename, bool treat_wave
 	return res;
 }
 
-std::string read_sample_file_as_string(const std::string& filename, bool treat_wave) {
-	auto data = read_sample_file(filename, treat_wave);
-	std::string str_data;
-	str_data.resize(data.size() * 2);
-	memcpy(const_cast<char*>(str_data.data()), data.data(), str_data.size());
-	return str_data;
-}
-
 bool file_exists(const std::string& name) {
 	struct stat buffer;
 	return stat(name.c_str(), &buffer) == 0;
@@ -124,18 +114,4 @@ std::string read_file(const std::string& file) {
 	std::stringstream content;
 	content << f.rdbuf();
 	return content.str();
-}
-
-std::string md5sum(const std::string& data) {
-	unsigned char hash[MD5_DIGEST_LENGTH];
-	MD5(reinterpret_cast<const unsigned char*>(data.data()), data.size(), hash);
-	auto ptr = OPENSSL_buf2hexstr(hash, MD5_DIGEST_LENGTH);
-	std::string res = ptr;
-	OPENSSL_free(ptr);
-	return res;
-}
-
-std::string md5sum_file(const std::string& file) {
-	auto content = read_file(file);
-	return md5sum(content);
 }

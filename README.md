@@ -5,11 +5,6 @@ Snowman Hotword Detection is an open source rewrite of the popular
 It was created in the hope of preserving support for and improving it, as well as allowing
 it to be used on modern devices (embedded and desktop).
 
-It is based on the latest publicly released version of Snowboy, which was built on Feb. 6th 2018.
-
-While planned, this repository does not yet include the code required to train custom hotwords.
-Check out the [official repo fork](https://github.com/seasalt-ai/snowboy) for this functionality.
-
 ### Disclamer
 
 While I did my best, reversing software tends to be more art than science, so it is
@@ -49,12 +44,6 @@ differences are the following:
   While present in the executable, they where never exposed with headers so no user code should
   rely on them. I might implement them at some point, though.
 
-- **Personal model training**:
-  With the takeover by [seasalt.ai](https://github.com/seasalt-ai/snowboy), a library containing
-  code to train personal models was also released. I have not reversed it yet, but I took a quick
-  look and it uses most of the same backend code, so it should be fairly simple to implement.
-  However, I need to set up a test environment for it first, so give it some time. Until then you
-  can train models using the official Docker container.
 
 ### Universal models
 
@@ -67,6 +56,9 @@ to do so. If you do, **please** reach out to me. Another issue is the lack of a 
 In the future I might build a website similar to the original kitt.ai website where people can train
 their personal models using a nice UI, as well as an option to share audio samples for building
 universal models, but this is still in the far future.
+
+### Personal models
+Training personal models is now possible using the `enroll` utility build along the library. While the resulting model is not bit identical with models trained using the original library, it is identical to 5 digits of precision. The remaining differences are most likely a result of rounding errors within the process and should not affect the performance of the model.
 
 ### Contributing
 

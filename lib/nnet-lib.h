@@ -51,6 +51,9 @@ namespace snowboy {
 		void SetIndices();
 		void Read(bool binary, std::istream* is);
 		void Write(bool binary, std::ostream* is) const;
+
+		int32_t LeftContext() const;
+		int32_t RightContext() const;
 	};
 	static_assert(sizeof(Nnet) == 0x110);
 } // namespace snowboy

@@ -33,7 +33,7 @@ namespace snowboy {
 		auto prefix = p;
 		if (!prefix.empty()) prefix += ".";
 
-		m_pipelineVadOptions.Register(prefix, opts);
+		m_pipelineVadOptions.Register(p, opts);
 		m_gainControlStreamOptions->Register(prefix + "gc", opts);
 		m_frontendStreamOptions->Register(prefix + "frontend", opts);
 		m_framerStreamOptions->Register(prefix + "framer", opts);

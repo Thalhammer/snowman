@@ -34,7 +34,6 @@ namespace snowboy {
 		void Register(const std::string& prefix, OptionsItf* opts);
 	};
 	struct PipelineVad : PipelineItf {
-		bool m_isInitialized;
 		std::unique_ptr<InterceptStream> m_interceptStream;
 		std::unique_ptr<GainControlStream> m_gainControlStream;
 		std::unique_ptr<FrontendStream> m_frontendStream;

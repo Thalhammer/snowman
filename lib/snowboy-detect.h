@@ -8,6 +8,9 @@ namespace snowboy {
 	struct WaveHeader;
 	struct PipelineDetect;
 	struct PipelineVad;
+	struct PipelinePersonalEnroll;
+	struct PipelineTemplateCut;
+	struct MatrixBase;
 
 	////////////////////////////////////////////////////////////////////////////////
 	//
@@ -213,6 +216,84 @@ namespace snowboy {
 	private:
 		std::unique_ptr<WaveHeader> wave_header_;
 		std::unique_ptr<PipelineVad> vad_pipeline_;
+	};
+
+	// TODO: This is untested
+	class SnowboyPersonalEnroll {
+	public:
+		SnowboyPersonalEnroll(const std::string& resource_filename, const std::string& model_filename);
+
+		// Runs hotword enrollment. Supported audio format is WAVE (with linear PCM,
+		// 8-bits unsigned integer, 16-bits signed integer or 32-bits signed integer).
+		// See SampleRate(), NumChannels() and BitsPerSample() for the required
+		// sampling rate, number of channels and bits per sample values. You are
+		// supposed to provide a full recording of the hotword for each call to
+		// RunEnrollment. You need to cut the recording beforehand to remove quiet and
+		// non voice samples at both start and end.
+		//
+		// Definition of return values:
+		// -1: Error initializing streams or reading audio data.
+		//  0: OK
+		//  1: Hotword is too long
+		//  2: Hotword is too short
+		//
+		// @param [in]  data               Small chunk of data to be detected. See
+		//                                 above for the supported data format.
+		int RunEnrollment(const std::string& data);
+
+		// Various versions of RunEnrollment() that take different format of audio. If
+		// NumChannels() > 1, e.g., NumChannels() == 2, then the array is as follows:
+		//
+		//   d1c1, d1c2, d2c1, d2c2, d3c1, d3c2, ..., dNc1, dNc2
+		//
+		// where d1c1 means data point 1 of channel 1.
+		//
+		// @param [in]  data               Small chunk of data to be detected. See
+		//                                 above for the supported data format.
+		// @param [in]  array_length       Length of the data array.
+		int RunEnrollment(const float* const data, const int array_length);
+		int RunEnrollment(const int16_t* const data, const int array_length);
+		int RunEnrollment(const int32_t* const data, const int array_length);
+
+		// Resets the enrollment.
+		bool Reset();
+
+		// Returns the number of the audio files required for the new model.
+		int GetNumTemplates() const;
+
+		// Returns the required sampling rate, number of channels and bits per sample
+		// values for the audio data. You should use this information to set up your
+		// audio capturing interface.
+		int SampleRate() const;
+		int NumChannels() const;
+		int BitsPerSample() const;
+
+		~SnowboyPersonalEnroll();
+
+	public:
+		int RunEnrollment(const MatrixBase&);
+		std::unique_ptr<WaveHeader> wave_header_;
+		std::unique_ptr<PipelinePersonalEnroll> enroll_pipeline_;
+	};
+
+	// TODO: This is untested
+	class SnowboyTemplateCut {
+	public:
+		SnowboyTemplateCut(const std::string& resource_filename);
+
+		std::string CutTemplate(const std::string& data);
+
+		bool Reset();
+
+		int SampleRate() const;
+		int NumChannels() const;
+		int BitsPerSample() const;
+
+		~SnowboyTemplateCut();
+
+	public:
+		std::unique_ptr<WaveHeader> wave_header_;
+		std::unique_ptr<PipelineTemplateCut> cut_pipeline_;
 	};
 
 } // namespace snowboy

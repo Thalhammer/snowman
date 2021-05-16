@@ -1,3 +1,4 @@
+#include <cassert>
 #include <frame-info.h>
 #include <iostream>
 #include <nnet-component.h>
@@ -55,13 +56,11 @@ namespace snowboy {
 	}
 
 	void Nnet::Compute(const MatrixBase& input, const std::vector<FrameInfo>& b, Matrix* output, std::vector<FrameInfo>* d) {
-		//std::cout << "Nnet::Compute(" << input << ", b.size()=" << b.size() << ", output=" << *output << ", d.size()=" << d->size() << ")" << std::endl;
 		if (input.m_rows == 0) {
 			output->Resize(0, 0);
 			d->clear();
 			return;
 		}
-		int32_t num_effective_input_rows = 0;
 		if (m_is_first_chunk == 0) {
 			m_input_data.Resize(input.m_rows + m_unprocessed_buffer.m_rows, input.m_cols);
 			if (m_unprocessed_buffer.m_rows > 0) {
@@ -69,20 +68,24 @@ namespace snowboy {
 			}
 			m_input_data.RowRange(m_unprocessed_buffer.m_rows, input.m_rows).CopyFromMat(input, MatrixTransposeType::kNoTrans);
 			m_unprocessed_buffer.Resize(0, 0);
-			num_effective_input_rows = m_left_context + m_right_context;
 		} else {
 			m_is_first_chunk = 0;
-			if (m_pad_input && m_left_context > 0) {
-				m_input_data.Resize(input.m_rows + m_left_context, input.m_cols);
-				m_input_data.RowRange(0, m_left_context).CopyRowsFromVec(SubVector{input, 0});
-				m_input_data.RowRange(m_left_context, input.m_rows).CopyFromMat(input, MatrixTransposeType::kNoTrans);
+			if (m_pad_input) {
+				if (m_left_context > 0) {
+					m_input_data.Resize(input.m_rows + m_left_context, input.m_cols);
+					m_input_data.RowRange(0, m_left_context).CopyRowsFromVec(SubVector{input, 0});
+					m_input_data.RowRange(m_left_context, input.m_rows).CopyFromMat(input, MatrixTransposeType::kNoTrans);
+				} else {
+					m_input_data.Resize(input.m_rows, input.m_cols);
+					m_input_data.CopyFromMat(input, MatrixTransposeType::kNoTrans);
+				}
 			} else {
 				m_input_data.Resize(input.m_rows, input.m_cols);
 				m_input_data.CopyFromMat(input, MatrixTransposeType::kNoTrans);
 			}
-			num_effective_input_rows = m_input_data.m_rows;
 		}
-		if (num_effective_input_rows >= m_left_context + m_right_context + 1) {
+		auto num_effective_input_rows = field_xa ? (m_input_data.m_rows + LeftContext() + RightContext()) : m_input_data.m_rows;
+		if (num_effective_input_rows > m_left_context + m_right_context) {
 			if (field_x18 != num_effective_input_rows) {
 				ComputeChunkInfo(num_effective_input_rows, 1);
 				field_x18 = num_effective_input_rows;
@@ -90,6 +93,7 @@ namespace snowboy {
 			field_b8 = SubVector{m_input_data, static_cast<int32_t>(m_input_data.m_rows) - 1};
 			Propagate();
 			*output = m_output_data;
+			m_output_data.Resize(0, 0);
 		} else {
 			m_unprocessed_buffer = m_input_data;
 			field_b8 = SubVector{m_input_data, static_cast<int32_t>(m_input_data.m_rows) - 1};
@@ -99,7 +103,7 @@ namespace snowboy {
 		for (auto& frame : b) {
 			field_x20.push_back(frame);
 		}
-		if (field_xc == 0 && m_pad_input == 0) {
+		if (field_xc == 0 && m_pad_input == 0 && input.m_rows > 0) {
 			for (int i = 0; i < m_left_context; i++) {
 				field_x20.pop_front();
 			}
@@ -173,49 +177,51 @@ namespace snowboy {
 		m_components.clear();
 	}
 
-	void Nnet::FlushOutput(const MatrixBase& a, const std::vector<FrameInfo>& b, Matrix* c, std::vector<FrameInfo>* d) {
-		//std::cout << "Nnet::FlushOutput()" << std::endl;
-		c->Resize(0, 0);
-		d->clear();
-		if (a.m_rows > 0)
-			Compute(a, b, c, d);
+	void Nnet::FlushOutput(const MatrixBase& param_1, const std::vector<FrameInfo>& param_2, Matrix* param_3, std::vector<FrameInfo>* param_4) {
+		param_3->Resize(0, 0);
+		param_4->clear();
+		if (param_1.m_rows > 0)
+			Compute(param_1, param_2, param_3, param_4);
 
-		const auto num_stored_frames = m_left_context + m_right_context;
-		const auto num_frames_padding = field_xa ? m_unprocessed_buffer.m_rows : 0;
-		auto num_effective_input_rows = num_stored_frames + num_frames_padding;
+		auto uVar10 = m_unprocessed_buffer.m_rows;
+		auto num_effective_input_rows_new = (field_xa ? LeftContext() + RightContext() : 0) + m_unprocessed_buffer.m_rows;
 
 		if (m_pad_input && field_b8.m_size > 0) {
-			num_effective_input_rows += m_unprocessed_buffer.m_rows;
+			auto t = RightContext();
+			num_effective_input_rows_new += t;
+			uVar10 += t;
 		}
 
-		if (num_effective_input_rows > num_stored_frames) {
-			auto dim = InputDim();
-			m_input_data.Resize(m_unprocessed_buffer.m_rows, dim);
+		if (LeftContext() + RightContext() < num_effective_input_rows_new) {
+			m_input_data.Resize(uVar10, InputDim());
 			if (m_unprocessed_buffer.m_rows > 0) {
 				m_input_data.RowRange(0, m_unprocessed_buffer.m_rows).CopyFromMat(m_unprocessed_buffer, MatrixTransposeType::kNoTrans);
 			}
-			if (m_pad_input && m_right_context > 0) {
-				m_input_data.RowRange(m_unprocessed_buffer.m_rows, m_right_context).CopyRowsFromVec(field_b8);
+			assert(m_right_context == RightContext());
+			if (m_pad_input && 0 < RightContext()) {
+				m_input_data.RowRange(m_unprocessed_buffer.m_rows, RightContext()).CopyRowsFromVec(field_b8);
 			}
-			if (num_effective_input_rows != field_x18) {
-				ComputeChunkInfo(num_effective_input_rows, 1);
-				field_x18 = num_effective_input_rows;
+			if (num_effective_input_rows_new != field_x18) {
+				ComputeChunkInfo(num_effective_input_rows_new, 1);
+				field_x18 = num_effective_input_rows_new;
 			}
 			Propagate();
 			if (m_output_data.m_rows > 0) {
-				if (c->m_rows != 0) {
-					c->Resize(m_output_data.m_rows + c->m_rows, c->m_cols, MatrixResizeType::kCopyData);
-					c->RowRange(c->m_rows - m_output_data.m_rows, m_output_data.m_rows).CopyFromMat(m_output_data, MatrixTransposeType::kNoTrans);
-					m_output_data.Resize(0, 0);
+				if (param_3->m_rows != 0) {
+					param_3->Resize(m_output_data.m_rows + param_3->m_rows, param_3->m_cols, MatrixResizeType::kCopyData);
+					param_3->RowRange(param_3->m_rows - m_output_data.m_rows, m_output_data.m_rows).CopyFromMat(m_output_data, MatrixTransposeType::kNoTrans);
+				} else {
+					*param_3 = m_output_data;
 				}
-			} else {
-				*c = m_output_data;
-				m_output_data.Resize(0, 0);
 			}
+			m_output_data.Resize(0, 0);
 		}
-		d->resize(c->m_rows);
-		// TODO: No clue if this is correct
-		field_x20.resize(c->m_rows);
+
+		param_4->resize(param_3->m_rows);
+		for (auto uVar7 = param_4->size() - field_x20.size(); uVar7 < param_4->size(); uVar7++) {
+			param_4->at(uVar7) = field_x20.front();
+			field_x20.pop_front();
+		}
 		ResetComputation();
 	}
 
@@ -230,26 +236,23 @@ namespace snowboy {
 	}
 
 	void Nnet::Propagate() {
-		//std::cout << "Nnet::Propagate()" << std::endl;
 		for (int32_t c = 0; c < m_components.size(); c++) {
-			m_chunkinfo[c].MakeOffsetsContiguous();		// Might not be needed
-			m_chunkinfo[c + 1].MakeOffsetsContiguous(); // Might not be needed
-
-			auto component = m_components[c];
-			auto context = component->Context();
-			if (context.size() > 1) {
-				auto dim = component->InputDim();
+			auto ctx = m_components[c]->Context();
+			auto inputDim = m_components[c]->InputDim();
+			if (ctx.size() > 1) {
 				auto& rci = m_reusable_component_inputs[c];
 				if (rci.m_rows > 0) {
-					Matrix temp;
-					temp.Resize(m_input_data.m_rows + rci.m_rows, dim);
-					temp.RowRange(0, rci.m_rows).CopyFromMat(rci, MatrixTransposeType::kNoTrans);
-					temp.RowRange(rci.m_rows, m_input_data.m_rows).CopyFromMat(m_input_data, MatrixTransposeType::kNoTrans);
-					m_input_data = temp;
+					Matrix local_98;
+					local_98.Resize(rci.m_rows + m_input_data.m_rows, inputDim);
+					local_98.RowRange(0, rci.m_rows).CopyFromMat(rci, MatrixTransposeType::kNoTrans);
+					local_98.RowRange(rci.m_rows, m_input_data.m_rows).CopyFromMat(m_input_data, MatrixTransposeType::kNoTrans);
+					m_input_data = std::move(local_98);
 				}
-				rci.Resize(context.back() - context.front(), dim);
+				rci.Resize(ctx.back() - ctx.front(), inputDim);
 				rci.CopyFromMat(m_input_data.RowRange(m_input_data.m_rows - rci.m_rows, rci.m_rows), MatrixTransposeType::kNoTrans);
 			}
+			m_chunkinfo[c].MakeOffsetsContiguous();
+			m_chunkinfo[c + 1].MakeOffsetsContiguous();
 			auto last_offset = m_chunkinfo[c].GetOffset(m_chunkinfo[c].ChunkSize() - 1);
 			ChunkInfo input_chunk_info{
 				m_chunkinfo[c].NumCols(),
@@ -260,10 +263,10 @@ namespace snowboy {
 			ChunkInfo output_chunk_info{
 				m_chunkinfo[c + 1].NumCols(),
 				m_chunkinfo[c + 1].NumChunks(),
-				last_offset - static_cast<int32_t>(m_input_data.m_rows - (context.back() - context.front())) + 1,
+				last_offset - static_cast<int32_t>(m_input_data.m_rows - (ctx.back() - ctx.front())) + 1,
 				last_offset};
-			m_output_data.Resize(output_chunk_info.NumRows(), output_chunk_info.NumCols());
-			component->Propagate(input_chunk_info, output_chunk_info, m_input_data, &m_output_data);
+			m_output_data.Resize(output_chunk_info.NumChunks() * output_chunk_info.ChunkSize(), output_chunk_info.NumCols());
+			m_components[c]->Propagate(input_chunk_info, output_chunk_info, m_input_data, &m_output_data);
 			if (c < m_components.size() - 1) {
 				m_input_data = m_output_data;
 				m_output_data.Resize(0, 0);
@@ -336,6 +339,22 @@ namespace snowboy {
 		}
 		WriteToken(binary, "</Components>", os);
 		WriteToken(binary, "</Nnet>", os);
+	}
+
+	int32_t Nnet::LeftContext() const {
+		int32_t ctx = 0;
+		for (size_t i = 0; i < m_components.size(); i++) {
+			ctx += m_components[i]->Context().front();
+		}
+		return -ctx;
+	}
+
+	int32_t Nnet::RightContext() const {
+		int32_t ctx = 0;
+		for (size_t i = 0; i < m_components.size(); i++) {
+			ctx += m_components[i]->Context().back();
+		}
+		return ctx;
 	}
 
 } // namespace snowboy

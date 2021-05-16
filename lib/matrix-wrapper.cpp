@@ -3,7 +3,6 @@ extern "C"
 #include <cblas.h>
 }
 #include <cstring>
-#include <iostream>
 #include <matrix-wrapper.h>
 #include <snowboy-debug.h>
 #include <snowboy-io.h>
@@ -103,7 +102,7 @@ namespace snowboy {
 	void MatrixBase::CopyRows(const MatrixBase& param_1, const std::vector<int>& param_2) {
 		for (auto row = 0; row < m_rows; row++) {
 			while (param_2[row] != -1) {
-				memcpy(&m_data[m_stride * row], param_1.m_data + (param_2[row] * param_1.m_stride), m_cols << 2);
+				memcpy(&m_data[m_stride * row], param_1.m_data + (param_2[row] * param_1.m_stride), m_cols * sizeof(float));
 				row++;
 				if (row >= this->m_rows) return;
 			}
@@ -266,7 +265,7 @@ namespace snowboy {
 			Matrix temp;
 			temp.Resize(rows, cols, MatrixResizeType::kSetZero);
 			for (int r = 0; r < std::min(rows, (int)m_rows); r++) {
-				memcpy(&temp.m_data[r * m_stride], &m_data[r * m_stride], std::min((int)m_cols, cols));
+				memcpy(&temp.m_data[r * temp.m_stride], &m_data[r * m_stride], std::min((int)m_cols, cols) * sizeof(float));
 			}
 			temp.Swap(this);
 		} else {
@@ -399,6 +398,22 @@ namespace snowboy {
 		m_rows = rows;
 		m_cols = cols;
 		m_data = parent.m_data + (rowoffset * parent.m_stride) + coloffset;
+	}
+
+	std::ostream& operator<<(std::ostream& s, const MatrixBase& o) {
+		auto flags = s.flags();
+		s << std::fixed;
+		s.precision(3);
+		s << "mat<" << o.m_rows << "," << o.m_cols << ">{\n";
+		for (int r = 0; r < o.m_rows; r++) {
+			s << "{ ";
+			for (int c = 0; c < o.m_cols; c++)
+				s << o.m_data[r * o.m_stride + c] << " ";
+			s << " }\n";
+		}
+		s << "}";
+		s.flags(flags);
+		return s;
 	}
 
 } // namespace snowboy

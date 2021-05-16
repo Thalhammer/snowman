@@ -21,6 +21,8 @@ add_library(snowboy_reimpl
     ${CMAKE_CURRENT_SOURCE_DIR}/ns3.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/pipeline-detect.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/pipeline-lib.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/pipeline-personal-enroll.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/pipeline-template-cut.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/pipeline-vad.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/raw-energy-vad-stream.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/raw-nnet-vad-stream.cpp
@@ -33,6 +35,7 @@ add_library(snowboy_reimpl
     ${CMAKE_CURRENT_SOURCE_DIR}/tdereverb_x.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/template-container.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/template-detect-stream.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/template-enroll-stream.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/universal-detect-stream.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/vad-lib.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/vad-state-stream.cpp
@@ -45,4 +48,4 @@ target_link_libraries(snowboy_reimpl dl m rt pthread f77blas cblas lapack_atlas 
 file(TOUCH ${CMAKE_CURRENT_BINARY_DIR}/dummy.cpp)
 add_library(snowboy ${CMAKE_CURRENT_BINARY_DIR}/dummy.cpp)
 target_link_libraries(snowboy -Wl,--start-group snowboy_reimpl -Wl,--end-group)
-#target_link_libraries(snowboy -Wl,--start-group snowboy_reimpl ${CMAKE_CURRENT_SOURCE_DIR}/../resources/libsnowboy-detect.a -Wl,--end-group)
+#target_link_libraries(snowboy -Wl,--start-group snowboy_reimpl ${CMAKE_CURRENT_SOURCE_DIR}/../resources/nnet-lib.o -Wl,--end-group)

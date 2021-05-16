@@ -1,5 +1,4 @@
 #include <frame-info.h>
-#include <iostream>
 #include <snowboy-debug.h>
 #include <snowboy-io.h>
 #include <snowboy-options.h>
