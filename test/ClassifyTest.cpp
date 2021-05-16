@@ -24,7 +24,7 @@ const static std::map<std::string, int> sample_map_pmdl{
 	{"noise1.wav", -2},
 	{"noise2.wav", -2},
 	{"noise3.wav", -2},
-	//{"sample1.wav", 0},
+	{"sample1.wav", 0},
 	{"snowboy.wav", 0},
 	{"alma1.wav", 1}};
 

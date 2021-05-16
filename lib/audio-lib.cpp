@@ -24,7 +24,7 @@ namespace snowboy {
 		// Note: Not 100% sure about this stuff...
 		data_out->Resize(hdr.wChannels, data.size() / hdr.wBlockAlign);
 		if (hdr.wBitsPerSample == 8) {
-			auto dptr = reinterpret_cast<uint8_t*>(const_cast<char*>(data.data()));
+			auto dptr = reinterpret_cast<int8_t*>(const_cast<char*>(data.data()));
 			for (size_t c = 0; c < data_out->m_cols; c++) {
 				for (size_t r = 0; r < data_out->m_rows; r++) {
 					data_out->m_data[r * data_out->m_stride + c] = *dptr;
@@ -32,7 +32,7 @@ namespace snowboy {
 				}
 			}
 		} else if (hdr.wBitsPerSample == 16) {
-			auto dptr = reinterpret_cast<uint16_t*>(const_cast<char*>(data.data()));
+			auto dptr = reinterpret_cast<int16_t*>(const_cast<char*>(data.data()));
 			for (size_t c = 0; c < data_out->m_cols; c++) {
 				for (size_t r = 0; r < data_out->m_rows; r++) {
 					data_out->m_data[r * data_out->m_stride + c] = *dptr;
@@ -40,7 +40,7 @@ namespace snowboy {
 				}
 			}
 		} else if (hdr.wBitsPerSample == 32) {
-			auto dptr = reinterpret_cast<uint32_t*>(const_cast<char*>(data.data()));
+			auto dptr = reinterpret_cast<int32_t*>(const_cast<char*>(data.data()));
 			for (size_t c = 0; c < data_out->m_cols; c++) {
 				for (size_t r = 0; r < data_out->m_rows; r++) {
 					data_out->m_data[r * data_out->m_stride + c] = *dptr;

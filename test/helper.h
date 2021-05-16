@@ -12,9 +12,11 @@ void GTEST_WARN(const std::string& fmt, Args... args) {
 }
 
 std::vector<short> read_sample_file(const std::string& filename, bool treat_wave = false);
+std::string read_sample_file_as_string(const std::string& filename, bool treat_wave = false);
 bool file_exists(const std::string& name);
 std::string detect_project_root();
 std::string read_file(const std::string& file);
+std::string md5sum(const std::string& data);
 std::string md5sum_file(const std::string& file);
 
 inline size_t hash(const snowboy::MatrixBase& b) {

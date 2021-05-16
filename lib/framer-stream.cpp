@@ -31,11 +31,11 @@ namespace snowboy {
 		auto data = this->m_window.m_data;
 		if (m_options.window_type == "hamming") {
 			for (size_t i = 0; i < len; i++) {
-				data[i] = 0.54 - 0.46 * cos((M_2_PI * i) / (len - 1));
+				data[i] = 0.54 - 0.46 * cos((M_PI * 2.0f * static_cast<float>(i)) / static_cast<float>(len - 1));
 			}
 		} else if (m_options.window_type == "hanning") {
 			for (size_t i = 0; i < len; i++) {
-				data[i] = (1.0 - cos((M_2_PI * i) / (len - 1))) * 0.5;
+				data[i] = (1.0 - cos((M_PI * 2.0f * static_cast<float>(i)) / static_cast<float>(len - 1))) * 0.5;
 			}
 		} else if (m_options.window_type == "rectangular") {
 			// TODO: Implement this correctly. Snowboy does not seem to follow the plain implementation on wikipedia
@@ -44,8 +44,8 @@ namespace snowboy {
 			}
 		} else if (m_options.window_type == "povey") {
 			for (size_t i = 0; i < len; i++) {
-				auto v = cos((M_2_PI * (i + 1)) / (len - 1));
-				v = pow((1.0 - v) * 0.5, 0.85);
+				auto v = cos((M_PI * 2.0f * static_cast<float>(i)) / static_cast<float>(len - 1));
+				v = pow((1.0f - v) * 0.5f, 0.85f);
 				data[i] = v;
 			}
 		} else {
@@ -58,14 +58,16 @@ namespace snowboy {
 		mat->Resize(nframes, this->m_frame_length_samples);
 		std::mt19937 gen;
 		// This might have a different mean
-		std::normal_distribution<float> dist;
+		std::uniform_real_distribution<float> dist;
 		for (int currentFrame = 0; currentFrame < nframes; currentFrame++) {
 			SubVector sub{*mat, currentFrame};
 			sub.CopyFromVec(data.Range(this->m_frame_shift_samples * currentFrame, this->m_frame_length_samples));
 			if (this->m_options.dither_coeff != 0.0 && sub.m_size > 0) {
 				auto data = sub.m_data;
 				for (size_t i = 0; i < sub.m_size; i++) {
-					data[i] += dist(gen) * this->m_options.dither_coeff;
+					// Kaldi RandGauss
+					float r = sqrt(-2 * std::log(dist(gen))) * cos(2 * M_PI * dist(gen));
+					data[i] += r * this->m_options.dither_coeff;
 				}
 			}
 			if (this->m_options.subtract_mean) {

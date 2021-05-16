@@ -22,6 +22,7 @@ add_library(snowboy_reimpl
     ${CMAKE_CURRENT_SOURCE_DIR}/pipeline-detect.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/pipeline-lib.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/pipeline-personal-enroll.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/pipeline-template-cut.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/pipeline-vad.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/raw-energy-vad-stream.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/raw-nnet-vad-stream.cpp

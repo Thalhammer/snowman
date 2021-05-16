@@ -1,4 +1,5 @@
 #pragma once
+#include <framer-stream.h>
 #include <matrix-wrapper.h>
 #include <memory>
 #include <pipeline-itf.h>
@@ -34,18 +35,13 @@ namespace snowboy {
 		std::unique_ptr<EavesdropStream> m_eavesdropStream;
 		std::unique_ptr<FftStream> m_fftStream;
 		std::unique_ptr<MfccStream> m_mfccStream;
-		std::unique_ptr<RawNnetVadStream> m_nnetStream;
+		std::unique_ptr<RawNnetVadStream> m_rawNnetVadStream;
 
 		PipelineTemplateCutOptions m_pipelineTemplateCutOptions;
-		std::unique_ptr<FramerStreamOptions> m_framerStreamOptions;
-		int field_x58;
-		float field_x5c;
-		float field_x60;
-		bool field_x64;
-		std::string field_x68;
+		FramerStreamOptions m_framerStreamOptions;
 		std::unique_ptr<FftStreamOptions> m_fftStreamOptions;
 		std::unique_ptr<MfccStreamOptions> m_mfccStreamOptions;
-		std::unique_ptr<RawNnetVadStreamOptions> m_nnetStreamOptions;
+		std::unique_ptr<RawNnetVadStreamOptions> m_rawNnetVadStreamOptions;
 		Matrix m_eavesdropMatrix;
 
 		virtual void RegisterOptions(const std::string& prefix, OptionsItf* opts) override;

@@ -16,4 +16,5 @@ add_link_options(-rdynamic)
 add_link_options("$<$<CONFIG:DEBUG>:-fsanitize=address>")
 
 add_subdirectory(lib)
+add_subdirectory(apps)
 add_subdirectory(test)
