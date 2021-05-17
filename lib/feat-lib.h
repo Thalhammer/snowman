@@ -28,7 +28,8 @@ namespace snowboy {
 		void InitMelFilterBank();
 		float GetVtlnWarping(float) const;
 		void ValidateOptions() const;
-    public:
+
+	public:
 		MelFilterBank(const MelFilterBankOptions& options);
 		~MelFilterBank() {}
 		void ComputeMelFilterBankEnergy(const VectorBase& input, Vector& output) const;

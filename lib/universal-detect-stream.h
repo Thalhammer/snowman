@@ -46,7 +46,7 @@ namespace snowboy {
 			float high_sensitivity;
 			int hotword_id;
 			// Kw Search Method
-			int search_method;  // TODO: This could be an enum
+			int search_method; // TODO: This could be an enum
 			// Kw Search Neighbour
 			int search_neighbour;
 			// Kw DurationPass

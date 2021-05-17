@@ -10,12 +10,12 @@ namespace snowboy {
 		uint32_t m_size{0};
 		float* m_data{nullptr};
 
-        float* begin() const noexcept { return m_data; }
-        float* end() const noexcept { return m_data + m_size; }
-        size_t size() const noexcept { return m_size; }
-        float* data() const noexcept { return m_data; }
-        float& operator[](size_t index) const noexcept { return m_data[index]; }
-        bool empty() const noexcept { return size() == 0; }
+		float* begin() const noexcept { return m_data; }
+		float* end() const noexcept { return m_data + m_size; }
+		size_t size() const noexcept { return m_size; }
+		float* data() const noexcept { return m_data; }
+		float& operator[](size_t index) const noexcept { return m_data[index]; }
+		bool empty() const noexcept { return size() == 0; }
 
 		void Add(float x);
 		void AddDiagMat2(float, const MatrixBase&, MatrixTransposeType, float);
@@ -80,7 +80,7 @@ namespace snowboy {
 		static void ResetAllocStats();
 	};
 	struct SubVector : VectorBase {
-        // TODO: Those int should be size_t or at least uint
+		// TODO: Those int should be size_t or at least uint
 		SubVector(const VectorBase& parent, int, int);
 		SubVector(const MatrixBase& parent, int);
 		SubVector(const SubVector& other);

@@ -170,7 +170,7 @@ namespace snowboy {
 				auto lVar14 = (long)local_68 * 2 + 1 + iVar9;
 				auto lVar15 = (long)(local_68 * 2);
 				for (auto iVar11 = 0; iVar11 != iVar9 / 2; iVar11++) {
-                    auto twiddle = snowboy::Fft::GetTwiddleFactor(iVar9, iVar11);
+					auto twiddle = snowboy::Fft::GetTwiddleFactor(iVar9, iVar11);
 					if (inverse) twiddle.second *= -1;
 					auto fVar16 = pfVar5[lVar15 + iVar9];
 					auto fVar18 = fVar16 * twiddle.first - twiddle.second * pfVar5[lVar14];
