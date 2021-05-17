@@ -1,13 +1,9 @@
 #include <cstring>
-#include <framer-stream.h>
 #include <fstream>
 #include <helper.h>
 #include <iostream>
-#include <pipeline-personal-enroll.h>
 #include <snowboy-detect.h>
-#include <template-container.h>
-#include <template-enroll-stream.h>
-#include <types.h>
+#include <wave-header.h>
 
 const static auto root = detect_project_root();
 

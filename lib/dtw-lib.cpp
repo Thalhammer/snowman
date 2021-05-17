@@ -109,7 +109,7 @@ namespace snowboy {
 			auto local_22c = std::numeric_limits<float>::max();
 			for (auto row = 0; row < param_2.m_rows; row++) {
 				/* try { // try from 00101d18 to 00101d74 has its CatchHandler @ 00102283 */
-				int local_1e8, local_1e4, local_1e0, local_1dc;
+				int local_1e8 = 0, local_1e4 = 0, local_1e0 = 0, local_1dc = 0;
 				snowboy::SlidingDtw::ComputeBandBoundary(row, &local_1e8, &local_1e4);
 				if (0 < row) {
 					snowboy::SlidingDtw::ComputeBandBoundary(row - 1, &local_1e0, &local_1dc);

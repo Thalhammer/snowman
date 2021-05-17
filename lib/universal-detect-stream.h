@@ -23,13 +23,11 @@ namespace snowboy {
 		bool debug_mode;
 		void Register(const std::string&, OptionsItf*);
 	};
-	static_assert(sizeof(UniversalDetectStreamOptions) == 0x40);
 
 	struct UniversalDetectStream : StreamItf {
 		struct PieceInfo {
 			char unknown[12];
 		};
-		static_assert(sizeof(PieceInfo) == 0xc);
 
 		UniversalDetectStreamOptions m_options;
 		int field_x58;
@@ -43,24 +41,24 @@ namespace snowboy {
 			// Kw <= unsure what this means
 			std::vector<int> field_x88;
 			// Kw Sensitivity
-			float field_xa0;
+			float sensitivity;
 			// Kw High Sensitivity
-			float field_xb8;
-			int field_xd0;
+			float high_sensitivity;
+			int hotword_id;
 			// Kw Search Method
-			int field_xe8;
+			int search_method;  // TODO: This could be an enum
 			// Kw Search Neighbour
-			int field_x100;
+			int search_neighbour;
 			// Kw DurationPass
-			int field_x118;
+			int duration_pass;
 			// Kw FloorPass
-			int field_x130;
+			int floor_pass;
 			// Kw SearchMask
-			std::vector<int> field_x148;
+			std::vector<int> search_mask;
 			// Kw SearchFloor
-			std::vector<float> field_x160;
+			std::vector<float> search_floor;
 			// Kw SearchMax
-			bool field_x178;
+			bool search_max;
 			int field_x1c0;
 			// Kw NumPieces
 			int field_x1d8;
@@ -72,18 +70,18 @@ namespace snowboy {
 		};
 
 		struct ModelInfo {
-			Nnet field_x70;
+			Nnet network;
 			std::vector<KeyWordInfo> keywords;
 			// License start
-			long field_x190;
+			long license_start;
 			// License days
-			float field_x1a8;
+			float license_days;
 
 			std::vector<std::vector<std::vector<PieceInfo>>> field_x1f0;
 			// Smooth window
-			int field_x208;
+			int smooth_window;
 			// Slide window
-			int field_x220;
+			int slide_window;
 			std::vector<std::deque<float>> field_x238;
 			std::vector<std::deque<float>> field_x250;
 			std::vector<float> field_x268;

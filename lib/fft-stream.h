@@ -10,7 +10,6 @@ namespace snowboy {
 		std::string method;
 		void Register(const std::string& prefix, OptionsItf* options);
 	};
-	static_assert(sizeof(FftStreamOptions) == 0x10);
 	struct FftStream : StreamItf {
 		FftStreamOptions m_options;
 		std::unique_ptr<FftItf> m_fft;
@@ -24,6 +23,5 @@ namespace snowboy {
 		virtual std::string Name() const override;
 		virtual ~FftStream();
 	};
-	static_assert(sizeof(FftStream) == 0x38);
 
 } // namespace snowboy

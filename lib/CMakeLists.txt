@@ -1,5 +1,5 @@
 
-add_library(snowboy_reimpl
+set(SNOWMAN_SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/agc.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/audio-lib.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/dtw-lib.cpp
@@ -41,11 +41,35 @@ add_library(snowboy_reimpl
     ${CMAKE_CURRENT_SOURCE_DIR}/vad-state-stream.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/vector-wrapper.cpp
 )
-target_include_directories(snowboy_reimpl PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_directories(snowboy_reimpl PRIVATE /usr/lib/atlas-base)
-target_link_libraries(snowboy_reimpl dl m rt pthread f77blas cblas lapack_atlas atlas)
+if(SNOWMAN_BUILD_SHARED)
+    add_library(snowman SHARED ${SNOWMAN_SRC})
+    set_target_properties(snowman PROPERTIES VERSION ${PROJECT_VERSION})
+    set_target_properties(mylib PROPERTIES SOVERSION ${CMAKE_PROJECT_VERSION_MAJOR})
+else()
+    add_library(snowman STATIC ${SNOWMAN_SRC})
+endif()
+target_compile_features(snowman PRIVATE cxx_std_11)
+target_compile_options(snowman PRIVATE -Wall -Wno-sign-compare -Winit-self -rdynamic)
+target_compile_options(snowman PRIVATE -DHAVE_POSIX_MEMALIGN -fno-omit-frame-pointer)
+target_include_directories(snowman PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_directories(snowman PRIVATE /usr/lib/atlas-base)
+target_link_libraries(snowman m pthread f77blas cblas lapack_atlas atlas)
 
-file(TOUCH ${CMAKE_CURRENT_BINARY_DIR}/dummy.cpp)
-add_library(snowboy ${CMAKE_CURRENT_BINARY_DIR}/dummy.cpp)
-target_link_libraries(snowboy -Wl,--start-group snowboy_reimpl -Wl,--end-group)
-#target_link_libraries(snowboy -Wl,--start-group snowboy_reimpl ${CMAKE_CURRENT_SOURCE_DIR}/../resources/nnet-lib.o -Wl,--end-group)
+if(SNOWMAN_BUILD_WITH_SSE3)
+target_compile_options(snowman PRIVATE -msse -msse2 -msse3 -mssse3)
+endif()
+if(SNOWMAN_BUILD_WITH_SSE4)
+target_compile_options(snowman PRIVATE -msse4.2)
+endif()
+if(SNOWMAN_BUILD_WITH_AVX)
+target_compile_options(snowman PRIVATE -mavx)
+endif()
+if(SNOWMAN_BUILD_WITH_AVX2)
+target_compile_options(snowman PRIVATE -mavx2)
+endif()
+if(SNOWMAN_BUILD_NATIVE)
+target_compile_options(snowman PRIVATE -march=native -mtune=native)
+endif()
+
+add_library(snowboy ALIAS snowman)
+

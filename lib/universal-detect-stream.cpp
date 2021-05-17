@@ -62,9 +62,9 @@ namespace snowboy {
 			Matrix nnet_out_mat;
 			std::vector<FrameInfo> nnet_out_info;
 			if ((read_res & 0x18) == 0)
-				m_model_info[file].field_x70.Compute(read_mat, read_info, &nnet_out_mat, &nnet_out_info);
+				m_model_info[file].network.Compute(read_mat, read_info, &nnet_out_mat, &nnet_out_info);
 			else
-				m_model_info[file].field_x70.FlushOutput(read_mat, read_info, &nnet_out_mat, &nnet_out_info);
+				m_model_info[file].network.FlushOutput(read_mat, read_info, &nnet_out_mat, &nnet_out_info);
 			m_model_info[file].SmoothPosterior(&nnet_out_mat);
 			for (size_t r = 0; r < nnet_out_mat.m_rows; r += m_options.slide_step) {
 				auto max = 0;
@@ -83,7 +83,7 @@ namespace snowboy {
 							if (3000 < max_frame_id - field_x64) {
 								field_x60 = false;
 							}
-							if (1.0f - m_model_info[file].keywords[i].field_xb8 <= posterior && m_options.min_detection_interval < max_frame_id - field_x58)
+							if (1.0f - m_model_info[file].keywords[i].high_sensitivity <= posterior && m_options.min_detection_interval < max_frame_id - field_x58)
 							{
 								if (fVar8 < posterior) {
 									local_130 = i;
@@ -92,10 +92,10 @@ namespace snowboy {
 								field_x64 = max_frame_id;
 							}
 						} else {
-							if (posterior < 1.0f - m_model_info[file].keywords[i].field_xa0 || max_frame_id - field_x58 <= m_options.min_detection_interval) {
+							if (posterior < 1.0f - m_model_info[file].keywords[i].sensitivity || max_frame_id - field_x58 <= m_options.min_detection_interval) {
 								if (!field_x68
-									&& 1.0f - m_model_info[file].keywords[i].field_xb8 <= posterior
-									&& posterior < 1.0f - m_model_info[file].keywords[i].field_xa0
+									&& 1.0f - m_model_info[file].keywords[i].high_sensitivity <= posterior
+									&& posterior < 1.0f - m_model_info[file].keywords[i].sensitivity
 									&& max_frame_id - field_x58 <= m_options.min_detection_interval) {
 									field_x68 = true;
 									field_x6c = max_frame_id;
@@ -105,7 +105,7 @@ namespace snowboy {
 									local_130 = i;
 									fVar8 = posterior;
 								}
-								if (!field_x68 && m_model_info[file].keywords[i].field_xa0 < m_model_info[file].keywords[i].field_xb8) {
+								if (!field_x68 && m_model_info[file].keywords[i].sensitivity < m_model_info[file].keywords[i].high_sensitivity) {
 									field_x68 = true;
 									field_x6c = max_frame_id;
 								}
@@ -115,7 +115,7 @@ namespace snowboy {
 						field_x68 = false;
 						field_x60 = true;
 						field_x64 = max_frame_id;
-						if (1.0f - m_model_info[file].keywords[i].field_xb8 <= posterior && m_options.min_detection_interval < max_frame_id - field_x58)
+						if (1.0f - m_model_info[file].keywords[i].high_sensitivity <= posterior && m_options.min_detection_interval < max_frame_id - field_x58)
 						{
 							if (fVar8 < posterior) {
 								local_130 = i;
@@ -131,7 +131,7 @@ namespace snowboy {
 					field_x5c = max_frame_id;
 					ResetDetection();
 					mat->Resize(1, 1);
-					mat->m_data[0] = m_model_info[file].keywords[local_130].field_xd0;
+					mat->m_data[0] = m_model_info[file].keywords[local_130].hotword_id;
 					if (info != nullptr) {
 						auto i = nnet_out_info[r];
 						info->push_back(i);
@@ -148,7 +148,7 @@ namespace snowboy {
 
 	bool UniversalDetectStream::Reset() {
 		for (auto& e : m_model_info)
-			e.field_x70.ResetComputation();
+			e.network.ResetComputation();
 		ResetDetection();
 		return true;
 	}
@@ -160,11 +160,11 @@ namespace snowboy {
 	UniversalDetectStream::~UniversalDetectStream() {}
 
 	void UniversalDetectStream::ModelInfo::CheckLicense() const {
-		if (field_x1a8 > 0.0f) {
+		if (license_days > 0.0f) {
 			time_t t;
 			time(&t);
-			auto diff = difftime(t, field_x190);
-			auto expires = field_x1a8;
+			auto diff = difftime(t, license_start);
+			auto expires = license_days;
 			if (expires < (diff / 86400.0f)) {
 				SNOWBOY_ERROR() << "Your license for Snowboy has been expired. Please contact KITT.AI at snowboy@kitt.ai";
 				return;
@@ -173,7 +173,7 @@ namespace snowboy {
 	}
 
 	float UniversalDetectStream::GetHotwordPosterior(int param_1, int param_2, int param_3) {
-		switch (m_model_info[param_1].keywords[param_2].field_xe8) {
+		switch (m_model_info[param_1].keywords[param_2].search_method) {
 		case 1: return m_model_info[param_1].HotwordNaiveSearch(param_2);
 		case 2: return HotwordDtwSearch(param_1, param_2);
 		case 3: return HotwordViterbiSearch(param_1, param_2);
@@ -196,7 +196,7 @@ namespace snowboy {
 				if (i != 0 || x != 0) {
 					res << ", ";
 				}
-				res << m_model_info[i].keywords[x].field_xa0;
+				res << m_model_info[i].keywords[x].sensitivity;
 			}
 		}
 		return res.str();
@@ -212,7 +212,7 @@ namespace snowboy {
 		float sum = 0.0f;
 		for (size_t i = 0; i < keywords[param_2].field_x88.size(); i++) {
 			auto& x = field_x250[keywords[param_2].field_x88[i]];
-			if (keywords[param_2].field_x160[i] > x.front()) return 0.0f;
+			if (keywords[param_2].search_floor[i] > x.front()) return 0.0f;
 			sum += logf(std::max(x.front(), std::numeric_limits<float>::min()));
 		}
 		return expf(sum / static_cast<float>(keywords[param_2].field_x88.size()));
@@ -233,16 +233,16 @@ namespace snowboy {
 		std::vector<float> x2;
 		x2.resize(m_model_info[param_1].keywords[param_2].field_x88.size(), 0);
 		auto& f250 = m_model_info[param_1].field_x250[0];
-		int i = f250.size() - m_model_info[param_1].keywords[param_2].field_x148.back();
+		int i = f250.size() - m_model_info[param_1].keywords[param_2].search_mask.back();
 		do {
 			if (f250.size() <= i) {
-				auto fVar2 = m_model_info[param_1].keywords[param_2].field_x160.back();
+				auto fVar2 = m_model_info[param_1].keywords[param_2].search_floor.back();
 				if (fVar2 <= x2.back()) {
-					if (m_model_info[param_1].keywords[param_2].field_x178 && !x.empty()) {
+					if (m_model_info[param_1].keywords[param_2].search_max && !x.empty()) {
 						for (auto& e : x) {
 							fVar2 = std::max(e, fVar2);
 						}
-						return fVar2 / static_cast<float>(m_model_info[param_1].keywords[param_2].field_x148.back());
+						return fVar2 / static_cast<float>(m_model_info[param_1].keywords[param_2].search_mask.back());
 					}
 				}
 			}
@@ -311,35 +311,35 @@ namespace snowboy {
 		ExpectToken(binary, "<Kw>", is);
 		ReadIntegerVector(binary, &field_x88, is);
 		ExpectToken(binary, "<Sensitivity>", is);
-		ReadBasicType<float>(binary, &field_xa0, is);
-		field_xb8 = 0.0f;
-		field_x160.resize(field_x88.size());
+		ReadBasicType<float>(binary, &sensitivity, is);
+		high_sensitivity = 0.0f;
+		search_floor.resize(field_x88.size());
 		// TODO: I think there is a bug here.
 		// If SearchMax is present, but SearchMethod is not, the code would branch into the first
 		// if and throw on the ExpectToken. It might be possible that SearchMethod is *required*
 		// if SearchMax is present, but I dont know for sure.
 		if (PeekToken(binary, is) == 'S') {
 			ExpectToken(binary, "<SearchMethod>", is);
-			ReadBasicType<int>(binary, &field_xe8, is);
+			ReadBasicType<int>(binary, &search_method, is);
 			ExpectToken(binary, "<SearchNeighbour>", is);
-			ReadBasicType<int>(binary, &field_x100, is);
+			ReadBasicType<int>(binary, &search_neighbour, is);
 			ExpectToken(binary, "<SearchMask>", is);
-			ReadIntegerVector<int>(binary, &field_x148, is);
+			ReadIntegerVector<int>(binary, &search_mask, is);
 			ExpectToken(binary, "<SearchFloor>", is);
 			Vector tvec;
 			tvec.Read(binary, is);
-			field_x160.resize(tvec.m_size);
+			search_floor.resize(tvec.m_size);
 			for (size_t i = 0; i < tvec.m_size; i++)
-				field_x160[i] = tvec.m_data[i];
+				search_floor[i] = tvec.m_data[i];
 		} else {
-			field_x148.resize(field_x88.size());
-			for (size_t i = 0; i < field_x148.size(); i++) {
-				field_x148[i] = (static_cast<float>(i) / static_cast<float>(field_x148.size())) * static_cast<float>(slide_window);
+			search_mask.resize(field_x88.size());
+			for (size_t i = 0; i < search_mask.size(); i++) {
+				search_mask[i] = (static_cast<float>(i) / static_cast<float>(search_mask.size())) * static_cast<float>(slide_window);
 			}
 		}
 		if (PeekToken(binary, is) == 'S') {
 			ExpectToken(binary, "<SearchMax>", is);
-			ReadBasicType<bool>(binary, &field_x178, is);
+			ReadBasicType<bool>(binary, &search_max, is);
 		}
 		if (PeekToken(binary, is) == 'N') {
 			ExpectToken(binary, "<NumPieces>", is);
@@ -347,9 +347,9 @@ namespace snowboy {
 		}
 		if (PeekToken(binary, is) == 'D') {
 			ExpectToken(binary, "<DurationPass>", is);
-			ReadBasicType<int>(binary, &field_x118, is);
+			ReadBasicType<int>(binary, &duration_pass, is);
 			ExpectToken(binary, "<FloorPass>", is);
-			ReadBasicType<int>(binary, &field_x130, is);
+			ReadBasicType<int>(binary, &floor_pass, is);
 		}
 	}
 
@@ -357,37 +357,37 @@ namespace snowboy {
 		ExpectToken(binary, "<UniversalModel>", is);
 		if (PeekToken(binary, is) == 'L') {
 			ExpectToken(binary, "<LicenseStart>", is);
-			ReadBasicType<long>(binary, &field_x190, is);
+			ReadBasicType<long>(binary, &license_start, is);
 			ExpectToken(binary, "<LicenseDays>", is);
-			ReadBasicType<float>(binary, &field_x1a8, is);
+			ReadBasicType<float>(binary, &license_days, is);
 		} else {
-			field_x190 = 0;
-			field_x1a8 = 0.0f;
+			license_start = 0;
+			license_days = 0.0f;
 		}
 		ExpectToken(binary, "<KwInfo>", is);
 		ExpectToken(binary, "<SmoothWindow>", is);
-		ReadBasicType<int>(binary, &field_x208, is);
+		ReadBasicType<int>(binary, &smooth_window, is);
 		ExpectToken(binary, "<SlideWindow>", is);
-		ReadBasicType<int>(binary, &field_x220, is);
+		ReadBasicType<int>(binary, &slide_window, is);
 		ExpectToken(binary, "<NumKws>", is);
 		int num_kws;
 		ReadBasicType<int>(binary, &num_kws, is);
 		keywords.resize(num_kws);
 		for (auto& e : keywords) {
-			e.field_xe8 = 1;
+			e.search_method = 1;
 			e.field_x1c0 = num_repeats;
 			e.field_x1d8 = 1;
 		}
 		for (size_t kw = 0; kw < num_kws; kw++) {
-			keywords[kw].ReadKeyword(binary, is, field_x220);
-			keywords[kw].field_xd0 = (*hotword_id)++;
+			keywords[kw].ReadKeyword(binary, is, slide_window);
+			keywords[kw].hotword_id = (*hotword_id)++;
 		}
 		ExpectToken(binary, "</KwInfo>", is);
-		field_x70.Read(binary, is);
-		field_x238.resize(field_x238.size() + field_x70.OutputDim());
-		field_x250.resize(field_x250.size() + field_x70.OutputDim());
-		field_x268.resize(field_x268.size() + field_x70.OutputDim());
-		if (keywords[0].field_xe8 == 4) {
+		network.Read(binary, is);
+		field_x238.resize(field_x238.size() + network.OutputDim());
+		field_x250.resize(field_x250.size() + network.OutputDim());
+		field_x268.resize(field_x268.size() + network.OutputDim());
+		if (keywords[0].search_method == 4) {
 			SNOWBOY_ERROR() << "Not implemented!";
 			// TODO
 		}
@@ -445,13 +445,13 @@ namespace snowboy {
 		if (parts.size() == 1) {
 			for (auto& e : m_model_info) {
 				for (auto& e2 : e.keywords) {
-					e2.field_xb8 = parts[0];
+					e2.high_sensitivity = parts[0];
 				}
 			}
 		} else if (parts.size() == m_model_info.size()) {
 			for (size_t i = 0; i < m_model_info.size(); i++) {
 				for (auto& e : m_model_info[i].keywords) {
-					e.field_xb8 = parts[i];
+					e.high_sensitivity = parts[i];
 				}
 			}
 		} else {
@@ -468,13 +468,13 @@ namespace snowboy {
 		if (parts.size() == 1) {
 			for (auto& e : m_model_info) {
 				for (auto& e2 : e.keywords) {
-					e2.field_xa0 = parts[0];
+					e2.sensitivity = parts[0];
 				}
 			}
 		} else if (parts.size() == m_model_info.size()) {
 			for (size_t i = 0; i < m_model_info.size(); i++) {
 				for (auto& e : m_model_info[i].keywords) {
-					e.field_xa0 = parts[i];
+					e.sensitivity = parts[i];
 				}
 			}
 		} else {
@@ -489,7 +489,7 @@ namespace snowboy {
 		std::vector<int> parts;
 		SplitStringToIntegers<int>(param_1, global_snowboy_string_delimiter, &parts);
 		for (size_t i = 0; i < std::min(m_model_info.size(), parts.size()); i++) {
-			m_model_info[i].field_x220 = parts[i];
+			m_model_info[i].slide_window = parts[i];
 		}
 	}
 
@@ -497,7 +497,7 @@ namespace snowboy {
 		std::vector<int> parts;
 		SplitStringToIntegers<int>(param_1, global_snowboy_string_delimiter, &parts);
 		for (size_t i = 0; i < std::min(m_model_info.size(), parts.size()); i++) {
-			m_model_info[i].field_x208 = parts[i];
+			m_model_info[i].smooth_window = parts[i];
 		}
 	}
 
@@ -507,17 +507,17 @@ namespace snowboy {
 				auto val = param_2->m_data[r * param_2->m_stride + c];
 				field_x268[c] += val;
 				field_x238[c].push_back(val);
-				if (field_x238[c].size() > field_x208) {
+				if (field_x238[c].size() > smooth_window) {
 					field_x238[c].pop_front();
 				}
-				param_2->m_data[r * param_2->m_stride + c] = field_x268[c] / field_x208;
+				param_2->m_data[r * param_2->m_stride + c] = field_x268[c] / smooth_window;
 			}
 		}
 	}
 
 	void UniversalDetectStream::ModelInfo::UpdateLicense(long param_2, float param_3) {
-		field_x190 = param_2;
-		field_x1a8 = param_3;
+		license_start = param_2;
+		license_days = param_3;
 	}
 
 	void UniversalDetectStream::UpdateLicense(int param_1, long param_2, float param_3) {
@@ -532,49 +532,49 @@ namespace snowboy {
 		WriteToken(binary, "<Kw>", os);
 		WriteIntegerVector<int>(binary, field_x88, os);
 		WriteToken(binary, "<Sensitivity>", os);
-		WriteBasicType<float>(binary, field_xa0, os);
+		WriteBasicType<float>(binary, sensitivity, os);
 		WriteToken(binary, "<SearchMethod>", os);
-		WriteBasicType<int>(binary, field_xe8, os);
+		WriteBasicType<int>(binary, search_method, os);
 		WriteToken(binary, "<SearchNeighbour>", os);
-		WriteBasicType<int>(binary, field_x100, os);
+		WriteBasicType<int>(binary, search_neighbour, os);
 		WriteToken(binary, "<SearchMask>", os);
-		WriteIntegerVector<int>(binary, field_x148, os);
+		WriteIntegerVector<int>(binary, search_mask, os);
 		WriteToken(binary, "<SearchFloor>", os);
 		Vector tvec;
-		tvec.Resize(field_x160.size());
+		tvec.Resize(search_floor.size());
 		// TODO: This could be a memcpy, or even better implement writing for vector
 		for (size_t i = 0; i < tvec.m_size; i++) {
-			tvec.m_data[i] = field_x160[i];
+			tvec.m_data[i] = search_floor[i];
 		}
 		tvec.Write(binary, os);
 		WriteToken(binary, "<SearchMax>", os);
-		WriteBasicType<bool>(binary, field_x178, os);
+		WriteBasicType<bool>(binary, search_max, os);
 		WriteToken(binary, "<NumPieces>", os);
 		WriteBasicType<int>(binary, field_x1d8, os);
 		WriteToken(binary, "<DurationPass>", os);
-		WriteBasicType<int>(binary, field_x118, os);
+		WriteBasicType<int>(binary, duration_pass, os);
 		WriteToken(binary, "<FloorPass>", os);
-		WriteBasicType<int>(binary, field_x130, os);
+		WriteBasicType<int>(binary, floor_pass, os);
 	}
 
 	void UniversalDetectStream::ModelInfo::WriteHotwordModel(bool binary, std::ostream* os) const {
 		WriteToken(binary, "<UniversalModel>", os);
 		WriteToken(binary, "<LicenseStart>", os);
-		WriteBasicType<long>(binary, field_x190, os);
+		WriteBasicType<long>(binary, license_start, os);
 		WriteToken(binary, "<LicenseDays>", os);
-		WriteBasicType<float>(binary, field_x1a8, os);
+		WriteBasicType<float>(binary, license_days, os);
 		WriteToken(binary, "<KwInfo>", os);
 		WriteToken(binary, "<SmoothWindow>", os);
-		WriteBasicType<int>(binary, field_x208, os);
+		WriteBasicType<int>(binary, smooth_window, os);
 		WriteToken(binary, "<SlideWindow>", os);
-		WriteBasicType<int>(binary, field_x220, os);
+		WriteBasicType<int>(binary, slide_window, os);
 		WriteToken(binary, "<NumKws>", os);
 		WriteBasicType<int>(binary, keywords.size(), os);
 		for (size_t kw = 0; kw < keywords.size(); kw++) {
 			keywords[kw].WriteKeyword(binary, os);
 		}
 		WriteToken(binary, "</KwInfo>", os);
-		field_x70.Write(binary, os);
+		network.Write(binary, os);
 	}
 
 	void UniversalDetectStream::WriteHotwordModel(bool binary, const std::string& filename) const {

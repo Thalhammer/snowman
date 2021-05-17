@@ -28,7 +28,6 @@ namespace snowboy {
 
 		void Register(const std::string& prefix, OptionsItf* opts);
 	};
-	static_assert(sizeof(PipelineTemplateCutOptions) == 0x10);
 	struct PipelineTemplateCut : PipelineItf {
 		std::unique_ptr<InterceptStream> m_interceptStream;
 		std::unique_ptr<FramerStream> m_framerStream;
@@ -57,5 +56,4 @@ namespace snowboy {
 		int CutTemplate(const MatrixBase& in, Matrix* out);
 		void ComputeTemplateBoundary(const MatrixBase&, const std::vector<FrameInfo>&, int*, int*) const;
 	};
-	static_assert(sizeof(PipelineTemplateCut) == 0xa0);
 } // namespace snowboy

@@ -11,7 +11,6 @@ namespace snowboy {
 		bool pad_context;
 		void Register(const std::string&, OptionsItf*);
 	};
-	static_assert(sizeof(NnetStreamOptions) == 0x10);
 	struct NnetStream : StreamItf {
 		NnetStreamOptions m_options;
 		std::unique_ptr<Nnet> m_nnet;
@@ -22,5 +21,4 @@ namespace snowboy {
 		virtual std::string Name() const override;
 		virtual ~NnetStream();
 	};
-	static_assert(sizeof(NnetStream) == 0x30);
 } // namespace snowboy

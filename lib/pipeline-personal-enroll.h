@@ -54,5 +54,4 @@ namespace snowboy {
 		void SetModelFilename(const std::string& filename);
 		int GetNumTemplates() const;
 	};
-	static_assert(sizeof(PipelinePersonalEnroll) == 0x70);
 } // namespace snowboy

@@ -14,7 +14,6 @@ namespace snowboy {
 		std::string agc_power;
 		void Register(const std::string&, OptionsItf*);
 	};
-	static_assert(sizeof(FrontendStreamOptions) == 0x20);
 	struct FrontendStream : StreamItf {
 		std::string m_ns_power;
 		std::string m_dr_power;
@@ -33,5 +32,4 @@ namespace snowboy {
 		virtual std::string Name() const override;
 		virtual ~FrontendStream();
 	};
-	static_assert(sizeof(FrontendStream) == 0x68);
 } // namespace snowboy

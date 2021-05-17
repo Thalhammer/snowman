@@ -1,7 +1,7 @@
 #include <audio-lib.h>
 #include <matrix-wrapper.h>
 #include <snowboy-debug.h>
-#include <types.h>
+#include <wave-header.h>
 
 namespace snowboy {
 	float GetMaxWaveAmplitude(const WaveHeader& hdr) {

@@ -84,9 +84,9 @@ namespace snowboy {
 		Vector v;
 		v.Resize(param_1.m_size);
 		v.CopyFromVec(param_1);
-		ComputePowerSpectrumReal(&v);
+		ComputePowerSpectrumReal(v);
 		Vector vout;
-		m_melfilterbank->ComputeMelFilterBankEnergy(v, &vout);
+		m_melfilterbank->ComputeMelFilterBankEnergy(v, vout);
 		vout.ApplyFloor(std::numeric_limits<float>::min());
 		vout.ApplyLog();
 		param_2->AddMatVec(1.0, m_dct_matrix, MatrixTransposeType::kNoTrans, vout, 0.0);

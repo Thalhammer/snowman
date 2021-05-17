@@ -19,5 +19,4 @@ namespace snowboy {
 		void Clear();
 		void AddTemplate(const MatrixBase& tpl);
 	};
-	static_assert(sizeof(TemplateContainer) == 0x28);
 } // namespace snowboy

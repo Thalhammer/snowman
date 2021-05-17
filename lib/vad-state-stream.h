@@ -13,7 +13,6 @@ namespace snowboy {
 		int extra_frame_adjust;
 		void Register(const std::string&, OptionsItf*);
 	};
-	static_assert(sizeof(VadStateStreamOptions) == 0x10);
 	struct VadStateStream : StreamItf {
 		const VadStateStreamOptions m_options;
 		int field_x28;
@@ -37,5 +36,4 @@ namespace snowboy {
 		virtual std::string Name() const override;
 		virtual ~VadStateStream();
 	};
-	static_assert(sizeof(VadStateStream) == 0xa8);
 } // namespace snowboy

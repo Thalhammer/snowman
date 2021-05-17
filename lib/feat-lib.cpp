@@ -22,13 +22,11 @@ namespace snowboy {
 		InitMelFilterBank();
 	}
 
-	MelFilterBank::~MelFilterBank() {}
-
 	void MelFilterBank::InitMelFilterBank() {
 		// TODO: This might contain bugs and generally needs a proper rewrite, but I dont know enough about audio processing to do it
 		field_x28.resize(m_options.num_bins, 0);
 		field_x40.resize(m_options.num_bins);
-		auto fVar13 = logf(m_options.low_frequency / 700.0f + 1.0f);
+		const auto fVar13 = logf(m_options.low_frequency / 700.0f + 1.0f);
 		auto fVar14 = logf(m_options.high_frequency / 700.0f + 1.0f);
 		fVar14 = (fVar14 * 1127.0 - fVar13 * 1127.0) / static_cast<float>(m_options.num_bins + 1);
 		auto fVar17 = static_cast<float>(m_options.sample_rate) / static_cast<float>(m_options.num_fft_points);
@@ -97,11 +95,10 @@ namespace snowboy {
 		}
 	}
 
-	void MelFilterBank::ComputeMelFilterBankEnergy(const VectorBase& param_1, Vector* param_2) const {
-		if (m_options.num_bins != param_2->m_size) param_2->Resize(m_options.num_bins);
-		for (int b = 0; b < param_2->m_size; b++) {
-			auto f = field_x40[b].DotVec(param_1.Range(field_x28[b], field_x40[b].m_size));
-			param_2->m_data[b] = f;
+	void MelFilterBank::ComputeMelFilterBankEnergy(const VectorBase& input, Vector& param_2) const {
+		if (m_options.num_bins != param_2.size()) param_2.Resize(m_options.num_bins);
+		for (int b = 0; b < param_2.size(); b++) {
+			param_2[b] = field_x40[b].DotVec(input.Range(field_x28[b], field_x40[b].size()));
 		}
 	}
 
@@ -131,15 +128,13 @@ namespace snowboy {
 		}
 	}
 
-	void ComputePowerSpectrumReal(Vector* data) {
-		if (data->m_size == 0) return;
-		auto ptr = data->m_data;
-		float f = ptr[0] * ptr[0];
-		for (int i = 0; i < data->m_size / 2 - 1; i++) {
-			ptr[i + 1] = ptr[i * 2 + 3] * ptr[i * 2 + 3] + ptr[i * 2 + 2] * ptr[i * 2 + 2];
+	void ComputePowerSpectrumReal(Vector& data) {
+		if (data.empty()) return;
+		data[0] = data[0] * data[0];
+		for (int i = 0; i < data.size() / 2 - 1; i++) {
+			data[i + 1] = data[i * 2 + 3] * data[i * 2 + 3] + data[i * 2 + 2] * data[i * 2 + 2];
 		}
-		ptr[0] = f;
-		data->Resize(data->m_size / 2, MatrixResizeType::kCopyData);
+		data.Resize(data.size() / 2, MatrixResizeType::kCopyData);
 	}
 
 	FftItf::~FftItf() {}
@@ -175,12 +170,11 @@ namespace snowboy {
 				auto lVar14 = (long)local_68 * 2 + 1 + iVar9;
 				auto lVar15 = (long)(local_68 * 2);
 				for (auto iVar11 = 0; iVar11 != iVar9 / 2; iVar11++) {
-					float local_40, local_3c;
-					snowboy::Fft::GetTwiddleFactor(iVar9, iVar11, &local_40, &local_3c);
-					if (inverse) local_3c *= -1;
+                    auto twiddle = snowboy::Fft::GetTwiddleFactor(iVar9, iVar11);
+					if (inverse) twiddle.second *= -1;
 					auto fVar16 = pfVar5[lVar15 + iVar9];
-					auto fVar18 = fVar16 * local_40 - local_3c * pfVar5[lVar14];
-					fVar16 = pfVar5[lVar14] * local_40 + fVar16 * local_3c;
+					auto fVar18 = fVar16 * twiddle.first - twiddle.second * pfVar5[lVar14];
+					fVar16 = pfVar5[lVar14] * twiddle.first + fVar16 * twiddle.second;
 					pfVar5[lVar15 + iVar9] = pfVar5[lVar15] - fVar18;
 					pfVar5[lVar14] = pfVar5[lVar15 + 1] - fVar16;
 					pfVar5[lVar15] += fVar18;
@@ -257,17 +251,16 @@ namespace snowboy {
 			auto lVar12 = 2;
 			auto lVar9 = num_pts;
 			for (auto iVar13 = 1; iVar13 <= iVar11 / 4; iVar13 += 1) {
-				float twiddle_a, twiddle_b;
-				snowboy::Fft::GetTwiddleFactor(num_pts, param_1 ? (static_cast<double>(num_pts) * 0.5 - iVar13) : iVar13, &twiddle_a, &twiddle_b);
+				const auto twiddle = snowboy::Fft::GetTwiddleFactor(num_pts, param_1 ? (static_cast<double>(num_pts) * 0.5 - iVar13) : iVar13);
 				const auto fVar4 = ptr[lVar9 - 1];
 				const auto fVar5 = ptr[lVar9 - 2];
 				const auto fVar6 = ptr[lVar12];
 				const auto fVar7 = ptr[lVar12 + 1];
-				ptr[lVar12] = (twiddle_a * fVar7 + (twiddle_b + 1.0) * fVar6 + (1.0 - twiddle_b) * fVar5 + fVar4 * twiddle_a) * 0.5;
-				ptr[lVar12 + 1] = ((twiddle_b + 1.0) * fVar7 + ((fVar5 * twiddle_a - (1.0 - twiddle_b) * fVar4) - twiddle_a * fVar6)) * 0.5;
+				ptr[lVar12] = (twiddle.first * fVar7 + (twiddle.second + 1.0) * fVar6 + (1.0 - twiddle.second) * fVar5 + fVar4 * twiddle.first) * 0.5;
+				ptr[lVar12 + 1] = ((twiddle.second + 1.0) * fVar7 + ((fVar5 * twiddle.first - (1.0 - twiddle.second) * fVar4) - twiddle.first * fVar6)) * 0.5;
 				if (iVar13 * 2 != lVar9 - 2) {
-					ptr[lVar9 - 2] = ((((twiddle_b + 1.0) * fVar5 - fVar4 * twiddle_a) + (1.0 - twiddle_b) * fVar6) - twiddle_a * fVar7) * 0.5;
-					ptr[lVar9 - 1] = (((fVar5 * twiddle_a + fVar4 * (twiddle_b + 1.0)) - fVar6 * twiddle_a) - fVar7 * (1.0 - twiddle_b)) * 0.5;
+					ptr[lVar9 - 2] = ((((twiddle.second + 1.0) * fVar5 - fVar4 * twiddle.first) + (1.0 - twiddle.second) * fVar6) - twiddle.first * fVar7) * 0.5;
+					ptr[lVar9 - 1] = (((fVar5 * twiddle.first + fVar4 * (twiddle.second + 1.0)) - fVar6 * twiddle.first) - fVar7 * (1.0 - twiddle.second)) * 0.5;
 				}
 				lVar12 += 2;
 				lVar9 -= 2;
@@ -283,15 +276,13 @@ namespace snowboy {
 		return param_1 == 0 ? 0 : (31 - __builtin_clz(param_1));
 	}
 
-	void Fft::GetTwiddleFactor(int param_1, int param_2, float* param_3, float* param_4) const {
+	std::pair<float, float> Fft::GetTwiddleFactor(int param_1, int param_2) const {
 		auto size = m_twiddle_factors.size();
 		auto idx = (size / param_1) * param_2 * 2;
 		if (idx < size) {
-			*param_3 = m_twiddle_factors[idx];
-			*param_4 = m_twiddle_factors[idx + 1];
+			return {m_twiddle_factors[idx], m_twiddle_factors[idx + 1]};
 		} else {
-			*param_3 = m_twiddle_factors[size - idx] * -1;
-			*param_3 = m_twiddle_factors[(size - idx) + 1] * -1;
+			return {m_twiddle_factors[size - idx] * -1.0f, m_twiddle_factors[(size - idx) + 1] * -1.0f};
 		}
 	}
 

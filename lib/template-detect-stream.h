@@ -17,7 +17,6 @@ namespace snowboy {
 		SlidingDtwOptions dtw_options;
 		void Register(const std::string&, OptionsItf*);
 	};
-	static_assert(sizeof(TemplateDetectStreamOptions) == 0x28);
 	struct TemplateDetectStream : StreamItf {
 		TemplateDetectStreamOptions m_options;
 		std::vector<TemplateContainer> field_x40;
@@ -38,5 +37,4 @@ namespace snowboy {
 		size_t NumHotwords(int model_id) const;
 		void UpdateModel() const;
 	};
-	static_assert(sizeof(TemplateDetectStream) == 0x98);
 } // namespace snowboy

@@ -15,7 +15,6 @@ namespace snowboy {
 		std::string model_filename;
 		void Register(const std::string&, OptionsItf*);
 	};
-	static_assert(sizeof(TemplateEnrollStreamOptions) == 0x20);
 	struct TemplateEnrollStream : StreamItf {
 		TemplateEnrollStreamOptions m_options;
 		TemplateContainer field_x38;
@@ -30,5 +29,4 @@ namespace snowboy {
 
 		void SetModelFilename(const std::string& name);
 	};
-	static_assert(sizeof(TemplateEnrollStream) == 0x80);
 } // namespace snowboy

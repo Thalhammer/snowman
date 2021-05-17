@@ -10,6 +10,13 @@ namespace snowboy {
 		uint32_t m_size{0};
 		float* m_data{nullptr};
 
+        float* begin() const noexcept { return m_data; }
+        float* end() const noexcept { return m_data + m_size; }
+        size_t size() const noexcept { return m_size; }
+        float* data() const noexcept { return m_data; }
+        float& operator[](size_t index) const noexcept { return m_data[index]; }
+        bool empty() const noexcept { return size() == 0; }
+
 		void Add(float x);
 		void AddDiagMat2(float, const MatrixBase&, MatrixTransposeType, float);
 		void AddMatVec(float, const MatrixBase&, MatrixTransposeType, const VectorBase&, float);
@@ -34,8 +41,6 @@ namespace snowboy {
 		float Norm(float) const;
 		SubVector Range(int, int) const;
 		SubVector Range(int, int);
-		void Read(bool, bool, std::istream*);
-		void Read(bool, std::istream*);
 		void Scale(float);
 		void Set(float);
 		void SetRandomGaussian();
@@ -57,9 +62,7 @@ namespace snowboy {
 		}
 
 		void Resize(int size, MatrixResizeType resize = MatrixResizeType::kSetZero);
-		void AllocateVectorMemory(int size);
-		void ReleaseVectorMemory(); // NOTE: Called destroy in kaldi
-		~Vector() { ReleaseVectorMemory(); }
+		~Vector();
 
 		Vector& operator=(const Vector& other);
 		Vector& operator=(const VectorBase& other);
@@ -69,7 +72,7 @@ namespace snowboy {
 		}
 
 		void Read(bool, bool, std::istream*);
-		void Read(bool, std::istream*); // Read(p1, false, p2);
+		void Read(bool, std::istream*);
 		void Swap(Vector* other);
 		void RemoveElement(int index);
 
@@ -77,11 +80,9 @@ namespace snowboy {
 		static void ResetAllocStats();
 	};
 	struct SubVector : VectorBase {
+        // TODO: Those int should be size_t or at least uint
 		SubVector(const VectorBase& parent, int, int);
 		SubVector(const MatrixBase& parent, int);
 		SubVector(const SubVector& other);
 	};
-	static_assert(sizeof(VectorBase) == 0x10);
-	static_assert(sizeof(Vector) == 0x10);
-	static_assert(sizeof(SubVector) == 0x10);
 } // namespace snowboy

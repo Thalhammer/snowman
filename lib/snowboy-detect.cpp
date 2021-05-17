@@ -7,7 +7,7 @@
 #include <pipeline-vad.h>
 #include <snowboy-debug.h>
 #include <snowboy-detect.h>
-#include <types.h>
+#include <wave-header.h>
 
 namespace snowboy {
 	SnowboyDetect::SnowboyDetect(const std::string& resource_filename, const std::string& model_str) {

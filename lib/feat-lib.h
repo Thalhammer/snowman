@@ -18,26 +18,25 @@ namespace snowboy {
 
 		void Register(const std::string& prefix, OptionsItf* opts);
 	};
-	static_assert(sizeof(MelFilterBankOptions) == 0x20);
 
-	struct MelFilterBank {
+	class MelFilterBank {
 		MelFilterBankOptions m_options;
 		// Both hold num_bins entries
 		std::vector<int> field_x28;
 		std::vector<Vector> field_x40;
 
-		MelFilterBank(const MelFilterBankOptions& options);
-		virtual ~MelFilterBank(); // TODO: Does not need to be virtual (imho) but we keep it that way to make sure the layout matches
 		void InitMelFilterBank();
 		float GetVtlnWarping(float) const;
-		void ComputeMelFilterBankEnergy(const VectorBase&, Vector*) const;
 		void ValidateOptions() const;
+    public:
+		MelFilterBank(const MelFilterBankOptions& options);
+		~MelFilterBank() {}
+		void ComputeMelFilterBankEnergy(const VectorBase& input, Vector& output) const;
 	};
-	static_assert(sizeof(MelFilterBank) == 0x58);
 
 	void ComputeDctMatrixTypeIII(Matrix* mat);
 	void ComputeCepstralLifterCoeffs(float, Vector*);
-	void ComputePowerSpectrumReal(Vector*);
+	void ComputePowerSpectrumReal(Vector&);
 
 	struct FftItf {
 		virtual void DoFft(Vector*) const = 0;
@@ -64,7 +63,7 @@ namespace snowboy {
 		void ComputeBitReversalIndex(int, std::vector<int>*) const;
 		void DoProcessingForReal(bool, Vector*) const;
 		unsigned int GetNumBits(unsigned int) const;
-		void GetTwiddleFactor(int, int, float*, float*) const;
+		std::pair<float, float> GetTwiddleFactor(int, int) const;
 		void Init();
 		unsigned int ReverseBit(unsigned int, unsigned int) const;
 		void SetOptions(const FftOptions& opts);
@@ -73,7 +72,6 @@ namespace snowboy {
 		virtual void DoIfft(Vector*) const override;
 		virtual ~Fft();
 	};
-	static_assert(sizeof(Fft) == 0x48);
 
 	struct SplitRadixFft : FftItf {
 		FftOptions m_options;
@@ -96,5 +94,4 @@ namespace snowboy {
 		virtual void DoIfft(Vector*) const override;
 		virtual ~SplitRadixFft();
 	};
-	static_assert(sizeof(SplitRadixFft) == 0x48);
 } // namespace snowboy

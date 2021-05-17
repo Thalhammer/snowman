@@ -16,7 +16,6 @@ namespace snowboy {
 		// TODO: This could be replaced with enum DistanceType
 		std::string distance_metric;
 	};
-	static_assert(sizeof(SlidingDtwOptions) == 0x10);
 	struct SlidingDtw {
 		SlidingDtwOptions m_options;
 		std::deque<std::deque<float>> field_x18;
@@ -38,7 +37,6 @@ namespace snowboy {
 		void ComputeBandBoundary(int, int*, int*) const;
 		virtual ~SlidingDtw();
 	};
-	static_assert(sizeof(SlidingDtw) == 0x78);
 
 	float DtwAlign(DistanceType, const MatrixBase&, const MatrixBase&, std::vector<std::vector<int>>*);
 } // namespace snowboy

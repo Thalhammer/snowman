@@ -100,9 +100,6 @@ namespace snowboy {
 	struct SubMatrix : MatrixBase {
 		SubMatrix(const MatrixBase& parent, int rowoffset, int rows, int coloffset, int cols);
 	};
-	static_assert(sizeof(MatrixBase) == 0x18);
-	static_assert(sizeof(Matrix) == 0x18);
-	static_assert(sizeof(SubMatrix) == 0x18);
 
 	std::ostream& operator<<(std::ostream&, const MatrixBase&);
 } // namespace snowboy

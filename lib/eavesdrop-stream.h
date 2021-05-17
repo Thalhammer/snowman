@@ -14,5 +14,4 @@ namespace snowboy {
 		virtual std::string Name() const override;
 		virtual ~EavesdropStream();
 	};
-	static_assert(sizeof(EavesdropStream) == 0x28);
 } // namespace snowboy

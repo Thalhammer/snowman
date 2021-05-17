@@ -1,14 +1,7 @@
 #include <cstring>
-#include <framer-stream.h>
-#include <fstream>
 #include <helper.h>
 #include <iostream>
-#include <openssl/crypto.h>
-#include <openssl/md5.h>
-#include <pipeline-personal-enroll.h>
 #include <snowboy-detect.h>
-#include <template-container.h>
-#include <template-enroll-stream.h>
 
 const static auto root = detect_project_root();
 
@@ -20,9 +13,6 @@ int main(int argc, const char** argv) {
 	bool cut_recordings;
 	if (!parse_args(argc, argv, output, recordings, lang, cut_recordings)) return -1;
 
-	{
-		std::ofstream t{output, std::ios::binary | std::ios::trunc};
-	}
 	snowboy::SnowboyPersonalEnroll enroll{root + "resources/pmdl/" + lang + "/personal_enroll.res", output};
 	snowboy::SnowboyTemplateCut cut{root + "resources/pmdl/" + lang + "/personal_enroll.res"};
 	for (auto& e : recordings) {

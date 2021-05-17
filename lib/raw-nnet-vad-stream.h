@@ -15,7 +15,6 @@ namespace snowboy {
 		std::string model_filename;
 		void Register(const std::string&, OptionsItf*);
 	};
-	static_assert(sizeof(RawNnetVadStreamOptions) == 0x10);
 	struct RawNnetVadStream : StreamItf {
 		RawNnetVadStreamOptions m_options;
 		std::unique_ptr<Nnet> m_nnet;
@@ -28,5 +27,4 @@ namespace snowboy {
 		virtual std::string Name() const override;
 		virtual ~RawNnetVadStream();
 	};
-	static_assert(sizeof(RawNnetVadStream) == 0x48);
 } // namespace snowboy
