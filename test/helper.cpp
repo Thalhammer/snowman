@@ -204,7 +204,7 @@ void* MemoryChecker::mc_malloc(size_t size, const void* caller) {
 }
 
 void* MemoryChecker::mc_realloc(void* cptr, size_t size, const void* caller) {
-	if(in_memchecker) return __libc_realloc(cptr, size);
+	if (in_memchecker) return __libc_realloc(cptr, size);
 	in_memchecker = true;
 	auto oldsize = malloc_usable_size(cptr);
 	void* ptr = __libc_realloc(cptr, size);
@@ -233,7 +233,7 @@ void* MemoryChecker::mc_realloc(void* cptr, size_t size, const void* caller) {
 }
 
 void MemoryChecker::mc_free(void* ptr, const void* caller) {
-	if(in_memchecker) return __libc_free(ptr);
+	if (in_memchecker) return __libc_free(ptr);
 	if (ptr == nullptr) return;
 	in_memchecker = true;
 	auto oldsize = malloc_usable_size(ptr);
@@ -248,7 +248,7 @@ void MemoryChecker::mc_free(void* ptr, const void* caller) {
 
 void* MemoryChecker::mc_memalign(size_t alignment, size_t size, const void* caller) {
 	void* ptr = __libc_memalign(alignment, size);
-	if(in_memchecker) return ptr;
+	if (in_memchecker) return ptr;
 	in_memchecker = true;
 
 	g_global.num_memalign++;
@@ -274,10 +274,10 @@ void* MemoryChecker::mc_memalign(size_t alignment, size_t size, const void* call
 	return ptr;
 }
 
-
 std::ostream& operator<<(std::ostream& str, const MemoryChecker::stacktrace& o) {
 	int n = 0;
-	for(; n < 49; n++) if(o.trace[n+1] == nullptr) break;
+	for (; n < 49; n++)
+		if (o.trace[n + 1] == nullptr) break;
 	auto strings = backtrace_symbols(o.trace, n);
 	if (strings == NULL) {
 		str << "<backtrace_symbols failed>";
@@ -304,11 +304,12 @@ std::ostream& operator<<(std::ostream& str, const MemoryChecker& o) {
 	str << "num_chunks_allocated_max = " << diff.num_chunks_allocated_max << "\n";
 	str << "num_bytes_allocated =      " << diff.num_bytes_allocated << "\n";
 	str << "num_bytes_allocated_max =  " << diff.num_bytes_allocated_max << "\n";
-	str << "max_chunks_at:\n" << diff.bt_max_chunks;
-	str << "max_bytes_at:\n" << diff.bt_max_bytes;
+	str << "max_chunks_at:\n"
+		<< diff.bt_max_chunks;
+	str << "max_bytes_at:\n"
+		<< diff.bt_max_bytes;
 	return str;
 }
-
 
 extern "C" void* malloc(size_t size) {
 	return MemoryChecker::mc_malloc(size, __builtin_return_address(0));
