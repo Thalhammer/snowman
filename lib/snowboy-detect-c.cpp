@@ -12,16 +12,16 @@ extern "C"
 	struct SNOWMAN_Detect : snowboy::SnowboyDetect {
 		using SnowboyDetect::SnowboyDetect;
 	};
-	
-    struct SNOWMAN_Vad : snowboy::SnowboyVad {
+
+	struct SNOWMAN_Vad : snowboy::SnowboyVad {
 		using SnowboyVad::SnowboyVad;
 	};
-	
-    struct SNOWMAN_PersonalEnroll : snowboy::SnowboyPersonalEnroll {
+
+	struct SNOWMAN_PersonalEnroll : snowboy::SnowboyPersonalEnroll {
 		using SnowboyPersonalEnroll::SnowboyPersonalEnroll;
 	};
-	
-    struct SNOWMAN_TemplateCut : snowboy::SnowboyTemplateCut {
+
+	struct SNOWMAN_TemplateCut : snowboy::SnowboyTemplateCut {
 		using SnowboyTemplateCut::SnowboyTemplateCut;
 	};
 
