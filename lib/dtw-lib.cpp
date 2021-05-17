@@ -200,22 +200,16 @@ namespace snowboy {
 		Matrix local_1d8;
 		local_1d8.Resize(param_2.m_rows, param_3.m_rows);
 		for (auto row = 0; row != local_1d8.m_rows; row++) {
-			const int iVar7 = (int(row) - 1) * (int)local_1d8.m_stride;
-			const int iVar14 = row * local_1f8.m_stride;
-			const int local_284 = row * local_1f8.m_stride;
-			const int iVar11 = row * local_1d8.m_stride;
-			const int iVar15 = row * local_1d8.m_stride;
 			if (0 < local_1d8.m_cols) {
-				auto pfVar9 = local_1d8.m_data + (long)iVar7 + -1;
-				auto pfVar8 = local_1d8.m_data + (long)iVar11 + -1;
-				if (row == 0) {
-					auto lVar12 = 0;
-					do {
+				auto pfVar9 = local_1d8.m_data + (row - 1) * local_1d8.m_stride - 1;
+				auto pfVar8 = local_1d8.m_data + (row * local_1d8.m_stride) - 1;
+				for (auto lVar12 = 0; lVar12 < local_1d8.m_cols; lVar12++) {
+					if (row == 0) {
 						while (((int)lVar12 == 0 || (row == 0))) {
-							pfVar9 = pfVar9 + 1;
 							local_1d8.m_data[lVar12] = local_1f8.m_data[lVar12];
-							lVar12 += 1;
+							pfVar9 = pfVar9 + 1;
 							pfVar8 = pfVar8 + 1;
+							lVar12++;
 							if (local_1d8.m_cols <= (int)lVar12) goto LAB_00186e9d;
 						}
 						auto fVar16 = pfVar9[1];
@@ -225,18 +219,12 @@ namespace snowboy {
 						if (*pfVar9 <= fVar16) {
 							fVar16 = *pfVar9;
 						}
-						auto lVar6 = iVar14 + lVar12;
-						lVar12 += 1;
-						pfVar8[1] = fVar16 + local_1f8.m_data[lVar6];
-						pfVar9 = pfVar9 + 1;
-						pfVar8 = pfVar8 + 1;
-					} while ((int)lVar12 < local_1d8.m_cols);
-				} else {
-					auto lVar12 = 0;
-					do {
+						pfVar8[1] = fVar16 + local_1f8.m_data[row * local_1f8.m_stride + lVar12];
+						
+					} else {
 						if (((int)lVar12 == 0) || (row == 0)) {
 							if ((int)lVar12 == 0) {
-								local_1d8.m_data[iVar15] = local_1f8.m_data[local_284] + local_1d8.m_data[iVar15 - local_1d8.m_stride];
+								local_1d8.m_data[row * local_1d8.m_stride] = local_1f8.m_data[row * local_1f8.m_stride] + local_1d8.m_data[(row - 1) * local_1d8.m_stride];
 							}
 						} else {
 							auto fVar16 = pfVar9[1];
@@ -246,40 +234,37 @@ namespace snowboy {
 							if (*pfVar9 <= fVar16) {
 								fVar16 = *pfVar9;
 							}
-							pfVar8[1] = fVar16 + local_1f8.m_data[iVar14 + lVar12];
+							pfVar8[1] = fVar16 + local_1f8.m_data[row * local_1f8.m_stride + lVar12];
 						}
-						lVar12 += 1;
-						pfVar9 = pfVar9 + 1;
-						pfVar8 = pfVar8 + 1;
-					} while ((int)lVar12 < local_1d8.m_cols);
+					}
+                    pfVar9 = pfVar9 + 1;
+					pfVar8 = pfVar8 + 1;
 				}
 			}
 		LAB_00186e9d:
 			[]() {}(); // TODO: This is just here cause for some reason a label directly before the closing bracket does not work
 		}
-		auto local_228 = -1;
-		int iVar11 = local_1d8.m_rows - 1;
-		SubVector{local_1d8, iVar11}.Min(&local_228);
-		auto fVar16 = local_1d8.m_data[local_1d8.m_stride * iVar11 + local_228];
+		auto min_index = -1;
+		auto min_value = SubVector{local_1d8, local_1d8.m_rows - 1}.Min(&min_index);
 		if (param_4 != nullptr) {
-			while (iVar11 != 0) {
+			for (int iVar11 = local_1d8.m_rows - 1; iVar11 != 0; ) {
 				// TODO: This is wrong
 				// If I look at the code it should only be
-				// param_4->at(iVar11).push_back(local_228);
+				// param_4->at(iVar11).push_back(min_index);
 				// But that produces different results from what it should
 				if (param_4->at(iVar11).empty())
-					param_4->at(iVar11).push_back(local_228);
+					param_4->at(iVar11).push_back(min_index);
 				else
-					param_4->at(iVar11).at(0) = local_228;
-				if (0 >= local_228) {
+					param_4->at(iVar11).at(0) = min_index;
+				if (0 >= min_index) {
 					iVar11--;
 					continue;
 				}
-				auto fVar18 = local_1d8.m_data[local_1d8.m_stride * iVar11 + local_228] - local_1f8.m_data[local_1f8.m_stride * iVar11 + local_228];
-				float pfVar8[3] = {fVar18, fVar18, fVar18};
-				pfVar8[0] = std::abs(fVar18 - local_1d8.m_data[(iVar11 + -1) * local_1d8.m_stride + (local_228 - 1)]);
-				pfVar8[1] = std::abs(fVar18 - local_1d8.m_data[(local_228 - 1) + iVar11 * local_1d8.m_stride]);
-				pfVar8[2] = std::abs(fVar18 - local_1d8.m_data[(iVar11 + -1) * local_1d8.m_stride + local_228]);
+				auto fVar18 = local_1d8.m_data[local_1d8.m_stride * iVar11 + min_index] - local_1f8.m_data[local_1f8.m_stride * iVar11 + min_index];
+				float pfVar8[3];
+				pfVar8[0] = std::abs(fVar18 - local_1d8.m_data[(iVar11 + -1) * local_1d8.m_stride + (min_index - 1)]);
+				pfVar8[1] = std::abs(fVar18 - local_1d8.m_data[(min_index - 1) + iVar11 * local_1d8.m_stride]);
+				pfVar8[2] = std::abs(fVar18 - local_1d8.m_data[(iVar11 + -1) * local_1d8.m_stride + min_index]);
 				auto pfVar9 = pfVar8 + 1;
 				if (pfVar8[0] <= pfVar8[1]) {
 					pfVar9 = pfVar8;
@@ -290,26 +275,26 @@ namespace snowboy {
 				auto iVar10 = (int)((long)((long)pfVar9 - (long)pfVar8) >> 2);
 				if (iVar10 != 0) {
 					if (iVar10 == 1) {
-						local_228 -= 1;
+						min_index -= 1;
 					} else {
 						if (iVar10 == 2) {
-							iVar11 = iVar11 + -1;
+							iVar11--;
 						}
 					}
 				} else {
-					local_228 -= 1;
-					iVar11 = iVar11 + -1;
+					min_index -= 1;
+					iVar11--;
 				}
 			}
 			// TODO: This is wrong
 			// If I look at the code it should only be
-			// param_4->at(0).push_back(local_228);
+			// param_4->at(0).push_back(min_index);
 			// But that produces different results from what it should
 			if (param_4->at(0).empty())
-				param_4->at(0).push_back(local_228);
+				param_4->at(0).push_back(min_index);
 			else
-				param_4->at(0).at(0) = local_228;
+				param_4->at(0).at(0) = min_index;
 		}
-		return fVar16 / param_2.m_rows;
+		return min_value / param_2.m_rows;
 	}
 } // namespace snowboy

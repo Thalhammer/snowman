@@ -299,7 +299,6 @@ namespace snowboy {
 		in_info.CheckSize(in);
 		out_info.CheckSize(*out);
 
-		//SNOWBOY_ERROR() << "Unimplemented";
 		for (size_t r = 0; r < in.m_rows; r++)
 		{
 			if (out->m_cols < 2)
@@ -308,19 +307,16 @@ namespace snowboy {
 			} else {
 				// TODO: I did my best but between here
 				auto ptr = out->m_data + (out->m_stride * r);
-				float x = 0.0;
-				auto ptr2 = ptr;
+				float sum = 0.0f;
 				for (auto& idx_vec : m_indices) {
-					ptr2++;
-					auto f = *ptr2;
+					ptr++;
 					for (auto idx : idx_vec) {
 						auto v = in.m_data[in.m_stride * r + idx];
-						f += v;
-						x += v;
+						*ptr += v;
+						sum += v;
 					}
-					*ptr2 = f;
 				}
-				out->m_data[out->m_stride * r] = 1.0 - x;
+				out->m_data[out->m_stride * r] = 1.0 - sum;
 				// TODO: and here are probably a number of bugs
 			}
 		}

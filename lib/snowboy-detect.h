@@ -218,7 +218,6 @@ namespace snowboy {
 		std::unique_ptr<PipelineVad> vad_pipeline_;
 	};
 
-	// TODO: This is untested
 	class SnowboyPersonalEnroll {
 	public:
 		SnowboyPersonalEnroll(const std::string& resource_filename, const std::string& model_filename);
@@ -276,7 +275,6 @@ namespace snowboy {
 		std::unique_ptr<PipelinePersonalEnroll> enroll_pipeline_;
 	};
 
-	// TODO: This is untested
 	class SnowboyTemplateCut {
 	public:
 		SnowboyTemplateCut(const std::string& resource_filename);

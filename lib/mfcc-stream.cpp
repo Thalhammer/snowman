@@ -17,17 +17,14 @@ namespace snowboy {
 		m_options = options;
 		field_x44 = -1;
 		field_x48 = 0.0f;
+        // TODO: Can we optimize this matrix ?
 		Matrix m;
 		m.Resize(m_options.mel_filter.num_bins, m_options.mel_filter.num_bins);
-		Vector v;
 		ComputeDctMatrixTypeIII(&m);
-		v.Resize(m_options.num_cepstral_coeffs);
-		ComputeCepstralLifterCoeffs(m_options.cepstral_lifter, &v);
+		m_cepstral_coeffs.Resize(m_options.num_cepstral_coeffs, MatrixResizeType::kUndefined);
+		ComputeCepstralLifterCoeffs(m_options.cepstral_lifter, &m_cepstral_coeffs);
 		m_dct_matrix.Resize(m_options.num_cepstral_coeffs, m_options.mel_filter.num_bins);
 		m_dct_matrix.CopyFromMat(m.RowRange(0, m_options.num_cepstral_coeffs), MatrixTransposeType::kNoTrans);
-		// TODO: These two could probably be a move
-		m_cepstral_coeffs.Resize(m_options.num_cepstral_coeffs);
-		m_cepstral_coeffs.CopyFromVec(v);
 	}
 
 	int MfccStream::Read(Matrix* mat, std::vector<FrameInfo>* info) {

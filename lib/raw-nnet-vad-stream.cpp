@@ -26,7 +26,6 @@ namespace snowboy {
 			SNOWBOY_ERROR() << "index " << m_options.non_voice_index << " for non-voice label runs out of range (0 - " << dims << "), wrong index?";
 			return;
 		}
-		m_fieldx30.Resize(0, 0); // TODO: Useless call
 	}
 
 	int RawNnetVadStream::Read(Matrix* mat, std::vector<FrameInfo>* info) {

@@ -27,9 +27,6 @@ TEST(EnrollTest, PersonalEnroll) {
 		auto res = enroll.RunEnrollment(str_data);
 		ASSERT_EQ(res, 0);
 	}
-	for (auto& e : enroll.enroll_pipeline_->m_templateEnrollStream->field_x38.m_templates) {
-		std::cout << e.m_rows << "x" << e.m_cols << " hash=" << hash(e) << std::endl;
-	}
 	ASSERT_TRUE(file_exists("temp_enroll_model.pmdl"));
 	ASSERT_EQ(hash(enroll.enroll_pipeline_->m_templateEnrollStream->field_x38.m_templates.front()), 928553);
 	// TODO: I would really like to do a md5 of the file instead but due to rounding errors (and dithering) thats not an option
@@ -54,9 +51,6 @@ TEST(EnrollTest, PersonalEnroll2) {
 		ASSERT_TRUE(str_data.size() > 0);
 		auto res = enroll.RunEnrollment(str_data);
 		ASSERT_EQ(res, 0);
-	}
-	for (auto& e : enroll.enroll_pipeline_->m_templateEnrollStream->field_x38.m_templates) {
-		std::cout << e.m_rows << "x" << e.m_cols << " hash=" << hash(e) << std::endl;
 	}
 	ASSERT_TRUE(file_exists("temp_enroll_model.pmdl"));
 	ASSERT_EQ(hash(enroll.enroll_pipeline_->m_templateEnrollStream->field_x38.m_templates.front()), 928522);

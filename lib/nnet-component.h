@@ -8,7 +8,6 @@
 
 namespace snowboy {
 	struct MatrixBase;
-	// TODO: This is kaldi::ChunkInfo
 	class ChunkInfo {
 		int32_t m_feat_dim;
 		int32_t m_num_chunks;

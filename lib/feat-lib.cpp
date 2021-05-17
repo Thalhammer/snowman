@@ -280,14 +280,6 @@ namespace snowboy {
 	}
 
 	unsigned int Fft::GetNumBits(unsigned int param_1) const {
-		// Note: This is the original function, but using __builtin_clz should generate way faster code
-		//unsigned int res = 0;
-		//while(param_1 > 1) {
-		//    res += 1;
-		//    param_1 >>= 1;
-		//}
-		//return res;
-		// TODO: Use C++20 bit operations once we build for real
 		return param_1 == 0 ? 0 : (31 - __builtin_clz(param_1));
 	}
 
