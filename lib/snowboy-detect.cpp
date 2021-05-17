@@ -7,7 +7,7 @@
 #include <pipeline-vad.h>
 #include <snowboy-debug.h>
 #include <snowboy-detect.h>
-#include <types.h>
+#include <wave-header.h>
 
 namespace snowboy {
 	SnowboyDetect::SnowboyDetect(const std::string& resource_filename, const std::string& model_str) {
@@ -35,9 +35,10 @@ namespace snowboy {
 	}
 
 	int SnowboyDetect::RunDetection(const std::string& data, bool is_end) {
-		SNOWBOY_ERROR() << "Not implemented";
-		return -1;
-		// TODO: Parse WAVE header and run detection on data block
+		if ((data.size() % wave_header_->wBlockAlign) != 0) return -1;
+		Matrix data_mat;
+		ReadRawWaveFromString(*wave_header_, data, &data_mat);
+		return detect_pipeline_->RunDetection(data_mat, is_end);
 	}
 
 	int SnowboyDetect::RunDetection(const float* const data, const int array_length, bool is_end) {
@@ -162,9 +163,10 @@ namespace snowboy {
 	}
 
 	int SnowboyVad::RunVad(const std::string& data, bool is_end) {
-		SNOWBOY_ERROR() << "Not implemented";
-		return -1;
-		// TODO: Parse WAVE header and run detection on data block
+		if ((data.size() % wave_header_->wBlockAlign) != 0) return -1;
+		Matrix data_mat;
+		ReadRawWaveFromString(*wave_header_, data, &data_mat);
+		return vad_pipeline_->RunVad(data_mat, is_end);
 	}
 
 	int SnowboyVad::RunVad(const float* const data, const int array_length, bool is_end) {

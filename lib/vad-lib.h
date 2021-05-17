@@ -6,7 +6,6 @@ namespace snowboy {
 		int min_non_voice_frames;
 		int min_voice_frames;
 	};
-	static_assert(sizeof(VadStateOptions) == 8);
 	enum VoiceType { VT_0,
 					 VT_1,
 					 VT_2 };
@@ -23,5 +22,4 @@ namespace snowboy {
 		void Reset();
 		void GetVoiceStates(const std::vector<VoiceType>&, std::vector<VoiceStateType>*);
 	};
-	static_assert(sizeof(VadState) == 24);
 } // namespace snowboy

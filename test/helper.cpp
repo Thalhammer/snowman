@@ -1,5 +1,7 @@
+#include <execinfo.h>
 #include <fstream>
 #include <helper.h>
+#include <malloc.h>
 #include <openssl/crypto.h>
 #include <openssl/md5.h>
 #include <sstream>
@@ -138,4 +140,191 @@ std::string md5sum(const std::string& data) {
 std::string md5sum_file(const std::string& file) {
 	auto content = read_file(file);
 	return md5sum(content);
+}
+
+MemoryChecker::snapshot MemoryChecker::g_global{};
+
+void MemoryChecker::stacktrace::capture() {
+	auto res = ::backtrace(trace, 50);
+	for (int i = res; i < 50; i++)
+		trace[i] = nullptr;
+}
+
+MemoryChecker::snapshot MemoryChecker::calculate_difference() const noexcept {
+	snapshot res;
+	res.num_malloc = g_global.num_malloc - m_start.num_malloc;
+	res.num_malloc_failed = g_global.num_malloc_failed - m_start.num_malloc_failed;
+	res.num_free = g_global.num_free - m_start.num_free;
+	res.num_realloc = g_global.num_realloc - m_start.num_realloc;
+	res.num_realloc_failed = g_global.num_realloc_failed - m_start.num_realloc_failed;
+	res.num_realloc_moved = g_global.num_realloc_moved - m_start.num_realloc_moved;
+	res.num_memalign = g_global.num_memalign - m_start.num_memalign;
+	res.num_memalign_failed = g_global.num_memalign_failed - m_start.num_memalign_failed;
+	res.num_chunks_allocated = g_global.num_chunks_allocated - m_start.num_chunks_allocated;
+	res.num_chunks_allocated_max = g_global.num_chunks_allocated_max - m_start.num_chunks_allocated_max;
+	res.num_bytes_allocated = g_global.num_bytes_allocated - m_start.num_bytes_allocated;
+	res.num_bytes_allocated_max = g_global.num_bytes_allocated_max - m_start.num_bytes_allocated_max;
+	res.bt_max_chunks = g_global.bt_max_chunks;
+	res.bt_max_bytes = g_global.bt_max_bytes;
+	return res;
+}
+
+extern "C" void* __libc_malloc(size_t);
+extern "C" void* __libc_realloc(void*, size_t);
+extern "C" void __libc_free(void*);
+extern "C" void* __libc_memalign(size_t alignment, size_t size);
+
+static thread_local bool in_memchecker = false;
+void* MemoryChecker::mc_malloc(size_t size, const void* caller) {
+	if (in_memchecker) return __libc_malloc(size);
+	in_memchecker = true;
+	void* ptr = __libc_malloc(size);
+
+	g_global.num_malloc++;
+	if (ptr == nullptr) {
+		g_global.num_malloc_failed++;
+		in_memchecker = false;
+		return ptr;
+	}
+
+	size = malloc_usable_size(ptr);
+
+	g_global.num_bytes_allocated += size;
+	g_global.num_chunks_allocated++;
+	if (g_global.num_chunks_allocated > g_global.num_chunks_allocated_max) {
+		g_global.num_chunks_allocated_max = g_global.num_chunks_allocated;
+		g_global.bt_max_chunks.capture();
+	}
+	if (g_global.num_bytes_allocated > g_global.num_bytes_allocated_max) {
+		g_global.num_bytes_allocated_max = g_global.num_bytes_allocated;
+		g_global.bt_max_bytes.capture();
+	}
+	in_memchecker = false;
+	return ptr;
+}
+
+void* MemoryChecker::mc_realloc(void* cptr, size_t size, const void* caller) {
+	if (in_memchecker) return __libc_realloc(cptr, size);
+	in_memchecker = true;
+	auto oldsize = malloc_usable_size(cptr);
+	void* ptr = __libc_realloc(cptr, size);
+
+	g_global.num_realloc++;
+	if (ptr == nullptr) {
+		g_global.num_realloc_failed++;
+		in_memchecker = false;
+		return ptr;
+	}
+	if (cptr == ptr) {
+		g_global.num_realloc_moved++;
+	}
+
+	g_global.num_bytes_allocated += (static_cast<ssize_t>(size) - static_cast<ssize_t>(oldsize));
+	if (g_global.num_chunks_allocated > g_global.num_chunks_allocated_max) {
+		g_global.num_chunks_allocated_max = g_global.num_chunks_allocated;
+		g_global.bt_max_chunks.capture();
+	}
+	if (g_global.num_bytes_allocated > g_global.num_bytes_allocated_max) {
+		g_global.num_bytes_allocated_max = g_global.num_bytes_allocated;
+		g_global.bt_max_bytes.capture();
+	}
+	in_memchecker = false;
+	return ptr;
+}
+
+void MemoryChecker::mc_free(void* ptr, const void* caller) {
+	if (in_memchecker) return __libc_free(ptr);
+	if (ptr == nullptr) return;
+	in_memchecker = true;
+	auto oldsize = malloc_usable_size(ptr);
+
+	__libc_free(ptr);
+
+	g_global.num_free++;
+	g_global.num_bytes_allocated -= oldsize;
+	g_global.num_chunks_allocated--;
+	in_memchecker = false;
+}
+
+void* MemoryChecker::mc_memalign(size_t alignment, size_t size, const void* caller) {
+	void* ptr = __libc_memalign(alignment, size);
+	if (in_memchecker) return ptr;
+	in_memchecker = true;
+
+	g_global.num_memalign++;
+	if (ptr == nullptr) {
+		g_global.num_memalign_failed++;
+		in_memchecker = false;
+		return ptr;
+	}
+
+	size = malloc_usable_size(ptr);
+
+	g_global.num_bytes_allocated += size;
+	g_global.num_chunks_allocated++;
+	if (g_global.num_chunks_allocated > g_global.num_chunks_allocated_max) {
+		g_global.num_chunks_allocated_max = g_global.num_chunks_allocated;
+		g_global.bt_max_chunks.capture();
+	}
+	if (g_global.num_bytes_allocated > g_global.num_bytes_allocated_max) {
+		g_global.num_bytes_allocated_max = g_global.num_bytes_allocated;
+		g_global.bt_max_bytes.capture();
+	}
+	in_memchecker = false;
+	return ptr;
+}
+
+std::ostream& operator<<(std::ostream& str, const MemoryChecker::stacktrace& o) {
+	int n = 0;
+	for (; n < 49; n++)
+		if (o.trace[n + 1] == nullptr) break;
+	auto strings = backtrace_symbols(o.trace, n);
+	if (strings == NULL) {
+		str << "<backtrace_symbols failed>";
+		return str;
+	}
+	for (int j = 0; j < n; j++)
+		str << strings[j] << "\n";
+	free(strings);
+	return str;
+}
+
+std::ostream& operator<<(std::ostream& str, const MemoryChecker& o) {
+	auto diff = o.calculate_difference();
+	str << "==== Memory report ====\n";
+	str << "num_malloc =               " << diff.num_malloc << "\n";
+	str << "num_malloc_failed =        " << diff.num_malloc_failed << "\n";
+	str << "num_free =                 " << diff.num_free << "\n";
+	str << "num_realloc =              " << diff.num_realloc << "\n";
+	str << "num_realloc_failed =       " << diff.num_realloc_failed << "\n";
+	str << "num_realloc_moved =        " << diff.num_realloc_moved << "\n";
+	str << "num_memalign =             " << diff.num_memalign << "\n";
+	str << "num_memalign_failed =      " << diff.num_memalign_failed << "\n";
+	str << "num_chunks_allocated =     " << diff.num_chunks_allocated << "\n";
+	str << "num_chunks_allocated_max = " << diff.num_chunks_allocated_max << "\n";
+	str << "num_bytes_allocated =      " << diff.num_bytes_allocated << "\n";
+	str << "num_bytes_allocated_max =  " << diff.num_bytes_allocated_max << "\n";
+	str << "max_chunks_at:\n"
+		<< diff.bt_max_chunks;
+	str << "max_bytes_at:\n"
+		<< diff.bt_max_bytes;
+	return str;
+}
+
+extern "C" void* malloc(size_t size) {
+	return MemoryChecker::mc_malloc(size, __builtin_return_address(0));
+}
+extern "C" void* realloc(void* ptr, size_t size) {
+	return MemoryChecker::mc_realloc(ptr, size, __builtin_return_address(0));
+}
+extern "C" void* memalign(size_t alignment, size_t size) {
+	return MemoryChecker::mc_memalign(alignment, size, __builtin_return_address(0));
+}
+extern "C" void free(void* ptr) {
+	MemoryChecker::mc_free(ptr, __builtin_return_address(0));
+}
+extern "C" int posix_memalign(void** memptr, size_t alignment, size_t size) {
+	*memptr = memalign(alignment, size);
+	if (!*memptr) return ENOMEM;
+	return 0;
 }

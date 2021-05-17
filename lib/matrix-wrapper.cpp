@@ -250,15 +250,36 @@ namespace snowboy {
 	static size_t allocs = 0;
 	static size_t frees = 0;
 
+	template <typename T>
+	constexpr inline T next_multiple_of(T val, T multi) noexcept {
+		return (val + multi - 1) & ~(multi - 1);
+	}
+
 	void Matrix::Resize(int rows, int cols, MatrixResizeType resize) {
-		// TODO: Smarter alloc similar to vector
-		if (m_rows == rows && m_cols == cols) {
-			if (resize == MatrixResizeType::kSetZero) Set(0.0f);
+		if (cols == 0 && rows == 0) {
+			m_rows = 0;
+			m_cols = 0;
 			return;
+		}
+		// TODO: Smarter alloc similar to vector
+		uint64_t mem_size = static_cast<uint64_t>(m_rows) * static_cast<uint64_t>(m_stride);
+		uint64_t new_size = static_cast<uint64_t>(rows) * next_multiple_of<uint64_t>(cols, 4);
+		if (new_size <= mem_size) {
+			if (resize == MatrixResizeType::kUndefined || resize == MatrixResizeType::kSetZero) {
+				m_rows = rows;
+				m_cols = cols;
+				m_stride = next_multiple_of<uint64_t>(cols, 4);
+				if (resize == MatrixResizeType::kSetZero) Set(0.0f);
+				return;
+			} else if (cols <= m_stride) {
+				m_rows = rows;
+				m_cols = cols;
+				return;
+			}
 		}
 		if (m_data == nullptr) {
 			AllocateMatrixMemory(rows, cols);
-			Set(0.0f);
+			if (resize == MatrixResizeType::kSetZero) Set(0.0f);
 			return;
 		}
 		if (resize == MatrixResizeType::kCopyData) {

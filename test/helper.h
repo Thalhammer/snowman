@@ -50,3 +50,47 @@ std::ostream& operator<<(std::ostream& s, const std::vector<T>& o) {
 	s << " }";
 	return s;
 }
+
+struct MemoryChecker {
+	struct stacktrace {
+		void* trace[50];
+		void capture();
+	};
+
+	struct snapshot {
+		ssize_t num_malloc = 0;
+		ssize_t num_malloc_failed = 0;
+		ssize_t num_free = 0;
+		ssize_t num_realloc = 0;
+		ssize_t num_realloc_failed = 0;
+		ssize_t num_realloc_moved = 0;
+		ssize_t num_memalign = 0;
+		ssize_t num_memalign_failed = 0;
+		ssize_t num_chunks_allocated = 0;
+		ssize_t num_chunks_allocated_max = 0;
+		ssize_t num_bytes_allocated = 0;
+		ssize_t num_bytes_allocated_max = 0;
+		stacktrace bt_max_chunks;
+		stacktrace bt_max_bytes;
+	};
+	static snapshot g_global;
+
+	snapshot m_start;
+
+	MemoryChecker() {
+		m_start = g_global;
+	}
+
+	~MemoryChecker() {
+	}
+
+	snapshot calculate_difference() const noexcept;
+
+	static void* mc_malloc(size_t size, const void* caller);
+	static void* mc_realloc(void* cptr, size_t size, const void* caller);
+	static void mc_free(void* ptr, const void* caller);
+	static void* mc_memalign(size_t alignment, size_t size, const void* caller);
+};
+
+std::ostream& operator<<(std::ostream& str, const MemoryChecker::stacktrace& o);
+std::ostream& operator<<(std::ostream& str, const MemoryChecker& o);

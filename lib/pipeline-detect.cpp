@@ -308,9 +308,9 @@ namespace snowboy {
 		auto num_personal = m_templateDetectStream == nullptr ? 0 : m_templateDetectStream->field_x40.size();
 		auto num_universal = 0;
 		if (m_universalDetectStream != nullptr
-			&& !m_universalDetectStream->field_xd0.empty()
-			&& !m_universalDetectStream->field_xd0.back().empty()) {
-			num_universal = m_universalDetectStream->field_xd0.back().back();
+			&& !m_universalDetectStream->m_model_info.empty()
+			&& !m_universalDetectStream->m_model_info.back().keywords.empty()) {
+			num_universal = m_universalDetectStream->m_model_info.back().keywords.back().hotword_id;
 		}
 		if (num_universal + num_personal < parts.size()) {
 			SNOWBOY_ERROR() << "number of hotwords and number of sensitivities mismatch, expecting sensitivities for "
@@ -376,8 +376,8 @@ namespace snowboy {
 		}
 		int num_hotwords = 0;
 		if (m_templateDetectStream) num_hotwords += m_templateDetectStream->field_x40.size();
-		if (m_universalDetectStream && !m_universalDetectStream->field_xd0.empty() && !m_universalDetectStream->field_xd0.back().empty())
-			num_hotwords += m_universalDetectStream->field_xd0.back().back();
+		if (m_universalDetectStream && !m_universalDetectStream->m_model_info.empty() && !m_universalDetectStream->m_model_info.back().keywords.empty())
+			num_hotwords += m_universalDetectStream->m_model_info.back().keywords.back().hotword_id;
 		return num_hotwords;
 	}
 

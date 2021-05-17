@@ -239,26 +239,6 @@ namespace snowboy {
 		return SubVector(*this, param_1, param_2);
 	}
 
-	void VectorBase::Read(bool binary, bool add, std::istream* is) {
-		// TODO: Since reading is always the same, couldn't we just drop it in here ?
-		Vector tmp;
-		tmp.Resize(m_size, MatrixResizeType::kSetZero);
-		tmp.Read(binary, false, is);
-		if (tmp.m_size != m_size) {
-			SNOWBOY_ERROR() << "Failed to read Vector: size missmatch (" << tmp.m_size << " v.s. " << m_size << ").";
-			return;
-		}
-		if (add) {
-			AddVec(1.0f, tmp);
-		} else {
-			CopyFromVec(tmp);
-		}
-	}
-
-	void VectorBase::Read(bool binary, std::istream* is) {
-		Read(binary, false, is);
-	}
-
 	void VectorBase::Scale(float factor) {
 		cblas_sscal(m_size, factor, m_data, 1);
 	}
@@ -306,71 +286,61 @@ namespace snowboy {
 		if (size <= m_size) {
 			m_size = size;
 			if (resize == MatrixResizeType::kSetZero) Set(0.0f);
-		} else {
-			// The new size is larger than we currently are, so we need to reallocate.
+			return;
+		}
+
+		// The new size is larger than we currently are, so we need to reallocate.
 #if HAS_MALLOC_USABLE_SIZE
-			auto usable = malloc_usable_size(m_data);
-			if (usable >= size * sizeof(float)) {
-				if (resize == MatrixResizeType::kSetZero) {
-					memset(&m_data[m_size], 0, usable - m_size * sizeof(float));
-				}
-				m_size = size;
-				return;
-			}
-#endif
-			// We dont have usable size or the allocated block was to small
-			if (resize == MatrixResizeType::kCopyData) {
-				// Since we would copy it anyway we can just call realloc and maybe save copying (e.g. if the next block is free).
-				auto ptr = static_cast<float*>(realloc(m_data, size * sizeof(float)));
-				if (ptr == nullptr) throw std::bad_alloc();
-				if (ptr != m_data && (reinterpret_cast<uintptr_t>(ptr) % 16) != 0) {
-					// realloc moved the data but the new buffer is not aligned correctly
-					allocs++;
-					frees++;
-					free(ptr);
-					allocs++;
-					ptr = static_cast<float*>(SnowboyMemalign(16, size * sizeof(float)));
-					if (ptr == nullptr) throw std::bad_alloc();
-					memcpy(ptr, m_data, sizeof(float) * m_size);
-				}
-				m_data = ptr;
-				memset(&m_data[m_size], 0, (size - m_size) * sizeof(float));
-			} else if (resize == MatrixResizeType::kSetZero) {
-				allocs++;
-				auto ptr = static_cast<float*>(SnowboyMemalign(16, size * sizeof(float)));
-				if (ptr == nullptr) throw std::bad_alloc();
-				if (m_data) {
-					frees++;
-					free(m_data);
-				}
-				memset(ptr, 0, size * sizeof(float));
-				m_data = ptr;
-			} else {
-				allocs++;
-				auto ptr = static_cast<float*>(SnowboyMemalign(16, size * sizeof(float)));
-				if (ptr == nullptr) throw std::bad_alloc();
-				if (m_data) {
-					frees++;
-					free(m_data);
-				}
-				m_data = ptr;
+		auto usable = malloc_usable_size(m_data);
+		if (usable >= size * sizeof(float)) {
+			if (resize == MatrixResizeType::kSetZero) {
+				memset(&m_data[m_size], 0, usable - m_size * sizeof(float));
 			}
 			m_size = size;
+			return;
 		}
-	}
-
-	void Vector::AllocateVectorMemory(int size) {
-		if (size == 0) {
-			m_data = nullptr;
-		} else {
-			m_data = static_cast<float*>(SnowboyMemalign(16, size << 2));
-			if (m_data == nullptr) throw std::bad_alloc();
+#endif
+		// We dont have usable size or the allocated block was to small
+		if (resize == MatrixResizeType::kCopyData) {
+			// Since we would copy it anyway we can just call realloc and maybe save copying (e.g. if the next block is free).
+			auto ptr = static_cast<float*>(realloc(m_data, size * sizeof(float)));
+			if (ptr == nullptr) throw std::bad_alloc();
+			if (ptr != m_data && (reinterpret_cast<uintptr_t>(ptr) % 16) != 0) {
+				// realloc moved the data but the new buffer is not aligned correctly
+				allocs++;
+				frees++;
+				free(ptr);
+				allocs++;
+				ptr = static_cast<float*>(SnowboyMemalign(16, size * sizeof(float)));
+				if (ptr == nullptr) throw std::bad_alloc();
+				memcpy(ptr, m_data, sizeof(float) * m_size);
+			}
+			m_data = ptr;
+			memset(&m_data[m_size], 0, (size - m_size) * sizeof(float));
+		} else if (resize == MatrixResizeType::kSetZero) {
 			allocs++;
+			auto ptr = static_cast<float*>(SnowboyMemalign(16, size * sizeof(float)));
+			if (ptr == nullptr) throw std::bad_alloc();
+			if (m_data) {
+				frees++;
+				free(m_data);
+			}
+			memset(ptr, 0, size * sizeof(float));
+			m_data = ptr;
+		} else {
+			allocs++;
+			auto ptr = static_cast<float*>(SnowboyMemalign(16, size * sizeof(float)));
+			if (ptr == nullptr) throw std::bad_alloc();
+			if (m_data) {
+				frees++;
+				free(m_data);
+			}
+			m_data = ptr;
 		}
 		m_size = size;
 	}
 
-	void Vector::ReleaseVectorMemory() {
+	Vector::~Vector() {
 		if (m_data) {
 			SnowboyMemalignFree(m_data);
 			frees++;
@@ -393,6 +363,7 @@ namespace snowboy {
 
 	void Vector::Read(bool binary, bool add, std::istream* is) {
 		if (!binary) {
+			// TODO: Is this still accurate ?
 			SNOWBOY_ERROR() << "Not implemented";
 			ExpectToken(binary, "[", is);
 			uint32_t i = 0;
@@ -479,7 +450,7 @@ namespace snowboy {
 
 	SubVector::SubVector(const VectorBase& parent, int offset, int size) {
 		m_data = parent.m_data + offset;
-		m_size = size; // TODO: std::min<int>(parent.m_size - offset, size);
+		m_size = std::min<int>(parent.m_size - offset, size);
 	}
 
 	SubVector::SubVector(const MatrixBase& parent, int row) {

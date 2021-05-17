@@ -87,8 +87,7 @@ namespace snowboy {
 		m_eavesdropStream->Connect(m_rawNnetVadStream.get());
 		m_vadStateStream2->Connect(m_eavesdropStream.get());
 		m_vadStateStream->field_x2c = 1;
-		m_vadStateStream->field_x2c = 2;
-		// TODO: Options are cleaned here in the original
+		m_vadStateStream2->field_x2c = 2;
 		m_isInitialized = true;
 		return true;
 	}

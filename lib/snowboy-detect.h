@@ -218,7 +218,6 @@ namespace snowboy {
 		std::unique_ptr<PipelineVad> vad_pipeline_;
 	};
 
-	// TODO: This is untested
 	class SnowboyPersonalEnroll {
 	public:
 		SnowboyPersonalEnroll(const std::string& resource_filename, const std::string& model_filename);
@@ -276,11 +275,21 @@ namespace snowboy {
 		std::unique_ptr<PipelinePersonalEnroll> enroll_pipeline_;
 	};
 
-	// TODO: This is untested
 	class SnowboyTemplateCut {
 	public:
 		SnowboyTemplateCut(const std::string& resource_filename);
 
+		// Cuts a template. Supported audio format is WAVE (with linear PCM,
+		// 8-bits unsigned integer, 16-bits signed integer or 32-bits signed integer).
+		// See SampleRate(), NumChannels() and BitsPerSample() for the required
+		// sampling rate, number of channels and bits per sample values. You are
+		// supposed to provide a full recording of the hotword for each call to
+		// CutTemplate. This method runs runs the provided sample through a Vad Pipeline
+		// and removes leading and trailing silence.
+		//
+		// @param [in]  data               Small chunk of data to be detected. See
+		//                                 above for the supported data format.
+		// @return Cut template in the format provided in data, without a wave header.
 		std::string CutTemplate(const std::string& data);
 
 		bool Reset();

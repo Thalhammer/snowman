@@ -23,11 +23,11 @@ namespace snowboy {
 	}
 
 	void SnowboyAssertFailure(int line, const std::string& file, const std::string& func, const std::string& cond) {
-		snowboy::MySnowboyLogMsg msg{line, file, func, snowboy::SnowboyLogType::ASSERT_FAIL, 0};
+		snowboy::SnowboyLogMsg msg{line, file, func, snowboy::SnowboyLogType::ASSERT_FAIL, 0};
 		msg << cond;
 	}
 
-	MySnowboyLogMsg::MySnowboyLogMsg(int line, const std::string& file, const std::string& function, const SnowboyLogType& type, int)
+	SnowboyLogMsg::SnowboyLogMsg(int line, const std::string& file, const std::string& function, const SnowboyLogType& type, int)
 		: m_type{type}, m_stream{} {
 		switch (type)
 		{
@@ -50,13 +50,17 @@ namespace snowboy {
 		m_stream << function << "():" << file << ":" << line << ") ";
 	}
 
-	MySnowboyLogMsg::~MySnowboyLogMsg() noexcept(false) {
-		std::cout << m_stream.str() << std::endl;
-		if (m_type == SnowboyLogType::ERROR || m_type == SnowboyLogType::ASSERT_FAIL)
+	SnowboyLogMsg::~SnowboyLogMsg() noexcept(false) {
+		std::cerr << m_stream.str() << std::endl;
+		if (m_type == SnowboyLogType::ERROR)
 		{
 			m_stream << GetStackTrace();
 			// TODO: This isnt normally allowed....
 			throw std::runtime_error(m_stream.str());
+		} else if (m_type == SnowboyLogType::ERROR)
+		{
+			std::cerr << GetStackTrace();
+			std::abort();
 		}
 	}
 } // namespace snowboy

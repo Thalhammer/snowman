@@ -96,11 +96,8 @@ namespace snowboy {
 		m_opt_print_usage = false;
 		m_usage = usage;
 		Register("", "config", "Configuration file to be read.", &m_opt_config_file);
-		//TODO: field_0x70.push_back("config");
 		Register("", "help", "If true, print usage information.", &m_opt_print_usage);
-		//TODO: field_0x70.push_back("help");
 		Register("", "verbose", "Verbose level.", &global_snowboy_verbose_level);
-		//TODO: field_0x70.push_back("verbose");
 	}
 
 	ParseOptions::~ParseOptions() {}

@@ -12,29 +12,28 @@ namespace snowboy {
 		LOG,
 		VLOG
 	};
-	struct MySnowboyLogMsg {
+	struct SnowboyLogMsg {
 		SnowboyLogType m_type;
 		std::stringstream m_stream;
-		MySnowboyLogMsg(int line, const std::string&, const std::string&, const SnowboyLogType& type, int);
-		~MySnowboyLogMsg() noexcept(false);
+		SnowboyLogMsg(int line, const std::string&, const std::string&, const SnowboyLogType& type, int);
+		~SnowboyLogMsg() noexcept(false);
 
 		template <typename T>
-		MySnowboyLogMsg& operator<<(T&& val) {
+		SnowboyLogMsg& operator<<(T&& val) {
 			m_stream << val;
 			return *this;
 		}
 	};
-	using SnowboyLogMsg = MySnowboyLogMsg;
 } // namespace snowboy
 
 #define SNOWBOY_ERROR() \
-	snowboy::MySnowboyLogMsg { __LINE__, __FILE__, __FUNCTION__, snowboy::SnowboyLogType::ERROR, 0 }
+	snowboy::SnowboyLogMsg { __LINE__, __FILE__, __FUNCTION__, snowboy::SnowboyLogType::ERROR, 0 }
 #define SNOWBOY_WARNING() \
-	snowboy::MySnowboyLogMsg { __LINE__, __FILE__, __FUNCTION__, snowboy::SnowboyLogType::WARNING, 0 }
+	snowboy::SnowboyLogMsg { __LINE__, __FILE__, __FUNCTION__, snowboy::SnowboyLogType::WARNING, 0 }
 #define SNOWBOY_LOG() \
-	snowboy::MySnowboyLogMsg { __LINE__, __FILE__, __FUNCTION__, snowboy::SnowboyLogType::LOG, 0 }
+	snowboy::SnowboyLogMsg { __LINE__, __FILE__, __FUNCTION__, snowboy::SnowboyLogType::LOG, 0 }
 #define SNOWBOY_VLOG() \
-	snowboy::MySnowboyLogMsg { __LINE__, __FILE__, __FUNCTION__, snowboy::SnowboyLogType::VLOG, 0 }
+	snowboy::SnowboyLogMsg { __LINE__, __FILE__, __FUNCTION__, snowboy::SnowboyLogType::VLOG, 0 }
 
 #ifndef NDEBUG
 #define SNOWBOY_ASSERT(cond)                                                          \
