@@ -14,6 +14,13 @@ namespace snowboy {
 		uint32_t m_stride{0};
 		float* m_data{nullptr};
 
+		size_t rows() const noexcept { return m_rows; }
+		size_t cols() const noexcept { return m_cols; }
+		size_t stride() const noexcept { return m_stride; }
+		float* data() const noexcept { return m_data; }
+		float& operator()(size_t row, size_t col) const noexcept { return m_data[row * m_stride + col]; }
+		bool empty() const noexcept { return rows() == 0 || cols() == 0; }
+
 		void AddMat(float alpha, const MatrixBase& A, MatrixTransposeType transA);
 		void AddMatMat(float, const MatrixBase&, MatrixTransposeType, const MatrixBase&, MatrixTransposeType, float);
 		void AddVecToRows(float, const VectorBase&);
@@ -76,15 +83,7 @@ namespace snowboy {
 		Matrix& operator=(const Matrix& other);
 		Matrix& operator=(const MatrixBase& other);
 		Matrix& operator=(Matrix&& other) {
-			ReleaseMatrixMemory();
-			m_rows = other.m_rows;
-			m_cols = other.m_cols;
-			m_stride = other.m_stride;
-			m_data = other.m_data;
-			other.m_rows = 0;
-			other.m_data = nullptr;
-			other.m_stride = 0;
-			other.m_cols = 0;
+			Swap(&other);
 			return *this;
 		}
 

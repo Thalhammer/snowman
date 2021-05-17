@@ -15,6 +15,7 @@ namespace snowboy {
 		size_t size() const noexcept { return m_size; }
 		float* data() const noexcept { return m_data; }
 		float& operator[](size_t index) const noexcept { return m_data[index]; }
+		float& operator()(size_t index) const noexcept { return m_data[index]; }
 		bool empty() const noexcept { return size() == 0; }
 
 		void Add(float x);
