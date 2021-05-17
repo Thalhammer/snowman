@@ -394,7 +394,7 @@ namespace snowboy {
 	void Vector::Read(bool binary, bool add, std::istream* is) {
 		if (!binary) {
 			// TODO: Is this still accurate ?
-            SNOWBOY_ERROR() << "Not implemented";
+			SNOWBOY_ERROR() << "Not implemented";
 			ExpectToken(binary, "[", is);
 			uint32_t i = 0;
 			auto s = m_size;

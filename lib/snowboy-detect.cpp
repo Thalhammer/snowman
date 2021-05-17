@@ -35,10 +35,10 @@ namespace snowboy {
 	}
 
 	int SnowboyDetect::RunDetection(const std::string& data, bool is_end) {
-		if((data.size() % wave_header_->wBlockAlign) != 0) return -1;
-        Matrix data_mat;
-        ReadRawWaveFromString(*wave_header_, data, &data_mat);
-        return detect_pipeline_->RunDetection(data_mat, is_end);
+		if ((data.size() % wave_header_->wBlockAlign) != 0) return -1;
+		Matrix data_mat;
+		ReadRawWaveFromString(*wave_header_, data, &data_mat);
+		return detect_pipeline_->RunDetection(data_mat, is_end);
 	}
 
 	int SnowboyDetect::RunDetection(const float* const data, const int array_length, bool is_end) {
@@ -163,10 +163,10 @@ namespace snowboy {
 	}
 
 	int SnowboyVad::RunVad(const std::string& data, bool is_end) {
-		if((data.size() % wave_header_->wBlockAlign) != 0) return -1;
-        Matrix data_mat;
-        ReadRawWaveFromString(*wave_header_, data, &data_mat);
-        return vad_pipeline_->RunVad(data_mat, is_end);
+		if ((data.size() % wave_header_->wBlockAlign) != 0) return -1;
+		Matrix data_mat;
+		ReadRawWaveFromString(*wave_header_, data, &data_mat);
+		return vad_pipeline_->RunVad(data_mat, is_end);
 	}
 
 	int SnowboyVad::RunVad(const float* const data, const int array_length, bool is_end) {

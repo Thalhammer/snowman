@@ -17,7 +17,7 @@ namespace snowboy {
 		m_options = options;
 		field_x44 = -1;
 		field_x48 = 0.0f;
-        // TODO: Can we optimize this matrix ?
+		// TODO: Can we optimize this matrix ?
 		Matrix m;
 		m.Resize(m_options.mel_filter.num_bins, m_options.mel_filter.num_bins);
 		ComputeDctMatrixTypeIII(&m);

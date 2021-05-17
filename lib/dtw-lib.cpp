@@ -220,7 +220,7 @@ namespace snowboy {
 							fVar16 = *pfVar9;
 						}
 						pfVar8[1] = fVar16 + local_1f8.m_data[row * local_1f8.m_stride + lVar12];
-						
+
 					} else {
 						if (((int)lVar12 == 0) || (row == 0)) {
 							if ((int)lVar12 == 0) {
@@ -237,7 +237,7 @@ namespace snowboy {
 							pfVar8[1] = fVar16 + local_1f8.m_data[row * local_1f8.m_stride + lVar12];
 						}
 					}
-                    pfVar9 = pfVar9 + 1;
+					pfVar9 = pfVar9 + 1;
 					pfVar8 = pfVar8 + 1;
 				}
 			}
@@ -247,7 +247,7 @@ namespace snowboy {
 		auto min_index = -1;
 		auto min_value = SubVector{local_1d8, local_1d8.m_rows - 1}.Min(&min_index);
 		if (param_4 != nullptr) {
-			for (int iVar11 = local_1d8.m_rows - 1; iVar11 != 0; ) {
+			for (int iVar11 = local_1d8.m_rows - 1; iVar11 != 0;) {
 				// TODO: This is wrong
 				// If I look at the code it should only be
 				// param_4->at(iVar11).push_back(min_index);
