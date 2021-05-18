@@ -115,3 +115,198 @@ std::string read_file(const std::string& file) {
 	content << f.rdbuf();
 	return content.str();
 }
+
+void ltrim(std::string& s) {
+	s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](int ch) {
+				return !std::isspace(ch);
+			}));
+}
+
+void rtrim(std::string& s) {
+	s.erase(std::find_if(s.rbegin(), s.rend(), [](int ch) {
+				return !std::isspace(ch);
+			}).base(),
+			s.end());
+}
+
+void trim(std::string& s) {
+	ltrim(s);
+	rtrim(s);
+}
+
+std::vector<std::string> split(const std::string& s, const std::string& delim, size_t max) {
+	std::vector<std::string> res;
+	size_t offset = 0;
+	do {
+		auto pos = s.find(delim, offset);
+		if (res.size() < max - 1 && pos != std::string::npos)
+			res.push_back(s.substr(offset, pos - offset));
+		else {
+			res.push_back(s.substr(offset));
+			break;
+		}
+		offset = pos + delim.size();
+	} while (true);
+	return res;
+}
+
+arg_iterator::arg_iterator(std::vector<std::string> a)
+	: args(a)
+{
+	current_token = args.begin();
+}
+
+arg_iterator::arg_iterator(int argc, const char** argv) {
+	for (int i = 0; i < argc; i++)
+		args.push_back(argv[i]);
+	current_token = args.begin();
+}
+
+arg_iterator::arg_iterator(const std::string& str) {
+	auto v = split(str, std::string(" "));
+	for (auto& e : v) {
+		trim(e);
+		args.push_back(e);
+	}
+	current_token = args.begin();
+}
+
+bool arg_iterator::has_more() const noexcept {
+	return current_token != args.end();
+}
+
+const std::string& arg_iterator::peek() const {
+	if (!has_more()) throw std::logic_error("out of arguments");
+	return *current_token;
+}
+
+const std::string& arg_iterator::take() {
+	if (!has_more()) throw std::logic_error("out of arguments");
+	return *current_token++;
+}
+
+option_base& option_base::set_shortname(std::string name) {
+	shortname = std::move(name);
+	return *this;
+}
+
+option_base& option_base::set_longname(std::string name) {
+	longname = std::move(name);
+	return *this;
+}
+
+option_base& option_base::set_description(std::string name) {
+	description = std::move(name);
+	return *this;
+}
+
+option_base& option_base::set_required(bool r) {
+	required = r;
+	return *this;
+}
+
+void bool_option::parse(arg_iterator& it) {
+	*value_ptr = true;
+	if (it.has_more() && it.peek() == "false") {
+		*value_ptr = false;
+		it.take();
+	}
+}
+
+void string_option::parse(arg_iterator& it) {
+	if (!it.has_more()) {
+		throw std::runtime_error("missing argument for option " + longname);
+	}
+	*value_ptr = it.take();
+}
+
+void string_list_option::parse(arg_iterator& it) {
+	if (!it.has_more()) {
+		throw std::runtime_error("missing argument for option " + longname);
+	}
+	value_ptr->push_back(it.take());
+}
+
+option_parser::~option_parser() {
+	for (auto& e : options)
+		delete e;
+	options.clear();
+}
+
+bool_option& option_parser::option(std::string longname, bool* ptr) {
+	auto opt = new bool_option(ptr);
+	opt->longname = longname;
+	options.push_back(opt);
+	return *opt;
+}
+
+string_option& option_parser::option(std::string longname, std::string* ptr) {
+	auto opt = new string_option(ptr);
+	opt->longname = longname;
+	options.push_back(opt);
+	return *opt;
+}
+
+string_list_option& option_parser::option(std::string longname, std::vector<std::string>* ptr) {
+	auto opt = new string_list_option(ptr);
+	opt->longname = longname;
+	options.push_back(opt);
+	return *opt;
+}
+
+std::vector<std::string> option_parser::parse(std::vector<std::string> a) {
+	arg_iterator it{a};
+	return parse(it);
+}
+
+std::vector<std::string> option_parser::parse(int argc, const char** argv) {
+	arg_iterator it{argc, argv};
+	return parse(it);
+}
+
+std::vector<std::string> option_parser::parse(const std::string& str) {
+	arg_iterator it{str};
+	return parse(it);
+}
+
+std::vector<std::string> option_parser::parse(arg_iterator& it) {
+	std::vector<std::string> extra_args;
+	while (it.has_more()) {
+		auto opt = it.take();
+		option_base* o = nullptr;
+		for (auto e : options) {
+			if (opt == e->shortname || opt == e->longname) {
+				o = e;
+				break;
+			}
+		}
+		if (o == nullptr) {
+			extra_args.push_back(opt);
+			continue;
+		}
+		o->parse(it);
+	}
+	return extra_args;
+}
+
+void option_parser::print_help(std::ostream& out) {
+	size_t max_name = 0;
+	size_t max_name_short = 0;
+	for(auto e : options) {
+		max_name_short = std::max(max_name_short,  e->shortname.size());
+		max_name = std::max(max_name,  e->longname.size());
+	}
+	max_name+=2;
+	max_name_short+=2;
+	for(auto e : options) {
+		out << e->shortname << std::string(max_name_short-(e->shortname.size()), ' ');
+		out << e->longname << std::string(max_name-(e->longname.size()), ' ');
+		out << e->description << "\n";
+	}
+}
+
+std::string option_parser::help() {
+	std::stringstream ss;
+	print_help(ss);
+	return ss.str();
+}

@@ -50,7 +50,7 @@ std::ostream& operator<<(std::ostream& s, const std::vector<T>& o) {
 	s << " }";
 	return s;
 }
-
+#define MEMCHECK_ENABLED (!defined(__SANITIZE_ADDRESS__) || __SANITIZE_ADDRESS__ != 1)
 struct MemoryChecker {
 	struct stacktrace {
 		void* trace[50];
@@ -70,27 +70,30 @@ struct MemoryChecker {
 		ssize_t num_chunks_allocated_max = 0;
 		ssize_t num_bytes_allocated = 0;
 		ssize_t num_bytes_allocated_max = 0;
-		stacktrace bt_max_chunks;
-		stacktrace bt_max_bytes;
 	};
-	static snapshot g_global;
+	snapshot info;
 
-	snapshot m_start;
-
-	MemoryChecker() {
-		m_start = g_global;
-	}
-
-	~MemoryChecker() {
-	}
-
-	snapshot calculate_difference() const noexcept;
-
-	static void* mc_malloc(size_t size, const void* caller);
-	static void* mc_realloc(void* cptr, size_t size, const void* caller);
-	static void mc_free(void* ptr, const void* caller);
-	static void* mc_memalign(size_t alignment, size_t size, const void* caller);
+	MemoryChecker();
+	~MemoryChecker();
 };
 
 std::ostream& operator<<(std::ostream& str, const MemoryChecker::stacktrace& o);
 std::ostream& operator<<(std::ostream& str, const MemoryChecker& o);
+
+#if MEMCHECK_ENABLED
+#define MEMCHECK_START() \
+	MemoryChecker check{};
+
+#define MEMCHECK_ASSERT_MAXMEM_LE(x)                      \
+	do {                                                  \
+		ASSERT_LE(check.info.num_bytes_allocated_max, x); \
+	} while (false)
+
+#else
+#define MEMCHECK_START() \
+	do {                 \
+	} while (false)
+#define MEMCHECK_ASSERT_MAXMEM_LE(x) \
+	do {                             \
+	} while (false)
+#endif
