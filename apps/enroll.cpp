@@ -35,36 +35,27 @@ int main(int argc, const char** argv) {
 }
 
 bool parse_args(int argc, const char** argv, std::string& output, std::vector<std::string>& recordings, std::string& lang, bool& cut_recordings) {
-	cut_recordings = true;
+	lang = "en";
+	option_parser parser;
+	bool no_cut = false;
+	parser.option("--no-cut-recordings", &no_cut).set_shortname("-nc").set_description("Do not cut recordings before running enrollment");
+	parser.option("--output", &output).set_shortname("-o").set_description("Output filename for the model");
+	parser.option("--language", &output).set_shortname("-l").set_description("Language of the enrolled word");
+	parser.option("--recording", &recordings).set_shortname("-r").set_required(true).set_description("Recording to enroll");
+	bool print_help = false;
+	parser.option("--help", &print_help).set_shortname("-h").set_description("Print help");
 	std::vector<std::string> extra_args;
-	for (int i = 1; i < argc; i++) {
-		if (argv[i] == std::string("-n")) {
-			if (i == argc - 1) {
-				std::cerr << "Missing parameter for arg -n" << std::endl;
-				return false;
-			}
-			output = argv[i + 1];
-			i++;
-		} else if (argv[i] == std::string("-r") || argv[i] == std::string("-r1") || argv[i] == std::string("-r2") || argv[i] == std::string("-r3")) {
-			if (i == argc - 1) {
-				std::cerr << "Missing parameter for arg -r" << std::endl;
-				return false;
-			}
-			recordings.push_back(argv[i + 1]);
-			i++;
-		} else if (argv[i] == std::string("-lang")) {
-			if (i == argc - 1) {
-				std::cerr << "Missing parameter for arg -lang" << std::endl;
-				return false;
-			}
-			lang = argv[i + 1];
-			i++;
-		} else if (argv[i] == std::string("-nc")) {
-			cut_recordings = false;
-		} else {
-			extra_args.push_back(argv[i]);
-		}
+	try {
+	extra_args = parser.parse(argc, argv);
+	} catch(const std::exception& e) {
+		std::cerr << e.what() << std::endl;
+		return false;
 	}
+	if(print_help) {
+		parser.print_help(std::cout);
+		return true;
+	}
+	cut_recordings = !no_cut;
 	if (output.empty() && !extra_args.empty()) {
 		output = extra_args.front();
 		extra_args.erase(extra_args.begin());
@@ -82,6 +73,5 @@ bool parse_args(int argc, const char** argv, std::string& output, std::vector<st
 		recordings.push_back("record2.wav");
 		recordings.push_back("record3.wav");
 	}
-	if (lang.empty()) lang = "en";
 	return true;
 }

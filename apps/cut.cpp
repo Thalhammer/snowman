@@ -12,6 +12,7 @@ bool parse_args(int argc, const char** argv, std::string& output, std::string& r
 int main(int argc, const char** argv) {
 	std::string output, recording, lang;
 	if (!parse_args(argc, argv, output, recording, lang)) return -1;
+	if(output.empty()) return 0;
 
 	snowboy::SnowboyTemplateCut cut{root + "resources/pmdl/" + lang + "/personal_enroll.res"};
 	auto data = read_sample_file(recording, true);
@@ -28,32 +29,23 @@ int main(int argc, const char** argv) {
 }
 
 bool parse_args(int argc, const char** argv, std::string& output, std::string& recording, std::string& lang) {
+	lang = "en";
+	option_parser parser;
+	parser.option("--output", &output).set_shortname("-o").set_description("Output filename for the model");
+	parser.option("--language", &output).set_shortname("-l").set_description("Language of the enrolled word");
+	parser.option("--recording", &recording).set_shortname("-r").set_required(true).set_description("Recording to cut");
+	bool print_help = false;
+	parser.option("--help", &print_help).set_shortname("-h").set_description("Print help");
 	std::vector<std::string> extra_args;
-	for (int i = 1; i < argc; i++) {
-		if (argv[i] == std::string("-r")) {
-			if (i == argc - 1) {
-				std::cerr << "Missing parameter for arg -r" << std::endl;
-				return false;
-			}
-			recording = argv[i + 1];
-			i++;
-		} else if (argv[i] == std::string("-lang")) {
-			if (i == argc - 1) {
-				std::cerr << "Missing parameter for arg -lang" << std::endl;
-				return false;
-			}
-			lang = argv[i + 1];
-			i++;
-		} else if (argv[i] == std::string("-o")) {
-			if (i == argc - 1) {
-				std::cerr << "Missing parameter for arg -o" << std::endl;
-				return false;
-			}
-			output = argv[i + 1];
-			i++;
-		} else {
-			extra_args.push_back(argv[i]);
-		}
+	try {
+		extra_args = parser.parse(argc, argv);
+	} catch(const std::exception& e) {
+		std::cerr << e.what() << std::endl;
+		return false;
+	}
+	if(print_help) {
+		parser.print_help(std::cout);
+		return true;
 	}
 	if (recording.empty() && !extra_args.empty()) {
 		recording = extra_args.front();
@@ -75,7 +67,6 @@ bool parse_args(int argc, const char** argv, std::string& output, std::string& r
 		} else
 			output = recording + "_cut.wav";
 	}
-	if (lang.empty()) lang = "en";
 	if (output.empty() || recording.empty() || lang.empty()) {
 		std::cerr << "Missing required argument" << std::endl;
 		return false;
