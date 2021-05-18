@@ -84,10 +84,16 @@ std::ostream& operator<<(std::ostream& str, const MemoryChecker& o);
 #define MEMCHECK_START() \
 	MemoryChecker check{};
 
-#define MEMCHECK_ASSERT_MAXMEM_LE(x) \
-	do { ASSERT_LE(check.info.num_bytes_allocated_max, x); } while(false)
+#define MEMCHECK_ASSERT_MAXMEM_LE(x)                      \
+	do {                                                  \
+		ASSERT_LE(check.info.num_bytes_allocated_max, x); \
+	} while (false)
 
 #else
-	#define MEMCHECK_START() do{} while(false)
-	#define MEMCHECK_ASSERT_MAXMEM_LE(x) do{} while(false)
+#define MEMCHECK_START() \
+	do {                 \
+	} while (false)
+#define MEMCHECK_ASSERT_MAXMEM_LE(x) \
+	do {                             \
+	} while (false)
 #endif

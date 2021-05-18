@@ -188,7 +188,7 @@ void* mc_malloc(size_t size, const void* caller) {
 }
 
 void* mc_realloc(void* cptr, size_t size, const void* caller) {
-	if(g_mc_info == nullptr) return __libc_realloc(cptr, size);
+	if (g_mc_info == nullptr) return __libc_realloc(cptr, size);
 
 	auto oldsize = malloc_usable_size(cptr);
 	void* ptr = __libc_realloc(cptr, size);
@@ -213,7 +213,7 @@ void* mc_realloc(void* cptr, size_t size, const void* caller) {
 }
 
 void mc_free(void* ptr, const void* caller) {
-	if(g_mc_info == nullptr) return __libc_free(ptr);
+	if (g_mc_info == nullptr) return __libc_free(ptr);
 	if (ptr == nullptr) return;
 	auto oldsize = malloc_usable_size(ptr);
 
@@ -226,7 +226,7 @@ void mc_free(void* ptr, const void* caller) {
 
 void* mc_memalign(size_t alignment, size_t size, const void* caller) {
 	void* ptr = __libc_memalign(alignment, size);
-	if(g_mc_info == nullptr) return ptr;
+	if (g_mc_info == nullptr) return ptr;
 
 	g_mc_info->num_memalign++;
 	if (ptr == nullptr) {
@@ -247,10 +247,10 @@ void* mc_memalign(size_t alignment, size_t size, const void* caller) {
 	return ptr;
 }
 
-
 std::ostream& operator<<(std::ostream& str, const MemoryChecker::stacktrace& o) {
 	int n = 0;
-	for(; n < 49; n++) if(o.trace[n+1] == nullptr) break;
+	for (; n < 49; n++)
+		if (o.trace[n + 1] == nullptr) break;
 	auto strings = backtrace_symbols(o.trace, n);
 	if (strings == NULL) {
 		str << "<backtrace_symbols failed>";
