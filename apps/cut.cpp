@@ -12,7 +12,7 @@ bool parse_args(int argc, const char** argv, std::string& output, std::string& r
 int main(int argc, const char** argv) {
 	std::string output, recording, lang;
 	if (!parse_args(argc, argv, output, recording, lang)) return -1;
-	if(output.empty()) return 0;
+	if (output.empty()) return 0;
 
 	snowboy::SnowboyTemplateCut cut{root + "resources/pmdl/" + lang + "/personal_enroll.res"};
 	auto data = read_sample_file(recording, true);
@@ -39,11 +39,11 @@ bool parse_args(int argc, const char** argv, std::string& output, std::string& r
 	std::vector<std::string> extra_args;
 	try {
 		extra_args = parser.parse(argc, argv);
-	} catch(const std::exception& e) {
+	} catch (const std::exception& e) {
 		std::cerr << e.what() << std::endl;
 		return false;
 	}
-	if(print_help) {
+	if (print_help) {
 		parser.print_help(std::cout);
 		return true;
 	}

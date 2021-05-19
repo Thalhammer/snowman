@@ -33,6 +33,7 @@ set(SNOWMAN_SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/snowboy-math.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/snowboy-options.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/snowboy-utils.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/srfft.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tdereverb_x.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/template-container.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/template-detect-stream.cpp

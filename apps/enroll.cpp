@@ -46,12 +46,12 @@ bool parse_args(int argc, const char** argv, std::string& output, std::vector<st
 	parser.option("--help", &print_help).set_shortname("-h").set_description("Print help");
 	std::vector<std::string> extra_args;
 	try {
-	extra_args = parser.parse(argc, argv);
-	} catch(const std::exception& e) {
+		extra_args = parser.parse(argc, argv);
+	} catch (const std::exception& e) {
 		std::cerr << e.what() << std::endl;
 		return false;
 	}
-	if(print_help) {
+	if (print_help) {
 		parser.print_help(std::cout);
 		return true;
 	}

@@ -151,8 +151,7 @@ std::vector<std::string> split(const std::string& s, const std::string& delim, s
 }
 
 arg_iterator::arg_iterator(std::vector<std::string> a)
-	: args(a)
-{
+	: args(a) {
 	current_token = args.begin();
 }
 
@@ -292,15 +291,15 @@ std::vector<std::string> option_parser::parse(arg_iterator& it) {
 void option_parser::print_help(std::ostream& out) {
 	size_t max_name = 0;
 	size_t max_name_short = 0;
-	for(auto e : options) {
-		max_name_short = std::max(max_name_short,  e->shortname.size());
-		max_name = std::max(max_name,  e->longname.size());
+	for (auto e : options) {
+		max_name_short = std::max(max_name_short, e->shortname.size());
+		max_name = std::max(max_name, e->longname.size());
 	}
-	max_name+=2;
-	max_name_short+=2;
-	for(auto e : options) {
-		out << e->shortname << std::string(max_name_short-(e->shortname.size()), ' ');
-		out << e->longname << std::string(max_name-(e->longname.size()), ' ');
+	max_name += 2;
+	max_name_short += 2;
+	for (auto e : options) {
+		out << e->shortname << std::string(max_name_short - (e->shortname.size()), ' ');
+		out << e->longname << std::string(max_name - (e->longname.size()), ' ');
 		out << e->description << "\n";
 	}
 }
