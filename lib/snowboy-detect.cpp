@@ -389,14 +389,14 @@ namespace snowboy {
 		mat_data.Resize(wave_header_->wChannels, array_length / wave_header_->wChannels, MatrixResizeType::kSetZero);
 		for (int c = 0; c < mat_data.cols(); c++)
 			for (int r = 0; r < mat_data.rows(); r++)
-				mat_data(r,c) = data[c * mat_data.m_rows + r];
+				mat_data(r, c) = data[c * mat_data.m_rows + r];
 		mat_data.Scale(GetMaxWaveAmplitude(*wave_header_));
 		auto res = cut_pipeline_->CutTemplate(mat_data, &mat_out);
 		if ((res & 2) == 0) {
 			for (int c = 0; c < mat_out.cols(); c++)
 				for (int r = 0; r < mat_out.rows(); r++)
-					data_out[c * mat_out.rows() + r] = mat_out(r,c);
-			if(array_length_out) *array_length_out = mat_out.rows() * mat_out.cols();
+					data_out[c * mat_out.rows() + r] = mat_out(r, c);
+			if (array_length_out) *array_length_out = mat_out.rows() * mat_out.cols();
 			return 0;
 		}
 		return 1;
@@ -412,13 +412,13 @@ namespace snowboy {
 		mat_data.Resize(wave_header_->wChannels, array_length / wave_header_->wChannels, MatrixResizeType::kSetZero);
 		for (int c = 0; c < mat_data.cols(); c++)
 			for (int r = 0; r < mat_data.rows(); r++)
-				mat_data(r,c) = data[c * mat_data.m_rows + r];
+				mat_data(r, c) = data[c * mat_data.m_rows + r];
 		auto res = cut_pipeline_->CutTemplate(mat_data, &mat_out);
 		if ((res & 2) == 0) {
 			for (int c = 0; c < mat_out.cols(); c++)
 				for (int r = 0; r < mat_out.rows(); r++)
-					data_out[c * mat_out.rows() + r] = mat_out(r,c);
-			if(array_length_out) *array_length_out = mat_out.rows() * mat_out.cols();
+					data_out[c * mat_out.rows() + r] = mat_out(r, c);
+			if (array_length_out) *array_length_out = mat_out.rows() * mat_out.cols();
 			return 0;
 		}
 		return 1;
@@ -434,14 +434,14 @@ namespace snowboy {
 		mat_data.Resize(wave_header_->wChannels, array_length / wave_header_->wChannels, MatrixResizeType::kSetZero);
 		for (int c = 0; c < mat_data.cols(); c++)
 			for (int r = 0; r < mat_data.rows(); r++)
-				mat_data(r,c) = data[c * mat_data.m_rows + r];
+				mat_data(r, c) = data[c * mat_data.m_rows + r];
 		mat_data.Scale(GetMaxWaveAmplitude(*wave_header_));
 		auto res = cut_pipeline_->CutTemplate(mat_data, &mat_out);
 		if ((res & 2) == 0) {
 			for (int c = 0; c < mat_out.cols(); c++)
 				for (int r = 0; r < mat_out.rows(); r++)
-					data_out[c * mat_out.rows() + r] = mat_out(r,c);
-			if(array_length_out) *array_length_out = mat_out.rows() * mat_out.cols();
+					data_out[c * mat_out.rows() + r] = mat_out(r, c);
+			if (array_length_out) *array_length_out = mat_out.rows() * mat_out.cols();
 			return 0;
 		}
 		return 1;

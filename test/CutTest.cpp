@@ -26,7 +26,7 @@ TEST(CutTest, CutTemplateShort) {
 	auto res = cut.CutTemplate(data.data(), data.size(), data.data(), &new_size);
 	ASSERT_EQ(res, 0);
 	ASSERT_EQ(new_size, 15120);
-	ASSERT_EQ("6A:77:2F:13:2E:32:F7:BD:82:19:78:42:D3:5E:63:FD", md5sum(data.data(), new_size*sizeof(int16_t)));
+	ASSERT_EQ("6A:77:2F:13:2E:32:F7:BD:82:19:78:42:D3:5E:63:FD", md5sum(data.data(), new_size * sizeof(int16_t)));
 }
 
 TEST(CutTest, CutTemplate2) {

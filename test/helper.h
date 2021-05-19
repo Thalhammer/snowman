@@ -90,8 +90,12 @@ std::ostream& operator<<(std::ostream& str, const MemoryChecker& o);
 #define MEMCHECK_DUMP() std::cout << MEMCHECK_REPORT() << std::endl;
 #define MEMCHECK_ASSERT_MAXMEM_LE(x) ASSERT_LE(check.info.num_bytes_allocated_max, x)
 #else
-#define MEMCHECK_START() do {} while (false)
+#define MEMCHECK_START() \
+	do {                 \
+	} while (false)
 #define MEMCHECK_REPORT() "<memcheck disabled due to asan>"
-#define MEMCHECK_DUMP() do {} while (false)
+#define MEMCHECK_DUMP() \
+	do {                \
+	} while (false)
 #define MEMCHECK_ASSERT_MAXMEM_LE(x) ASSERT_TRUE(true)
 #endif
