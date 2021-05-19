@@ -129,8 +129,12 @@ std::string read_file(const std::string& file) {
 }
 
 std::string md5sum(const std::string& data) {
+	return md5sum(data.data(), data.size());
+}
+
+std::string md5sum(const void* const data, size_t len) {
 	unsigned char hash[MD5_DIGEST_LENGTH];
-	MD5(reinterpret_cast<const unsigned char*>(data.data()), data.size(), hash);
+	MD5(reinterpret_cast<const unsigned char*>(data), len, hash);
 	auto ptr = OPENSSL_buf2hexstr(hash, MD5_DIGEST_LENGTH);
 	std::string res = ptr;
 	OPENSSL_free(ptr);
@@ -177,6 +181,7 @@ void* mc_malloc(size_t size, const void* caller) {
 	size = malloc_usable_size(ptr);
 
 	g_mc_info->num_bytes_allocated += size;
+	g_mc_info->num_malloc_bytes += size;
 	g_mc_info->num_chunks_allocated++;
 	if (g_mc_info->num_chunks_allocated > g_mc_info->num_chunks_allocated_max) {
 		g_mc_info->num_chunks_allocated_max = g_mc_info->num_chunks_allocated;
@@ -198,11 +203,14 @@ void* mc_realloc(void* cptr, size_t size, const void* caller) {
 		g_mc_info->num_realloc_failed++;
 		return ptr;
 	}
-	if (cptr == ptr) {
+	if (cptr != ptr) {
 		g_mc_info->num_realloc_moved++;
 	}
+	size = malloc_usable_size(ptr);
 
-	g_mc_info->num_bytes_allocated += (static_cast<ssize_t>(size) - static_cast<ssize_t>(oldsize));
+	auto alloc_size = (static_cast<ssize_t>(size) - static_cast<ssize_t>(oldsize));
+	g_mc_info->num_realloc_bytes += alloc_size;
+	g_mc_info->num_bytes_allocated += alloc_size;
 	if (g_mc_info->num_chunks_allocated > g_mc_info->num_chunks_allocated_max) {
 		g_mc_info->num_chunks_allocated_max = g_mc_info->num_chunks_allocated;
 	}
@@ -237,6 +245,7 @@ void* mc_memalign(size_t alignment, size_t size, const void* caller) {
 	size = malloc_usable_size(ptr);
 
 	g_mc_info->num_bytes_allocated += size;
+	g_mc_info->num_memalign_bytes += size;
 	g_mc_info->num_chunks_allocated++;
 	if (g_mc_info->num_chunks_allocated > g_mc_info->num_chunks_allocated_max) {
 		g_mc_info->num_chunks_allocated_max = g_mc_info->num_chunks_allocated;
@@ -266,12 +275,15 @@ std::ostream& operator<<(std::ostream& str, const MemoryChecker& o) {
 	str << "==== Memory report ====\n";
 	str << "num_malloc =               " << o.info.num_malloc << "\n";
 	str << "num_malloc_failed =        " << o.info.num_malloc_failed << "\n";
+	str << "num_malloc_bytes =         " << o.info.num_malloc_bytes << "\n";
 	str << "num_free =                 " << o.info.num_free << "\n";
 	str << "num_realloc =              " << o.info.num_realloc << "\n";
 	str << "num_realloc_failed =       " << o.info.num_realloc_failed << "\n";
 	str << "num_realloc_moved =        " << o.info.num_realloc_moved << "\n";
+	str << "num_realloc_bytes =        " << o.info.num_realloc_bytes << "\n";
 	str << "num_memalign =             " << o.info.num_memalign << "\n";
 	str << "num_memalign_failed =      " << o.info.num_memalign_failed << "\n";
+	str << "num_memalign_bytes =       " << o.info.num_memalign_bytes << "\n";
 	str << "num_chunks_allocated =     " << o.info.num_chunks_allocated << "\n";
 	str << "num_chunks_allocated_max = " << o.info.num_chunks_allocated_max << "\n";
 	str << "num_bytes_allocated =      " << o.info.num_bytes_allocated << "\n";
