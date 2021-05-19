@@ -23,7 +23,12 @@ int main(int argc, const char** argv) {
 	auto res = cut.CutTemplate(str_data);
 
 	std::ofstream file{output, std::ios::binary};
-	file.write(reinterpret_cast<const char*>(cut.wave_header_.get()), sizeof(snowboy::WaveHeader));
+	snowboy::WaveHeader header{};
+	header.dwSamplesPerSec = cut.SampleRate();
+	header.wBitsPerSample = cut.BitsPerSample();
+	header.wChannels = cut.NumChannels();
+	header.dwAvgBytesPerSec = header.dwSamplesPerSec * (header.wBitsPerSample / 8) * header.wChannels;
+	file.write(reinterpret_cast<const char*>(&header), sizeof(header));
 	file.write(res.data(), res.size());
 	return 0;
 }

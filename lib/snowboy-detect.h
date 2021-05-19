@@ -3,6 +3,7 @@
 #include <string>
 
 namespace snowboy {
+	namespace testing { struct Inspector; }
 	struct WaveHeader;
 	struct PipelineDetect;
 	struct PipelineVad;
@@ -17,6 +18,7 @@ namespace snowboy {
 	 * voice activity detection.
 	 */
 	class SnowboyDetect {
+		friend struct testing::Inspector;
 	public:
 		/**
 		 * \brief Default constructor
@@ -259,6 +261,7 @@ namespace snowboy {
 	 * a VAD pipeline as well.
 	 */
 	class SnowboyVad {
+		friend struct testing::Inspector;
 	public:
 		/**
 		 * \brief Default constructor
@@ -415,6 +418,7 @@ namespace snowboy {
 	 * Class that allows enrolling new personal hotwords.
 	 */
 	class SnowboyPersonalEnroll {
+		friend struct testing::Inspector;
 	public:
 		/**
 		 * \brief Default constructor
@@ -550,6 +554,7 @@ namespace snowboy {
 	 * by removing all leading and trailing silence.
 	 */
 	class SnowboyTemplateCut {
+		friend struct testing::Inspector;
 	public:
 		/**
 		 * \brief Default constructor
