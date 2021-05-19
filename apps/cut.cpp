@@ -28,6 +28,8 @@ int main(int argc, const char** argv) {
 	header.wBitsPerSample = cut.BitsPerSample();
 	header.wChannels = cut.NumChannels();
 	header.dwAvgBytesPerSec = header.dwSamplesPerSec * (header.wBitsPerSample / 8) * header.wChannels;
+	header.dataChunkSize = res.size();
+	header.chunkSize = sizeof(header) + res.size();
 	file.write(reinterpret_cast<const char*>(&header), sizeof(header));
 	file.write(res.data(), res.size());
 	return 0;
