@@ -1,6 +1,7 @@
 #include <framer-stream.h>
 #include <fstream>
 #include <helper.h>
+#include <inspector.h>
 #include <matrix-wrapper.h>
 #include <pipeline-personal-enroll.h>
 #include <snowboy-detect.h>
@@ -28,7 +29,8 @@ TEST(EnrollTest, PersonalEnroll) {
 		ASSERT_EQ(res, 0);
 	}
 	ASSERT_TRUE(file_exists("temp_enroll_model.pmdl"));
-	ASSERT_EQ(hash(enroll.enroll_pipeline_->m_templateEnrollStream->field_x38.m_templates.front()), 928553);
+	auto pipeline = snowboy::testing::Inspector::SnowboyPersonalEnroll_GetEnrollPipeline(enroll);
+	ASSERT_EQ(hash(pipeline->m_templateEnrollStream->field_x38.m_templates.front()), 928553);
 	// TODO: I would really like to do a md5 of the file instead but due to rounding errors (and dithering) thats not an option
 	// auto hash = md5sum_file("temp_enroll_model.pmdl");
 	// ASSERT_EQ(hash, "55:F2:DA:B4:E7:6E:B2:68:6F:DA:6E:0E:0D:13:39:F1");
@@ -53,7 +55,8 @@ TEST(EnrollTest, PersonalEnroll2) {
 		ASSERT_EQ(res, 0);
 	}
 	ASSERT_TRUE(file_exists("temp_enroll_model.pmdl"));
-	ASSERT_EQ(hash(enroll.enroll_pipeline_->m_templateEnrollStream->field_x38.m_templates.front()), 928522);
+	auto pipeline = snowboy::testing::Inspector::SnowboyPersonalEnroll_GetEnrollPipeline(enroll);
+	ASSERT_EQ(hash(pipeline->m_templateEnrollStream->field_x38.m_templates.front()), 928522);
 	// TODO: I would really like to do a md5 of the file instead but due to rounding errors (and dithering) thats not an option
 	// auto hash = md5sum_file("temp_enroll_model.pmdl");
 	// ASSERT_EQ(hash, "44:F9:AE:8E:CB:4A:E0:36:C6:FC:7D:9A:DA:C3:67:0F");

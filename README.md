@@ -60,6 +60,9 @@ universal models, but this is still in the far future.
 ### Personal models
 Training personal models is now possible using the `enroll` utility build along the library. While the resulting model is not bit identical with models trained using the original library, it is identical to 5 digits of precision. The remaining differences are most likely a result of rounding errors within the process and should not affect the performance of the model.
 
+### Usage
+As before the main interface is `snowboy-detect.h` which includes the well known `snowboy::SnowboyDetect`, `snowboy::SnowboyVad`, `snowboy::SnowboyPersonalEnroll` and `snowboy::SnowboyTemplateCut` classes. Those classes provide a very high level interface to snowboy that should be sufficient for most applications. There is also a file `snowboy-detect-c.h` file which provides a C wrapper for the beforementioned classes and should make integration into other languages a lot easier.
+
 ### Contributing
 
 Any help would be highly appreciated. I am particularly looking for people with knowledge of machine

@@ -33,6 +33,7 @@ set(SNOWMAN_SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/snowboy-math.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/snowboy-options.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/snowboy-utils.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/srfft.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tdereverb_x.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/template-container.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/template-detect-stream.cpp
@@ -45,7 +46,7 @@ set(SNOWMAN_SRC
 if(SNOWMAN_BUILD_SHARED)
     add_library(snowman SHARED ${SNOWMAN_SRC})
     set_target_properties(snowman PROPERTIES VERSION ${PROJECT_VERSION})
-    set_target_properties(mylib PROPERTIES SOVERSION ${CMAKE_PROJECT_VERSION_MAJOR})
+    set_target_properties(snowman PROPERTIES SOVERSION ${CMAKE_PROJECT_VERSION_MAJOR})
 else()
     add_library(snowman STATIC ${SNOWMAN_SRC})
 endif()

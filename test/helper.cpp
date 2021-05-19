@@ -129,8 +129,12 @@ std::string read_file(const std::string& file) {
 }
 
 std::string md5sum(const std::string& data) {
+	return md5sum(data.data(), data.size());
+}
+
+std::string md5sum(const void* const data, size_t len) {
 	unsigned char hash[MD5_DIGEST_LENGTH];
-	MD5(reinterpret_cast<const unsigned char*>(data.data()), data.size(), hash);
+	MD5(reinterpret_cast<const unsigned char*>(data), len, hash);
 	auto ptr = OPENSSL_buf2hexstr(hash, MD5_DIGEST_LENGTH);
 	std::string res = ptr;
 	OPENSSL_free(ptr);
@@ -142,7 +146,7 @@ std::string md5sum_file(const std::string& file) {
 	return md5sum(content);
 }
 
-MemoryChecker::snapshot MemoryChecker::g_global{};
+static MemoryChecker::snapshot* g_mc_info = nullptr;
 
 void MemoryChecker::stacktrace::capture() {
 	auto res = ::backtrace(trace, 50);
@@ -150,23 +154,12 @@ void MemoryChecker::stacktrace::capture() {
 		trace[i] = nullptr;
 }
 
-MemoryChecker::snapshot MemoryChecker::calculate_difference() const noexcept {
-	snapshot res;
-	res.num_malloc = g_global.num_malloc - m_start.num_malloc;
-	res.num_malloc_failed = g_global.num_malloc_failed - m_start.num_malloc_failed;
-	res.num_free = g_global.num_free - m_start.num_free;
-	res.num_realloc = g_global.num_realloc - m_start.num_realloc;
-	res.num_realloc_failed = g_global.num_realloc_failed - m_start.num_realloc_failed;
-	res.num_realloc_moved = g_global.num_realloc_moved - m_start.num_realloc_moved;
-	res.num_memalign = g_global.num_memalign - m_start.num_memalign;
-	res.num_memalign_failed = g_global.num_memalign_failed - m_start.num_memalign_failed;
-	res.num_chunks_allocated = g_global.num_chunks_allocated - m_start.num_chunks_allocated;
-	res.num_chunks_allocated_max = g_global.num_chunks_allocated_max - m_start.num_chunks_allocated_max;
-	res.num_bytes_allocated = g_global.num_bytes_allocated - m_start.num_bytes_allocated;
-	res.num_bytes_allocated_max = g_global.num_bytes_allocated_max - m_start.num_bytes_allocated_max;
-	res.bt_max_chunks = g_global.bt_max_chunks;
-	res.bt_max_bytes = g_global.bt_max_bytes;
-	return res;
+MemoryChecker::MemoryChecker() {
+	g_mc_info = &info;
+}
+
+MemoryChecker::~MemoryChecker() {
+	g_mc_info = nullptr;
 }
 
 extern "C" void* __libc_malloc(size_t);
@@ -174,103 +167,92 @@ extern "C" void* __libc_realloc(void*, size_t);
 extern "C" void __libc_free(void*);
 extern "C" void* __libc_memalign(size_t alignment, size_t size);
 
-static thread_local bool in_memchecker = false;
-void* MemoryChecker::mc_malloc(size_t size, const void* caller) {
-	if (in_memchecker) return __libc_malloc(size);
-	in_memchecker = true;
+void* mc_malloc(size_t size, const void* caller) {
+	if (g_mc_info == nullptr) return __libc_malloc(size);
+
 	void* ptr = __libc_malloc(size);
 
-	g_global.num_malloc++;
+	g_mc_info->num_malloc++;
 	if (ptr == nullptr) {
-		g_global.num_malloc_failed++;
-		in_memchecker = false;
+		g_mc_info->num_malloc_failed++;
 		return ptr;
 	}
 
 	size = malloc_usable_size(ptr);
 
-	g_global.num_bytes_allocated += size;
-	g_global.num_chunks_allocated++;
-	if (g_global.num_chunks_allocated > g_global.num_chunks_allocated_max) {
-		g_global.num_chunks_allocated_max = g_global.num_chunks_allocated;
-		g_global.bt_max_chunks.capture();
+	g_mc_info->num_bytes_allocated += size;
+	g_mc_info->num_malloc_bytes += size;
+	g_mc_info->num_chunks_allocated++;
+	if (g_mc_info->num_chunks_allocated > g_mc_info->num_chunks_allocated_max) {
+		g_mc_info->num_chunks_allocated_max = g_mc_info->num_chunks_allocated;
 	}
-	if (g_global.num_bytes_allocated > g_global.num_bytes_allocated_max) {
-		g_global.num_bytes_allocated_max = g_global.num_bytes_allocated;
-		g_global.bt_max_bytes.capture();
+	if (g_mc_info->num_bytes_allocated > g_mc_info->num_bytes_allocated_max) {
+		g_mc_info->num_bytes_allocated_max = g_mc_info->num_bytes_allocated;
 	}
-	in_memchecker = false;
 	return ptr;
 }
 
-void* MemoryChecker::mc_realloc(void* cptr, size_t size, const void* caller) {
-	if (in_memchecker) return __libc_realloc(cptr, size);
-	in_memchecker = true;
+void* mc_realloc(void* cptr, size_t size, const void* caller) {
+	if (g_mc_info == nullptr) return __libc_realloc(cptr, size);
+
 	auto oldsize = malloc_usable_size(cptr);
 	void* ptr = __libc_realloc(cptr, size);
 
-	g_global.num_realloc++;
+	g_mc_info->num_realloc++;
 	if (ptr == nullptr) {
-		g_global.num_realloc_failed++;
-		in_memchecker = false;
+		g_mc_info->num_realloc_failed++;
 		return ptr;
 	}
-	if (cptr == ptr) {
-		g_global.num_realloc_moved++;
+	if (cptr != ptr) {
+		g_mc_info->num_realloc_moved++;
 	}
+	size = malloc_usable_size(ptr);
 
-	g_global.num_bytes_allocated += (static_cast<ssize_t>(size) - static_cast<ssize_t>(oldsize));
-	if (g_global.num_chunks_allocated > g_global.num_chunks_allocated_max) {
-		g_global.num_chunks_allocated_max = g_global.num_chunks_allocated;
-		g_global.bt_max_chunks.capture();
+	auto alloc_size = (static_cast<ssize_t>(size) - static_cast<ssize_t>(oldsize));
+	g_mc_info->num_realloc_bytes += alloc_size;
+	g_mc_info->num_bytes_allocated += alloc_size;
+	if (g_mc_info->num_chunks_allocated > g_mc_info->num_chunks_allocated_max) {
+		g_mc_info->num_chunks_allocated_max = g_mc_info->num_chunks_allocated;
 	}
-	if (g_global.num_bytes_allocated > g_global.num_bytes_allocated_max) {
-		g_global.num_bytes_allocated_max = g_global.num_bytes_allocated;
-		g_global.bt_max_bytes.capture();
+	if (g_mc_info->num_bytes_allocated > g_mc_info->num_bytes_allocated_max) {
+		g_mc_info->num_bytes_allocated_max = g_mc_info->num_bytes_allocated;
 	}
-	in_memchecker = false;
 	return ptr;
 }
 
-void MemoryChecker::mc_free(void* ptr, const void* caller) {
-	if (in_memchecker) return __libc_free(ptr);
+void mc_free(void* ptr, const void* caller) {
+	if (g_mc_info == nullptr) return __libc_free(ptr);
 	if (ptr == nullptr) return;
-	in_memchecker = true;
 	auto oldsize = malloc_usable_size(ptr);
 
 	__libc_free(ptr);
 
-	g_global.num_free++;
-	g_global.num_bytes_allocated -= oldsize;
-	g_global.num_chunks_allocated--;
-	in_memchecker = false;
+	g_mc_info->num_free++;
+	g_mc_info->num_bytes_allocated -= oldsize;
+	g_mc_info->num_chunks_allocated--;
 }
 
-void* MemoryChecker::mc_memalign(size_t alignment, size_t size, const void* caller) {
+void* mc_memalign(size_t alignment, size_t size, const void* caller) {
 	void* ptr = __libc_memalign(alignment, size);
-	if (in_memchecker) return ptr;
-	in_memchecker = true;
+	if (g_mc_info == nullptr) return ptr;
 
-	g_global.num_memalign++;
+	g_mc_info->num_memalign++;
 	if (ptr == nullptr) {
-		g_global.num_memalign_failed++;
-		in_memchecker = false;
+		g_mc_info->num_memalign_failed++;
 		return ptr;
 	}
 
 	size = malloc_usable_size(ptr);
 
-	g_global.num_bytes_allocated += size;
-	g_global.num_chunks_allocated++;
-	if (g_global.num_chunks_allocated > g_global.num_chunks_allocated_max) {
-		g_global.num_chunks_allocated_max = g_global.num_chunks_allocated;
-		g_global.bt_max_chunks.capture();
+	g_mc_info->num_bytes_allocated += size;
+	g_mc_info->num_memalign_bytes += size;
+	g_mc_info->num_chunks_allocated++;
+	if (g_mc_info->num_chunks_allocated > g_mc_info->num_chunks_allocated_max) {
+		g_mc_info->num_chunks_allocated_max = g_mc_info->num_chunks_allocated;
 	}
-	if (g_global.num_bytes_allocated > g_global.num_bytes_allocated_max) {
-		g_global.num_bytes_allocated_max = g_global.num_bytes_allocated;
-		g_global.bt_max_bytes.capture();
+	if (g_mc_info->num_bytes_allocated > g_mc_info->num_bytes_allocated_max) {
+		g_mc_info->num_bytes_allocated_max = g_mc_info->num_bytes_allocated;
 	}
-	in_memchecker = false;
 	return ptr;
 }
 
@@ -290,41 +272,41 @@ std::ostream& operator<<(std::ostream& str, const MemoryChecker::stacktrace& o) 
 }
 
 std::ostream& operator<<(std::ostream& str, const MemoryChecker& o) {
-	auto diff = o.calculate_difference();
 	str << "==== Memory report ====\n";
-	str << "num_malloc =               " << diff.num_malloc << "\n";
-	str << "num_malloc_failed =        " << diff.num_malloc_failed << "\n";
-	str << "num_free =                 " << diff.num_free << "\n";
-	str << "num_realloc =              " << diff.num_realloc << "\n";
-	str << "num_realloc_failed =       " << diff.num_realloc_failed << "\n";
-	str << "num_realloc_moved =        " << diff.num_realloc_moved << "\n";
-	str << "num_memalign =             " << diff.num_memalign << "\n";
-	str << "num_memalign_failed =      " << diff.num_memalign_failed << "\n";
-	str << "num_chunks_allocated =     " << diff.num_chunks_allocated << "\n";
-	str << "num_chunks_allocated_max = " << diff.num_chunks_allocated_max << "\n";
-	str << "num_bytes_allocated =      " << diff.num_bytes_allocated << "\n";
-	str << "num_bytes_allocated_max =  " << diff.num_bytes_allocated_max << "\n";
-	str << "max_chunks_at:\n"
-		<< diff.bt_max_chunks;
-	str << "max_bytes_at:\n"
-		<< diff.bt_max_bytes;
+	str << "num_malloc =               " << o.info.num_malloc << "\n";
+	str << "num_malloc_failed =        " << o.info.num_malloc_failed << "\n";
+	str << "num_malloc_bytes =         " << o.info.num_malloc_bytes << "\n";
+	str << "num_free =                 " << o.info.num_free << "\n";
+	str << "num_realloc =              " << o.info.num_realloc << "\n";
+	str << "num_realloc_failed =       " << o.info.num_realloc_failed << "\n";
+	str << "num_realloc_moved =        " << o.info.num_realloc_moved << "\n";
+	str << "num_realloc_bytes =        " << o.info.num_realloc_bytes << "\n";
+	str << "num_memalign =             " << o.info.num_memalign << "\n";
+	str << "num_memalign_failed =      " << o.info.num_memalign_failed << "\n";
+	str << "num_memalign_bytes =       " << o.info.num_memalign_bytes << "\n";
+	str << "num_chunks_allocated =     " << o.info.num_chunks_allocated << "\n";
+	str << "num_chunks_allocated_max = " << o.info.num_chunks_allocated_max << "\n";
+	str << "num_bytes_allocated =      " << o.info.num_bytes_allocated << "\n";
+	str << "num_bytes_allocated_max =  " << o.info.num_bytes_allocated_max << "\n";
 	return str;
 }
 
+#if MEMCHECK_ENABLED
 extern "C" void* malloc(size_t size) {
-	return MemoryChecker::mc_malloc(size, __builtin_return_address(0));
+	return mc_malloc(size, __builtin_return_address(0));
 }
 extern "C" void* realloc(void* ptr, size_t size) {
-	return MemoryChecker::mc_realloc(ptr, size, __builtin_return_address(0));
+	return mc_realloc(ptr, size, __builtin_return_address(0));
 }
 extern "C" void* memalign(size_t alignment, size_t size) {
-	return MemoryChecker::mc_memalign(alignment, size, __builtin_return_address(0));
+	return mc_memalign(alignment, size, __builtin_return_address(0));
 }
 extern "C" void free(void* ptr) {
-	MemoryChecker::mc_free(ptr, __builtin_return_address(0));
+	mc_free(ptr, __builtin_return_address(0));
 }
 extern "C" int posix_memalign(void** memptr, size_t alignment, size_t size) {
 	*memptr = memalign(alignment, size);
 	if (!*memptr) return ENOMEM;
 	return 0;
 }
+#endif

@@ -1,9 +1,17 @@
 cmake_minimum_required(VERSION 3.12)
 project(snowman VERSION 1.0.0 DESCRIPTION "Snowman hotword detection library")
+
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+  message(STATUS "Setting build type to 'Release' as none was specified.")
+  set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build." FORCE)
+  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
+endif()
+
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
 
 option(SNOWMAN_CXX11_COMPAT "Build library with C++11 strings disabled to be binary compatible with the original release." ON)
 option(SNOWMAN_BUILD_APPS "Build helper applications like enroll or cut" ON)
+option(SNOWMAN_BUILD_APPS_STATIC "Build apps statically" OFF)
 option(SNOWMAN_BUILD_TESTS "Build unit tests (requires gtest and openssl)" ON)
 option(SNOWMAN_BUILD_SHARED "Build library as a shared library instead of a static library" OFF)
 # According to steam ~99.17% of users have at least ssse3

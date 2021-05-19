@@ -15,7 +15,8 @@ extern "C"
 		unsigned char unknown3[0x28e];
 	};
 	static_assert(sizeof(TAgc_Instance) == 0x298);
-	// TODO: Types
+	// TODO: Can we just copy the WebRtc implementation ?
+	// https://chromium.googlesource.com/external/webrtc/+/refs/heads/master/modules/audio_processing/agc/legacy/gain_control.h
 	extern void TAgc_Create(TAgc_Instance** ptr);
 	extern void TAgc_Init_org(TAgc_Instance* instance, uint64_t, uint64_t, int, int sample_rate);
 	extern void TAgc_Free(TAgc_Instance* instance);

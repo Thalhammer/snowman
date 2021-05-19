@@ -5,6 +5,7 @@
 #include <snowboy-debug.h>
 #include <snowboy-math.h>
 #include <snowboy-options.h>
+#include <srfft.h>
 #include <vector-wrapper.h>
 
 namespace snowboy {
@@ -23,7 +24,7 @@ namespace snowboy {
 			// Never used in any of my models
 			m_fft.reset(new Fft(options));
 		} else if (m_options.method == "srfft") {
-			// TODO: m_fft.reset(new SplitRadixFft(options));
+			m_fft.reset(new SplitRadixFft(options));
 		} else {
 			SNOWBOY_ERROR() << "FFT method has not been implemented: " << m_options.method;
 			return;

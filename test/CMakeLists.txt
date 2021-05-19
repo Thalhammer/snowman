@@ -3,6 +3,7 @@ include(FetchGoogleTest)
 include(GoogleTest)
 add_executable(snowboy-test
     helper.cpp
+    inspector.cpp
     ClassifyTest.cpp
     EnrollTest.cpp
     DtwTest.cpp
