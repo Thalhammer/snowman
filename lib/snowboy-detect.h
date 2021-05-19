@@ -3,7 +3,9 @@
 #include <string>
 
 namespace snowboy {
-	namespace testing { struct Inspector; }
+	namespace testing {
+		struct Inspector;
+	}
 	struct WaveHeader;
 	struct PipelineDetect;
 	struct PipelineVad;
@@ -19,6 +21,7 @@ namespace snowboy {
 	 */
 	class SnowboyDetect {
 		friend struct testing::Inspector;
+
 	public:
 		/**
 		 * \brief Default constructor
@@ -262,6 +265,7 @@ namespace snowboy {
 	 */
 	class SnowboyVad {
 		friend struct testing::Inspector;
+
 	public:
 		/**
 		 * \brief Default constructor
@@ -419,6 +423,7 @@ namespace snowboy {
 	 */
 	class SnowboyPersonalEnroll {
 		friend struct testing::Inspector;
+
 	public:
 		/**
 		 * \brief Default constructor
@@ -555,6 +560,7 @@ namespace snowboy {
 	 */
 	class SnowboyTemplateCut {
 		friend struct testing::Inspector;
+
 	public:
 		/**
 		 * \brief Default constructor

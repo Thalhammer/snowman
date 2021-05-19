@@ -1,12 +1,12 @@
 #include <framer-stream.h>
 #include <fstream>
 #include <helper.h>
+#include <inspector.h>
 #include <matrix-wrapper.h>
 #include <pipeline-personal-enroll.h>
 #include <snowboy-detect.h>
 #include <template-container.h>
 #include <template-enroll-stream.h>
-#include <inspector.h>
 
 const static auto root = detect_project_root();
 
