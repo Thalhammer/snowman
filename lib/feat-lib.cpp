@@ -167,8 +167,8 @@ namespace snowboy {
 		for (auto local_54 = 1; local_54 <= iVar7; local_54 += 1) {
 			const auto iVar9 = 1 << (local_54 & 0x1f);
 			for (auto local_68 = 0; local_68 < (int)uVar6; local_68 += iVar9) {
-				auto lVar14 = (long)local_68 * 2 + 1 + iVar9;
-				auto lVar15 = (long)(local_68 * 2);
+				long lVar14 = local_68 * 2 + 1 + iVar9;
+				long lVar15 = (local_68 * 2);
 				for (auto iVar11 = 0; iVar11 != iVar9 / 2; iVar11++) {
 					auto twiddle = snowboy::Fft::GetTwiddleFactor(iVar9, iVar11);
 					if (inverse) twiddle.second *= -1;
