@@ -258,7 +258,7 @@ namespace snowboy {
 		auto beg_token = "<" + Type() + ">";
 		auto end_token = "</" + Type() + ">";
 		ExpectOneOrTwoTokens(binary, beg_token, "<Dim>", is);
-		ReadBasicType<int>(binary, &m_dim, is);
+		ReadBasicType<int32_t>(binary, &m_dim, is);
 		ExpectToken(binary, end_token, is);
 		field_x10 = 1;
 	}
@@ -268,7 +268,7 @@ namespace snowboy {
 		auto end_token = "</" + Type() + ">";
 		WriteToken(binary, beg_token, os);
 		WriteToken(binary, "<Dim>", os);
-		WriteBasicType<int>(binary, m_dim, os);
+		WriteBasicType<int32_t>(binary, m_dim, os);
 		WriteToken(binary, end_token, os);
 	}
 
@@ -326,13 +326,13 @@ namespace snowboy {
 		auto beg_token = "<" + Type() + ">";
 		auto end_token = "</" + Type() + ">";
 		ExpectOneOrTwoTokens(binary, beg_token, "<InputDim>", is);
-		ReadBasicType<int>(binary, &m_inputDim, is);
+		ReadBasicType<int32_t>(binary, &m_inputDim, is);
 		ExpectToken(binary, "<OutputDim>", is);
-		ReadBasicType<int>(binary, &m_outputDim, is);
+		ReadBasicType<int32_t>(binary, &m_outputDim, is);
 		ExpectToken(binary, "<Indices>", is);
 		m_indices.resize(m_outputDim - 1);
 		for (auto& e : m_indices)
-			ReadIntegerVector<int>(binary, &e, is);
+			ReadIntegerVector<int32_t>(binary, &e, is);
 		ExpectToken(binary, end_token, is);
 		field_xc = 1;
 	}
@@ -342,9 +342,9 @@ namespace snowboy {
 		auto end_token = "</" + Type() + ">";
 		WriteToken(binary, beg_token, os);
 		WriteToken(binary, "<InputDim>", os);
-		WriteBasicType<int>(binary, m_inputDim, os);
+		WriteBasicType<int32_t>(binary, m_inputDim, os);
 		WriteToken(binary, "<OutputDim>", os);
-		WriteBasicType<int>(binary, m_outputDim, os);
+		WriteBasicType<int32_t>(binary, m_outputDim, os);
 		WriteToken(binary, "<Indices>", os);
 		for (auto& e : m_indices)
 			WriteIntegerVector(binary, e, os);
@@ -387,7 +387,7 @@ namespace snowboy {
 		auto beg_token = "<" + Type() + ">";
 		auto end_token = "</" + Type() + ">";
 		ExpectOneOrTwoTokens(binary, beg_token, "<Dim>", is);
-		ReadBasicType<int>(binary, &m_dim, is);
+		ReadBasicType<int32_t>(binary, &m_dim, is);
 		ExpectToken(binary, end_token, is);
 		field_x10 = 1;
 	}
@@ -397,7 +397,7 @@ namespace snowboy {
 		auto end_token = "</" + Type() + ">";
 		WriteToken(binary, beg_token, os);
 		WriteToken(binary, "<Dim>", os);
-		WriteBasicType<int>(binary, m_dim, os);
+		WriteBasicType<int32_t>(binary, m_dim, os);
 		WriteToken(binary, end_token, os);
 	}
 
@@ -442,7 +442,7 @@ namespace snowboy {
 		auto beg_token = "<" + Type() + ">";
 		auto end_token = "</" + Type() + ">";
 		ExpectOneOrTwoTokens(binary, beg_token, "<Dim>", is);
-		ReadBasicType<int>(binary, &m_dim, is);
+		ReadBasicType<int32_t>(binary, &m_dim, is);
 		ExpectToken(binary, end_token, is);
 		field_x10 = 1;
 	}
@@ -452,7 +452,7 @@ namespace snowboy {
 		auto end_token = "</" + Type() + ">";
 		WriteToken(binary, beg_token, os);
 		WriteToken(binary, "<Dim>", os);
-		WriteBasicType<int>(binary, m_dim, os);
+		WriteBasicType<int32_t>(binary, m_dim, os);
 		WriteToken(binary, end_token, os);
 	}
 
@@ -566,11 +566,11 @@ namespace snowboy {
 		auto beg_token = "<" + Type() + ">";
 		auto end_token = "</" + Type() + ">";
 		ExpectOneOrTwoTokens(binary, beg_token, "<InputDim>", is);
-		ReadBasicType<int>(binary, &m_inputDim, is);
+		ReadBasicType<int32_t>(binary, &m_inputDim, is);
 		ExpectToken(binary, "<Context>", is);
 		ReadIntegerVector<int>(binary, &m_context, is);
 		ExpectToken(binary, "<ConstComponentDim>", is);
-		ReadBasicType<int>(binary, &m_constComponentDim, is);
+		ReadBasicType<int32_t>(binary, &m_constComponentDim, is);
 		ExpectToken(binary, end_token, is);
 		field_xc = 1;
 	}
@@ -580,11 +580,11 @@ namespace snowboy {
 		auto end_token = "</" + Type() + ">";
 		WriteToken(binary, beg_token, os);
 		WriteToken(binary, "<InputDim>", os);
-		WriteBasicType<int>(binary, m_inputDim, os);
+		WriteBasicType<int32_t>(binary, m_inputDim, os);
 		WriteToken(binary, "<Context>", os);
-		WriteIntegerVector<int>(binary, m_context, os);
+		WriteIntegerVector<int32_t>(binary, m_context, os);
 		WriteToken(binary, "<ConstComponentDim>", os);
-		WriteBasicType<int>(binary, m_constComponentDim, os);
+		WriteBasicType<int32_t>(binary, m_constComponentDim, os);
 		WriteToken(binary, end_token, os);
 	}
 

@@ -274,7 +274,7 @@ namespace snowboy {
 			*os << "]\n";
 		} else {
 			WriteToken(binary, "FV", os);
-			WriteBasicType<int>(binary, m_size, os);
+			WriteBasicType<int32_t>(binary, m_size, os);
 			os->write(reinterpret_cast<const char*>(m_data), m_size * sizeof(float));
 		}
 		if (!*os) SNOWBOY_ERROR() << "Failed to write Vector to stream.";
@@ -401,7 +401,7 @@ namespace snowboy {
 		} else {
 			ExpectToken(binary, "FV", is);
 			int size;
-			ReadBasicType<int>(binary, &size, is);
+			ReadBasicType<int32_t>(binary, &size, is);
 			if (!add) {
 				Resize(size, MatrixResizeType::kUndefined);
 				if (size != 0) {

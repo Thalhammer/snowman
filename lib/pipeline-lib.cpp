@@ -56,10 +56,10 @@ namespace snowboy {
 		auto stream = out.Stream();
 		WriteToken(binary, "<ResourceFileOffsets>", stream);
 		WriteToken(binary, "<NumOffsets>", stream);
-		WriteBasicType<int>(binary, filenames.size(), stream);
+		WriteBasicType<int32_t>(binary, filenames.size(), stream);
 		size_t offset = 0;
 		for (auto& e : filenames) {
-			WriteBasicType<int>(binary, offset, stream);
+			WriteBasicType<int32_t>(binary, offset, stream);
 			struct stat stat_buf;
 			int rc = stat(e.c_str(), &stat_buf);
 			if (rc != 0) {
@@ -71,7 +71,7 @@ namespace snowboy {
 		WriteToken(binary, "</ResourceFileOffsets>", stream);
 		WriteToken(binary, "<Configuration>", stream);
 		WriteToken(binary, "<NumConfigs>", stream);
-		WriteBasicType<int>(binary, config_parts.size(), stream);
+		WriteBasicType<int32_t>(binary, config_parts.size(), stream);
 		for (const auto& e : config_parts)
 			WriteToken(binary, e, stream);
 		WriteToken(binary, "</Configuration>", stream);
@@ -92,16 +92,16 @@ namespace snowboy {
 		ExpectToken(binary, "<ResourceFileOffsets>", stream);
 		ExpectToken(binary, "<NumOffsets>", stream);
 		int num_offsets = 0;
-		ReadBasicType<int>(binary, &num_offsets, stream);
+		ReadBasicType<int32_t>(binary, &num_offsets, stream);
 		std::vector<int> offsets(num_offsets);
 		for (auto& e : offsets) {
-			ReadBasicType<int>(binary, &e, stream);
+			ReadBasicType<int32_t>(binary, &e, stream);
 		}
 		ExpectToken(binary, "</ResourceFileOffsets>", stream);
 		ExpectToken(binary, "<Configuration>", stream);
 		ExpectToken(binary, "<NumConfigs>", stream);
 		int num_configs = 0;
-		ReadBasicType<int>(binary, &num_configs, stream);
+		ReadBasicType<int32_t>(binary, &num_configs, stream);
 		std::vector<std::string> configs(num_configs);
 		for (auto& e : configs) {
 			ReadToken(binary, &e, stream);

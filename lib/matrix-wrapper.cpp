@@ -233,8 +233,8 @@ namespace snowboy {
 	void MatrixBase::Write(bool binary, std::ostream* os) const {
 		if (!binary) SNOWBOY_ERROR() << "Not implemented";
 		WriteToken(binary, "FM", os);
-		WriteBasicType<int>(binary, m_rows, os);
-		WriteBasicType<int>(binary, m_cols, os);
+		WriteBasicType<int32_t>(binary, m_rows, os);
+		WriteBasicType<int32_t>(binary, m_cols, os);
 		if (m_cols == m_stride) {
 			os->write(reinterpret_cast<const char*>(m_data), m_rows * m_cols * sizeof(float));
 		} else {
@@ -373,8 +373,8 @@ namespace snowboy {
 		} else {
 			ExpectToken(binary, "FM", is);
 			int rows, cols;
-			ReadBasicType<int>(binary, &rows, is);
-			ReadBasicType<int>(binary, &cols, is);
+			ReadBasicType<int32_t>(binary, &rows, is);
+			ReadBasicType<int32_t>(binary, &cols, is);
 			if (m_rows != rows || m_cols != cols) {
 				Resize(rows, cols, MatrixResizeType::kUndefined);
 			}

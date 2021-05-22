@@ -2,7 +2,8 @@
 #include <string>
 namespace snowboy {
 	struct OptionsItf;
-	struct PipelineItf {
+	class PipelineItf {
+	public:
 		virtual void RegisterOptions(const std::string&, OptionsItf*) = 0;
 		virtual void SetResource(const std::string&);
 		virtual int GetPipelineSampleRate() const = 0;
@@ -12,6 +13,7 @@ namespace snowboy {
 		virtual std::string OptionPrefix() const = 0;
 		virtual ~PipelineItf();
 
+	protected:
 		bool m_isInitialized = false;
 	};
 } // namespace snowboy
