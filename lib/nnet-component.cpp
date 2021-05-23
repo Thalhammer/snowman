@@ -134,9 +134,10 @@ namespace snowboy {
 
 	void AffineComponent::Propagate(const ChunkInfo& in_info,
 									const ChunkInfo& out_info,
-									const MatrixBase& in,
-									MatrixBase* out) const {
+									Matrix&& in,
+									Matrix* out) const {
 		in_info.CheckSize(in);
+		out->Resize(out_info.NumChunks() * out_info.ChunkSize(), out_info.NumCols());
 		out_info.CheckSize(*out);
 		out->CopyRowsFromVec(m_bias_params);
 		out->AddMatMat(1.0, in, MatrixTransposeType::kNoTrans, m_linear_params, MatrixTransposeType::kTrans, 1.0);
@@ -186,11 +187,11 @@ namespace snowboy {
 
 	void CmvnComponent::Propagate(const ChunkInfo& in_info,
 								  const ChunkInfo& out_info,
-								  const MatrixBase& in,
-								  MatrixBase* out) const {
+								  Matrix&& in,
+								  Matrix* out) const {
 		in_info.CheckSize(in);
+		*out = std::move(in);
 		out_info.CheckSize(*out);
-		out->CopyFromMat(in, MatrixTransposeType::kNoTrans);
 		out->MulColsVec(m_scales);
 		out->AddVecToRows(1.0, m_offsets);
 	}
@@ -239,18 +240,18 @@ namespace snowboy {
 
 	void NormalizeComponent::Propagate(const ChunkInfo& in_info,
 									   const ChunkInfo& out_info,
-									   const MatrixBase& in,
-									   MatrixBase* out) const {
+									   Matrix&& in,
+									   Matrix* out) const {
 		in_info.CheckSize(in);
-		out_info.CheckSize(*out);
-
-		out->CopyFromMat(in, MatrixTransposeType::kNoTrans);
 
 		Vector vec;
 		vec.Resize(in.m_rows);
 		vec.AddDiagMat2(1.0 / in.m_cols, in, MatrixTransposeType::kNoTrans, 0.0);
 		vec.ApplyFloor(field_x14);
 		vec.ApplyPow(-0.5);
+
+		*out = std::move(in);
+		out_info.CheckSize(*out);
 		out->MulRowsVec(vec);
 	}
 
@@ -294,9 +295,10 @@ namespace snowboy {
 
 	void PosteriorMapComponent::Propagate(const ChunkInfo& in_info,
 										  const ChunkInfo& out_info,
-										  const MatrixBase& in,
-										  MatrixBase* out) const {
+										  Matrix&& in,
+										  Matrix* out) const {
 		in_info.CheckSize(in);
+		out->Resize(out_info.NumChunks() * out_info.ChunkSize(), out_info.NumCols());
 		out_info.CheckSize(*out);
 
 		for (size_t r = 0; r < in.m_rows; r++)
@@ -374,12 +376,11 @@ namespace snowboy {
 
 	void RectifiedLinearComponent::Propagate(const ChunkInfo& in_info,
 											 const ChunkInfo& out_info,
-											 const MatrixBase& in,
-											 MatrixBase* out) const {
+											 Matrix&& in,
+											 Matrix* out) const {
 		in_info.CheckSize(in);
+		*out = std::move(in);
 		out_info.CheckSize(*out);
-
-		out->CopyFromMat(in, MatrixTransposeType::kNoTrans);
 		out->ApplyFloor(0.0);
 	}
 
@@ -422,12 +423,12 @@ namespace snowboy {
 
 	void SoftmaxComponent::Propagate(const ChunkInfo& in_info,
 									 const ChunkInfo& out_info,
-									 const MatrixBase& in,
-									 MatrixBase* out) const {
+									 Matrix&& in,
+									 Matrix* out) const {
 		in_info.CheckSize(in);
-		out_info.CheckSize(*out);
 
-		out->CopyFromMat(in, MatrixTransposeType::kNoTrans);
+		*out = std::move(in);
+		out_info.CheckSize(*out);
 		for (int i = 0; i < out->m_rows; i++)
 		{
 			SubVector vec{*out, i};
@@ -485,9 +486,10 @@ namespace snowboy {
 
 	void SpliceComponent::Propagate(const ChunkInfo& in_info,
 									const ChunkInfo& out_info,
-									const MatrixBase& in,
-									MatrixBase* out) const {
+									Matrix&& in,
+									Matrix* out) const {
 		in_info.CheckSize(in);
+		out->Resize(out_info.NumChunks() * out_info.ChunkSize(), out_info.NumCols());
 		out_info.CheckSize(*out);
 		SNOWBOY_ASSERT(in_info.NumChunks() == out_info.NumChunks());
 

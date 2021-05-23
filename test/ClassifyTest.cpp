@@ -93,7 +93,7 @@ TEST(ClassifyTest, ClassifySamplesChunked) {
 		detector.ApplyFrontend(false);
 
 		int result = -3;
-		const auto chunksize = data.size();
+		const auto chunksize = 4096;
 		for (size_t i = 0; i < data.size(); i += chunksize) {
 			auto len = std::min<int>(chunksize, data.size() - i);
 			result = std::max(result, detector.RunDetection(data.data() + i, len, len != chunksize));
