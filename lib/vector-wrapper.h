@@ -1,8 +1,8 @@
 #pragma once
 #include <cstdint>
 #include <matrix-types.h>
-#include <string>
 #include <snowboy-debug.h>
+#include <string>
 
 namespace snowboy {
 	struct MatrixBase;
@@ -15,8 +15,14 @@ namespace snowboy {
 		float* end() const noexcept { return m_data + m_size; }
 		size_t size() const noexcept { return m_size; }
 		float* data() const noexcept { return m_data; }
-		float& operator[](size_t index) const noexcept { SNOWBOY_ASSERT(index < m_size); return m_data[index]; }
-		float& operator()(size_t index) const noexcept { SNOWBOY_ASSERT(index < m_size); return m_data[index]; }
+		float& operator[](size_t index) const noexcept {
+			SNOWBOY_ASSERT(index < m_size);
+			return m_data[index];
+		}
+		float& operator()(size_t index) const noexcept {
+			SNOWBOY_ASSERT(index < m_size);
+			return m_data[index];
+		}
 		bool empty() const noexcept { return size() == 0; }
 
 		void Add(float x);

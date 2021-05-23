@@ -319,7 +319,7 @@ namespace snowboy {
 			free(m_data);
 		}
 		if (resize == MatrixResizeType::kCopyData)
-			memset(&ptr[m_size], 0, (size-m_size) * sizeof(float));
+			memset(&ptr[m_size], 0, (size - m_size) * sizeof(float));
 		else if (resize == MatrixResizeType::kSetZero)
 			memset(ptr, 0, size * sizeof(float));
 		m_data = ptr;

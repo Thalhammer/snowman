@@ -2,13 +2,13 @@ extern "C"
 {
 #include <cblas.h>
 }
+#include <cmath>
 #include <cstring>
 #include <matrix-wrapper.h>
 #include <snowboy-debug.h>
 #include <snowboy-io.h>
 #include <snowboy-utils.h>
 #include <vector-wrapper.h>
-#include <cmath>
 
 namespace snowboy {
 
@@ -249,18 +249,18 @@ namespace snowboy {
 	}
 
 	bool MatrixBase::HasNan() const {
-		for(size_t r = 0; r<rows(); r++) {
-			for(size_t c = 0; c<cols(); c++) {
-				if((*this)(r,c) != (*this)(r,c)) return true;
+		for (size_t r = 0; r < rows(); r++) {
+			for (size_t c = 0; c < cols(); c++) {
+				if ((*this)(r, c) != (*this)(r, c)) return true;
 			}
 		}
 		return false;
 	}
 
 	bool MatrixBase::HasInfinity() const {
-		for(size_t r = 0; r<rows(); r++) {
-			for(size_t c = 0; c<cols(); c++) {
-				if(std::isinf((*this)(r,c))) return true;
+		for (size_t r = 0; r < rows(); r++) {
+			for (size_t c = 0; c < cols(); c++) {
+				if (std::isinf((*this)(r, c))) return true;
 			}
 		}
 		return false;

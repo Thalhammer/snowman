@@ -2,9 +2,9 @@
 #include <frame-info.h>
 #include <limits>
 #include <mfcc-stream.h>
+#include <snowboy-debug.h>
 #include <snowboy-options.h>
 #include <vector-wrapper.h>
-#include <snowboy-debug.h>
 
 namespace snowboy {
 	void MfccStreamOptions::Register(const std::string& prefix, OptionsItf* opts) {
