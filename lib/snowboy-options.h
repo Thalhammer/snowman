@@ -44,17 +44,18 @@ namespace snowboy {
 		virtual void Register(const std::string& prefix, const std::string& name, const std::string& usage_info, uint32_t* ptr) = 0;
 		virtual void Register(const std::string& prefix, const std::string& name, const std::string& usage_info, float* ptr) = 0;
 		virtual void Register(const std::string& prefix, const std::string& name, const std::string& usage_info, std::string* ptr) = 0;
-		virtual void Remove(const std::string&, const std::string&) = 0;
+		virtual void Remove(const std::string& prefix, const std::string& name) = 0;
 		virtual ~OptionsItf() {}
 	};
 
-	struct ParseOptions : OptionsItf {
+	class ParseOptions : public OptionsItf {
 		bool m_opt_print_usage;
 		std::string m_opt_config_file;
 		std::string m_usage;
 		std::vector<std::string> m_arguments;
 		std::unordered_map<std::string, OptionInfo> m_options;
 
+	public:
 		ParseOptions(const std::string& usage);
 		~ParseOptions();
 
@@ -63,12 +64,11 @@ namespace snowboy {
 		void Register(const std::string& prefix, const std::string& name, const std::string& usage_info, uint32_t* ptr) override;
 		void Register(const std::string& prefix, const std::string& name, const std::string& usage_info, float* ptr) override;
 		void Register(const std::string& prefix, const std::string& name, const std::string& usage_info, std::string* ptr) override;
-		void Remove(const std::string&, const std::string&) override;
+		void Remove(const std::string& prefix, const std::string& name) override;
 
 		std::string GetArgument(int index) const;
 		bool IsValidOption(const std::string& opt) const;
 		std::string NormalizeOptionName(const std::string& option) const;
-		// Remove leading -- and split on =
 		void ParseOneOption(const std::string& opt, std::string* out_name, std::string* out_value) const;
 		void PrintUsage(bool);
 		void ReadArguments(int argc, char const* const* argv);

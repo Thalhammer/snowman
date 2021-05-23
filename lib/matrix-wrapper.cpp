@@ -2,6 +2,7 @@ extern "C"
 {
 #include <cblas.h>
 }
+#include <cmath>
 #include <cstring>
 #include <matrix-wrapper.h>
 #include <snowboy-debug.h>
@@ -233,8 +234,8 @@ namespace snowboy {
 	void MatrixBase::Write(bool binary, std::ostream* os) const {
 		if (!binary) SNOWBOY_ERROR() << "Not implemented";
 		WriteToken(binary, "FM", os);
-		WriteBasicType<int>(binary, m_rows, os);
-		WriteBasicType<int>(binary, m_cols, os);
+		WriteBasicType<int32_t>(binary, m_rows, os);
+		WriteBasicType<int32_t>(binary, m_cols, os);
 		if (m_cols == m_stride) {
 			os->write(reinterpret_cast<const char*>(m_data), m_rows * m_cols * sizeof(float));
 		} else {
@@ -245,6 +246,24 @@ namespace snowboy {
 		if (!*os) {
 			SNOWBOY_ERROR() << "Fail to write Matrix to stream.";
 		}
+	}
+
+	bool MatrixBase::HasNan() const {
+		for (size_t r = 0; r < rows(); r++) {
+			for (size_t c = 0; c < cols(); c++) {
+				if ((*this)(r, c) != (*this)(r, c)) return true;
+			}
+		}
+		return false;
+	}
+
+	bool MatrixBase::HasInfinity() const {
+		for (size_t r = 0; r < rows(); r++) {
+			for (size_t c = 0; c < cols(); c++) {
+				if (std::isinf((*this)(r, c))) return true;
+			}
+		}
+		return false;
 	}
 
 	static size_t allocs = 0;
@@ -373,8 +392,8 @@ namespace snowboy {
 		} else {
 			ExpectToken(binary, "FM", is);
 			int rows, cols;
-			ReadBasicType<int>(binary, &rows, is);
-			ReadBasicType<int>(binary, &cols, is);
+			ReadBasicType<int32_t>(binary, &rows, is);
+			ReadBasicType<int32_t>(binary, &cols, is);
 			if (m_rows != rows || m_cols != cols) {
 				Resize(rows, cols, MatrixResizeType::kUndefined);
 			}

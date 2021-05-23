@@ -24,7 +24,7 @@ namespace snowboy {
 		WriteToken(binary, "<Sensitivity>", os);
 		WriteBasicType<float>(binary, m_sensitivity, os);
 		WriteToken(binary, "<NumTemplates>", os);
-		WriteBasicType<int>(binary, m_templates.size(), os);
+		WriteBasicType<int32_t>(binary, m_templates.size(), os);
 		for (auto& e : m_templates) {
 			WriteToken(binary, "<Template>", os);
 			e.Write(binary, os);
@@ -41,7 +41,7 @@ namespace snowboy {
 		ReadBasicType<float>(binary, &m_sensitivity, is);
 		ExpectToken(binary, "<NumTemplates>", is);
 		int num = -1;
-		ReadBasicType<int>(binary, &num, is);
+		ReadBasicType<int32_t>(binary, &num, is);
 		m_templates.resize(num);
 		for (auto& e : m_templates) {
 			ExpectToken(binary, "<Template>", is);
@@ -119,6 +119,7 @@ namespace snowboy {
 	}
 
 	void TemplateContainer::AddTemplate(const MatrixBase& tpl) {
+		SNOWBOY_ASSERT(!tpl.HasNan() && !tpl.HasInfinity());
 		m_templates.emplace_back(tpl);
 	}
 

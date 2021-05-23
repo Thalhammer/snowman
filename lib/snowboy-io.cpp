@@ -170,13 +170,13 @@ namespace snowboy {
 			*is >> *t;
 		} else {
 			auto c = is->peek();
-			if (c == 4) {
+			if (c == sizeof(float)) {
 				is->get();
 				is->read(reinterpret_cast<char*>(t), sizeof(*t));
 			} else {
 				SNOWBOY_ERROR() << "Failed to read <float> type in ReadBasicType(): "
-								   "expected float, got instead "
-								<< static_cast<int>(c) << " at position " << is->tellg();
+								   "expected 4, got "
+								<< static_cast<int>(c) << " instead at position " << is->tellg();
 				return;
 			}
 		}
@@ -186,18 +186,18 @@ namespace snowboy {
 	}
 
 	template <>
-	void ReadBasicType<int>(bool binary, int* t, std::istream* is) {
+	void ReadBasicType<int32_t>(bool binary, int32_t* t, std::istream* is) {
 		if (!binary) {
 			*is >> *t;
 		} else {
 			auto c = is->peek();
-			if (c == 4) {
+			if (c == sizeof(int32_t)) {
 				is->get();
 				is->read(reinterpret_cast<char*>(t), sizeof(*t));
 			} else {
-				SNOWBOY_ERROR() << "Failed to read <int> type in ReadBasicType(): "
-								   "expected int, got instead "
-								<< static_cast<int>(c) << " at position " << is->tellg();
+				SNOWBOY_ERROR() << "Failed to read <int32_t> type in ReadBasicType(): "
+								   "expected 4, got "
+								<< static_cast<int>(c) << " instead at position " << is->tellg();
 				return;
 			}
 		}
@@ -207,18 +207,18 @@ namespace snowboy {
 	}
 
 	template <>
-	void ReadBasicType<long>(bool binary, long* t, std::istream* is) {
+	void ReadBasicType<int64_t>(bool binary, int64_t* t, std::istream* is) {
 		if (!binary) {
 			*is >> *t;
 		} else {
 			auto c = is->peek();
-			if (c == 8) {
+			if (c == sizeof(int64_t)) {
 				is->get();
 				is->read(reinterpret_cast<char*>(t), sizeof(*t));
 			} else {
-				SNOWBOY_ERROR() << "Failed to read <long> type in ReadBasicType(): "
-								   "expected long, got instead "
-								<< static_cast<int>(c) << " at position " << is->tellg();
+				SNOWBOY_ERROR() << "Failed to read <int64_t> type in ReadBasicType(): "
+								   "expected 8, got "
+								<< static_cast<int>(c) << " instead at position " << is->tellg();
 				return;
 			}
 		}
@@ -250,7 +250,7 @@ namespace snowboy {
 	}
 
 	template <>
-	void WriteBasicType<int>(bool binary, int t, std::ostream* os) {
+	void WriteBasicType<int32_t>(bool binary, int32_t t, std::ostream* os) {
 		if (!binary) {
 			*os << t << " ";
 		} else {
@@ -263,7 +263,7 @@ namespace snowboy {
 	}
 
 	template <>
-	void WriteBasicType<long>(bool binary, long t, std::ostream* os) {
+	void WriteBasicType<int64_t>(bool binary, int64_t t, std::ostream* os) {
 		if (!binary) {
 			*os << t << " ";
 		} else {

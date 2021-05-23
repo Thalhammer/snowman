@@ -77,6 +77,37 @@ TEST(ClassifyTest, ClassifySamples) {
 	std::cout << "\n";
 }
 
+TEST(ClassifyTest, ClassifySamplesChunked) {
+	bool skipped_all = true;
+	for (auto& e : sample_map) {
+		if (!file_exists(root + "audio_samples/" + e.first)) {
+			GTEST_WARN("Skiping %s because audio file is missing!", e.first.c_str());
+			continue;
+		}
+		skipped_all = false;
+		auto data = read_sample_file(root + "audio_samples/" + e.first);
+		// Initializes Snowboy detector.
+		snowboy::SnowboyDetect detector(root + "resources/common.res", root + "resources/models/snowboy.umdl");
+		detector.SetSensitivity("0.5");
+		detector.SetAudioGain(1.0);
+		detector.ApplyFrontend(false);
+
+		int result = -3;
+		const auto chunksize = 4096;
+		for (size_t i = 0; i < data.size(); i += chunksize) {
+			auto len = std::min<int>(chunksize, data.size() - i);
+			result = std::max(result, detector.RunDetection(data.data() + i, len, len != chunksize));
+		}
+		if (e.second > 0)
+			EXPECT_EQ(result, e.second) << "Failed to correctly classify sample " << e.first;
+		else {
+			EXPECT_LE(result, 0) << "Failed to correctly classify sample " << e.first;
+			EXPECT_GE(result, -2) << "Failed to correctly classify sample " << e.first;
+		}
+	}
+	ASSERT_FALSE(skipped_all);
+}
+
 TEST(ClassifyTest, ClassifySamplesAlma) {
 	auto model_exists = file_exists(root + "resources/models/Alma.pmdl");
 	if (!model_exists) {
@@ -108,6 +139,43 @@ TEST(ClassifyTest, ClassifySamplesAlma) {
 	std::cout << "\n";
 	snowboy::Matrix::PrintAllocStats(std::cout);
 	std::cout << "\n";
+}
+
+TEST(ClassifyTest, ClassifySamplesAlmaChunked) {
+	auto model_exists = file_exists(root + "resources/models/Alma.pmdl");
+	if (!model_exists) {
+		GTEST_WARN("Missing private model, this does not mean, that private models dont work, just that my model is not present!");
+		return;
+	}
+
+	bool skipped_all = true;
+	for (auto& e : sample_map_pmdl) {
+		if (!file_exists(root + "audio_samples/" + e.first)) {
+			GTEST_WARN("Skiping %s because audio file is missing!", e.first.c_str());
+			continue;
+		}
+		skipped_all = false;
+		auto data = read_sample_file(root + "audio_samples/" + e.first);
+		// Initializes Snowboy detector.
+		snowboy::SnowboyDetect detector(root + "resources/common.res", root + "resources/models/Alma.pmdl");
+		detector.SetSensitivity("0.5");
+		detector.SetAudioGain(1.0);
+		detector.ApplyFrontend(false);
+
+		int result = -3;
+		const int chunksize = 4096;
+		for (size_t i = 0; i < data.size(); i += chunksize) {
+			auto len = std::min<int>(chunksize, data.size() - i);
+			result = std::max(result, detector.RunDetection(data.data() + i, len, len != chunksize));
+		}
+		if (e.second > 0)
+			EXPECT_EQ(result, e.second) << "Failed to correctly classify sample " << e.first;
+		else {
+			EXPECT_LE(result, 0) << "Failed to correctly classify sample " << e.first;
+			EXPECT_GE(result, -2) << "Failed to correctly classify sample " << e.first;
+		}
+	}
+	ASSERT_FALSE(skipped_all);
 }
 
 TEST(ClassifyTest, ClassifySamplesReset) {

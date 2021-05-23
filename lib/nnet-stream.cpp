@@ -33,6 +33,7 @@ namespace snowboy {
 			mat->Resize(0, 0);
 			return res;
 		}
+		SNOWBOY_ASSERT(!tmat.HasNan() && !tmat.HasInfinity());
 		if ((res & 0x18) == 0) {
 			m_nnet->Compute(tmat, tinfo, mat, info);
 		} else {

@@ -320,11 +320,11 @@ namespace snowboy {
 		// if SearchMax is present, but I dont know for sure.
 		if (PeekToken(binary, is) == 'S') {
 			ExpectToken(binary, "<SearchMethod>", is);
-			ReadBasicType<int>(binary, &search_method, is);
+			ReadBasicType<int32_t>(binary, &search_method, is);
 			ExpectToken(binary, "<SearchNeighbour>", is);
-			ReadBasicType<int>(binary, &search_neighbour, is);
+			ReadBasicType<int32_t>(binary, &search_neighbour, is);
 			ExpectToken(binary, "<SearchMask>", is);
-			ReadIntegerVector<int>(binary, &search_mask, is);
+			ReadIntegerVector<int32_t>(binary, &search_mask, is);
 			ExpectToken(binary, "<SearchFloor>", is);
 			Vector tvec;
 			tvec.Read(binary, is);
@@ -343,13 +343,13 @@ namespace snowboy {
 		}
 		if (PeekToken(binary, is) == 'N') {
 			ExpectToken(binary, "<NumPieces>", is);
-			ReadBasicType<int>(binary, &field_x1d8, is);
+			ReadBasicType<int32_t>(binary, &field_x1d8, is);
 		}
 		if (PeekToken(binary, is) == 'D') {
 			ExpectToken(binary, "<DurationPass>", is);
-			ReadBasicType<int>(binary, &duration_pass, is);
+			ReadBasicType<int32_t>(binary, &duration_pass, is);
 			ExpectToken(binary, "<FloorPass>", is);
-			ReadBasicType<int>(binary, &floor_pass, is);
+			ReadBasicType<int32_t>(binary, &floor_pass, is);
 		}
 	}
 
@@ -357,7 +357,7 @@ namespace snowboy {
 		ExpectToken(binary, "<UniversalModel>", is);
 		if (PeekToken(binary, is) == 'L') {
 			ExpectToken(binary, "<LicenseStart>", is);
-			ReadBasicType<long>(binary, &license_start, is);
+			ReadBasicType<int64_t>(binary, &license_start, is);
 			ExpectToken(binary, "<LicenseDays>", is);
 			ReadBasicType<float>(binary, &license_days, is);
 		} else {
@@ -366,12 +366,12 @@ namespace snowboy {
 		}
 		ExpectToken(binary, "<KwInfo>", is);
 		ExpectToken(binary, "<SmoothWindow>", is);
-		ReadBasicType<int>(binary, &smooth_window, is);
+		ReadBasicType<int32_t>(binary, &smooth_window, is);
 		ExpectToken(binary, "<SlideWindow>", is);
-		ReadBasicType<int>(binary, &slide_window, is);
+		ReadBasicType<int32_t>(binary, &slide_window, is);
 		ExpectToken(binary, "<NumKws>", is);
 		int num_kws;
-		ReadBasicType<int>(binary, &num_kws, is);
+		ReadBasicType<int32_t>(binary, &num_kws, is);
 		keywords.resize(num_kws);
 		for (auto& e : keywords) {
 			e.search_method = 1;
@@ -534,11 +534,11 @@ namespace snowboy {
 		WriteToken(binary, "<Sensitivity>", os);
 		WriteBasicType<float>(binary, sensitivity, os);
 		WriteToken(binary, "<SearchMethod>", os);
-		WriteBasicType<int>(binary, search_method, os);
+		WriteBasicType<int32_t>(binary, search_method, os);
 		WriteToken(binary, "<SearchNeighbour>", os);
-		WriteBasicType<int>(binary, search_neighbour, os);
+		WriteBasicType<int32_t>(binary, search_neighbour, os);
 		WriteToken(binary, "<SearchMask>", os);
-		WriteIntegerVector<int>(binary, search_mask, os);
+		WriteIntegerVector<int32_t>(binary, search_mask, os);
 		WriteToken(binary, "<SearchFloor>", os);
 		Vector tvec;
 		tvec.Resize(search_floor.size());
@@ -550,26 +550,26 @@ namespace snowboy {
 		WriteToken(binary, "<SearchMax>", os);
 		WriteBasicType<bool>(binary, search_max, os);
 		WriteToken(binary, "<NumPieces>", os);
-		WriteBasicType<int>(binary, field_x1d8, os);
+		WriteBasicType<int32_t>(binary, field_x1d8, os);
 		WriteToken(binary, "<DurationPass>", os);
-		WriteBasicType<int>(binary, duration_pass, os);
+		WriteBasicType<int32_t>(binary, duration_pass, os);
 		WriteToken(binary, "<FloorPass>", os);
-		WriteBasicType<int>(binary, floor_pass, os);
+		WriteBasicType<int32_t>(binary, floor_pass, os);
 	}
 
 	void UniversalDetectStream::ModelInfo::WriteHotwordModel(bool binary, std::ostream* os) const {
 		WriteToken(binary, "<UniversalModel>", os);
 		WriteToken(binary, "<LicenseStart>", os);
-		WriteBasicType<long>(binary, license_start, os);
+		WriteBasicType<int64_t>(binary, license_start, os);
 		WriteToken(binary, "<LicenseDays>", os);
 		WriteBasicType<float>(binary, license_days, os);
 		WriteToken(binary, "<KwInfo>", os);
 		WriteToken(binary, "<SmoothWindow>", os);
-		WriteBasicType<int>(binary, smooth_window, os);
+		WriteBasicType<int32_t>(binary, smooth_window, os);
 		WriteToken(binary, "<SlideWindow>", os);
-		WriteBasicType<int>(binary, slide_window, os);
+		WriteBasicType<int32_t>(binary, slide_window, os);
 		WriteToken(binary, "<NumKws>", os);
-		WriteBasicType<int>(binary, keywords.size(), os);
+		WriteBasicType<int32_t>(binary, keywords.size(), os);
 		for (size_t kw = 0; kw < keywords.size(); kw++) {
 			keywords[kw].WriteKeyword(binary, os);
 		}

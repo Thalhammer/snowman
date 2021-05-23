@@ -265,11 +265,9 @@ namespace snowboy {
 				m_chunkinfo[c + 1].NumChunks(),
 				last_offset - static_cast<int32_t>(m_input_data.m_rows - (ctx.back() - ctx.front())) + 1,
 				last_offset};
-			m_output_data.Resize(output_chunk_info.NumChunks() * output_chunk_info.ChunkSize(), output_chunk_info.NumCols());
-			m_components[c]->Propagate(input_chunk_info, output_chunk_info, m_input_data, &m_output_data);
+			m_components[c]->Propagate(input_chunk_info, output_chunk_info, std::move(m_input_data), &m_output_data);
 			if (c < m_components.size() - 1) {
-				m_input_data = m_output_data;
-				m_output_data.Resize(0, 0);
+				m_input_data = std::move(m_output_data);
 			} else {
 				m_input_data.Resize(0, 0);
 			}
@@ -303,7 +301,7 @@ namespace snowboy {
 		ExpectToken(binary, "<Nnet>", is);
 		ExpectToken(binary, "<NumComponents>", is);
 		int num_components;
-		ReadBasicType<int>(binary, &num_components, is);
+		ReadBasicType<int32_t>(binary, &num_components, is);
 		m_components.resize(num_components);
 		ExpectToken(binary, "<Components>", is);
 		for (int i = 0; i < num_components; i++) {
@@ -332,7 +330,7 @@ namespace snowboy {
 	void Nnet::Write(bool binary, std::ostream* os) const {
 		WriteToken(binary, "<Nnet>", os);
 		WriteToken(binary, "<NumComponents>", os);
-		WriteBasicType<int>(binary, m_components.size(), os);
+		WriteBasicType<int32_t>(binary, m_components.size(), os);
 		WriteToken(binary, "<Components>", os);
 		for (auto e : m_components) {
 			e->Write(binary, os);

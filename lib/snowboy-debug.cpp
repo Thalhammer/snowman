@@ -57,7 +57,7 @@ namespace snowboy {
 			m_stream << GetStackTrace();
 			// TODO: This isnt normally allowed....
 			throw std::runtime_error(m_stream.str());
-		} else if (m_type == SnowboyLogType::ERROR)
+		} else if (m_type == SnowboyLogType::ASSERT_FAIL)
 		{
 			std::cerr << GetStackTrace();
 			std::abort();

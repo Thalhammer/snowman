@@ -70,7 +70,7 @@ namespace snowboy {
 		}
 		m_framerStreamOptions->sample_rate = m_pipelineDetectOptions.sampleRate;
 		m_mfccStreamOptions->mel_filter.sample_rate = m_pipelineDetectOptions.sampleRate;
-		field_x169 = m_pipelineDetectOptions.applyFrontend;
+		m_frontend_enabled = m_pipelineDetectOptions.applyFrontend;
 		m_interceptStream.reset(new InterceptStream{});
 		m_gainControlStream.reset(new GainControlStream{*m_gainControlStreamOptions});
 		m_frontendStream.reset(new FrontendStream{*m_frontendStreamOptions});
@@ -92,7 +92,7 @@ namespace snowboy {
 			m_universalDetectStream.reset(new UniversalDetectStream{*m_universalDetectStreamOptions});
 		}
 		m_gainControlStream->Connect(m_interceptStream.get());
-		if (!field_x169) {
+		if (!m_frontend_enabled) {
 			m_framerStream->Connect(m_gainControlStream.get());
 		} else {
 			m_frontendStream->Connect(m_gainControlStream.get());
@@ -117,16 +117,16 @@ namespace snowboy {
 		int npersonal = 0;
 		int nuniversal = 0;
 		int kwid = 1;
-		for (size_t i = 0; i < field_x110.size(); i++) {
-			if (field_x110[i] == false) {
+		for (size_t i = 0; i < m_is_personal_model.size(); i++) {
+			if (m_is_personal_model[i] == false) {
 				for (int x = 0; x < m_universalDetectStream->NumHotwords(nuniversal); x++) {
-					field_x150.push_back(kwid);
+					m_universal_kw_mapping.push_back(kwid);
 					kwid++;
 				}
 				nuniversal++;
 			} else {
 				for (int x = 0; x < m_templateDetectStream->NumHotwords(npersonal); x++) {
-					field_x138.push_back(kwid);
+					m_personal_kw_mapping.push_back(kwid);
 					kwid++;
 				}
 				npersonal++;
@@ -249,22 +249,19 @@ namespace snowboy {
 		m_universalDetectStreamOptions->slide_window_str = "";
 		m_universalDetectStreamOptions->debug_mode = false;
 		m_universalDetectStreamOptions->num_repeats = 3;
-		field_x110.resize(0, false);
-		field_x138.clear();
-		field_x150.clear();
 		m_eavesdropStreamFrameInfoVector.clear();
 		field_x168 = true;
-		field_x169 = m_pipelineDetectOptions.applyFrontend;
+		m_frontend_enabled = m_pipelineDetectOptions.applyFrontend;
 	}
 
 	void PipelineDetect::ApplyFrontend(bool apply) {
 		if (m_isInitialized == false) {
 			m_pipelineDetectOptions.applyFrontend = apply;
-			field_x169 = apply;
+			m_frontend_enabled = apply;
 			return;
 		}
-		if (apply != field_x169) {
-			field_x169 = apply;
+		if (apply != m_frontend_enabled) {
+			m_frontend_enabled = apply;
 			if (apply == false) {
 				m_framerStream->Connect(m_gainControlStream.get());
 			} else {
@@ -274,29 +271,37 @@ namespace snowboy {
 		}
 	}
 
-	void PipelineDetect::ClassifyModels(const std::string& param_1, std::string* param_2, std::string* param_3) {
-		param_2->clear();
-		param_3->clear();
+	void PipelineDetect::ClassifyModels(const std::string& model_str, std::string* personal_models, std::string* universal_models) {
+		personal_models->clear();
+		universal_models->clear();
 		std::vector<std::string> parts;
-		SplitStringToVector(param_1, global_snowboy_string_delimiter, &parts);
-		field_x110.resize(parts.size(), false);
+		SplitStringToVector(model_str, global_snowboy_string_delimiter, &parts);
+		m_is_personal_model.resize(parts.size(), false);
 		for (size_t i = 0; i < parts.size(); i++) {
-			Input in{parts[i]};
-			auto binary = in.is_binary();
-			auto is = in.Stream();
-			std::string token;
-			ReadToken(binary, &token, is);
-			if (token == "<PersonalModel>") {
-				if (!param_2->empty()) param_2->append(",");
-				param_2->append(parts[i]);
-				field_x110[i] = true;
-			} else if (token == "<UniversalModel>") {
-				if (!param_3->empty()) param_3->append(",");
-				param_3->append(parts[i]);
-				field_x110[i] = false;
+			if (ClassifyModel(parts[i])) {
+				if (!personal_models->empty()) personal_models->append(",");
+				personal_models->append(parts[i]);
+				m_is_personal_model[i] = true;
 			} else {
-				SNOWBOY_ERROR() << "undefined model type detected. Most likely you provided the wrong model.";
+				if (!universal_models->empty()) universal_models->append(",");
+				universal_models->append(parts[i]);
+				m_is_personal_model[i] = false;
 			}
+		}
+	}
+
+	bool PipelineDetect::ClassifyModel(const std::string& model_filename) {
+		Input in{model_filename};
+		auto binary = in.is_binary();
+		auto is = in.Stream();
+		std::string token;
+		ReadToken(binary, &token, is);
+		if (token == "<PersonalModel>") {
+			return true;
+		} else if (token == "<UniversalModel>") {
+			return false;
+		} else {
+			SNOWBOY_ERROR() << "undefined model type detected. Most likely you provided the wrong model.";
 		}
 	}
 
@@ -318,8 +323,8 @@ namespace snowboy {
 							<< parts.size() << " sensitivities instead.";
 			return;
 		}
-		for (size_t i = 0; i < field_x110.size(); i++) {
-			if (field_x110[i]) {
+		for (size_t i = 0; i < m_is_personal_model.size(); i++) {
+			if (m_is_personal_model[i]) {
 				if (!param_2->empty()) param_2->append(", ");
 				param_2->append(parts[i]);
 			} else {
@@ -356,9 +361,9 @@ namespace snowboy {
 		auto pit = personal.begin();
 		auto uit = universal.begin();
 		std::string res;
-		for (size_t i = 0; i < field_x110.size(); i++) {
+		for (size_t i = 0; i < m_is_personal_model.size(); i++) {
 			if (i != 0) res.append(",");
-			if (field_x110[i]) {
+			if (m_is_personal_model[i]) {
 				res.append(*pit);
 				pit++;
 			} else {
@@ -405,7 +410,7 @@ namespace snowboy {
 					this->Reset();
 					auto f = ptmat.m_data[0] - 1.0f;
 					if (f >= 9.223372e+18) f -= 9.223372e+18;
-					x = field_x138[static_cast<int>(f)];
+					x = m_personal_kw_mapping[static_cast<int>(f)];
 					return x;
 				}
 			}
@@ -419,7 +424,7 @@ namespace snowboy {
 					this->Reset();
 					auto f = utmat.m_data[0] - 1.0f;
 					if (f >= 9.223372e+18) f -= 9.223372e+18;
-					x = field_x150[static_cast<int>(f)];
+					x = m_universal_kw_mapping[static_cast<int>(f)];
 					return x;
 				}
 			}

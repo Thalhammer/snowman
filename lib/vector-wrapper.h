@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 #include <matrix-types.h>
+#include <snowboy-debug.h>
 #include <string>
 
 namespace snowboy {
@@ -14,8 +15,14 @@ namespace snowboy {
 		float* end() const noexcept { return m_data + m_size; }
 		size_t size() const noexcept { return m_size; }
 		float* data() const noexcept { return m_data; }
-		float& operator[](size_t index) const noexcept { return m_data[index]; }
-		float& operator()(size_t index) const noexcept { return m_data[index]; }
+		float& operator[](size_t index) const noexcept {
+			SNOWBOY_ASSERT(index < m_size);
+			return m_data[index];
+		}
+		float& operator()(size_t index) const noexcept {
+			SNOWBOY_ASSERT(index < m_size);
+			return m_data[index];
+		}
 		bool empty() const noexcept { return size() == 0; }
 
 		void Add(float x);
@@ -48,20 +55,32 @@ namespace snowboy {
 		void SetRandomUniform();
 		float Sum() const;
 		void Write(bool, std::ostream*) const;
+
+		bool HasNan() const;
+		bool HasInfinity() const;
 	};
 	struct Vector : VectorBase {
+		uint32_t m_cap{0};
+
 		Vector() {}
 		Vector(const VectorBase& other) {
 			Resize(other.m_size, MatrixResizeType::kUndefined);
 			CopyFromVec(other);
 		}
+		Vector(const Vector& other) {
+			Resize(other.m_size, MatrixResizeType::kUndefined);
+			CopyFromVec(other);
+		}
 		Vector(Vector&& other) {
 			m_size = other.m_size;
+			m_cap = other.m_cap;
 			m_data = other.m_data;
 			other.m_data = nullptr;
 			other.m_size = 0;
+			other.m_cap = 0;
 		}
 
+		size_t capacity() const noexcept { return m_cap; }
 		void Resize(int size, MatrixResizeType resize = MatrixResizeType::kSetZero);
 		~Vector();
 

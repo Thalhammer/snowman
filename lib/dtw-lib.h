@@ -22,6 +22,7 @@ namespace snowboy {
 		const MatrixBase* m_reference = nullptr;
 		int field_x70 = 0;
 		float m_early_stop_threshold = 1.0;
+		DistanceType m_distance_function;
 
 		SlidingDtw();
 		SlidingDtw(const SlidingDtwOptions&);

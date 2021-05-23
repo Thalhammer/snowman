@@ -2,6 +2,7 @@
 #include <frame-info.h>
 #include <limits>
 #include <mfcc-stream.h>
+#include <snowboy-debug.h>
 #include <snowboy-options.h>
 #include <vector-wrapper.h>
 
@@ -35,6 +36,7 @@ namespace snowboy {
 			info->clear();
 			return res;
 		}
+		SNOWBOY_ASSERT(!m.HasNan() && !m.HasInfinity());
 		if (field_x44 == -1) {
 			SubVector svec{m, 0};
 			field_x44 = svec.m_size;
@@ -81,11 +83,12 @@ namespace snowboy {
 	}
 
 	void MfccStream::ComputeMfcc(const VectorBase& param_1, SubVector* param_2) const {
-		Vector v;
+		// TODO: Instead of using thread_local I'd prefer stack allocation
+		static thread_local Vector v;
 		v.Resize(param_1.m_size);
 		v.CopyFromVec(param_1);
 		ComputePowerSpectrumReal(v);
-		Vector vout;
+		static thread_local Vector vout;
 		m_melfilterbank->ComputeMelFilterBankEnergy(v, vout);
 		vout.ApplyFloor(std::numeric_limits<float>::min());
 		vout.ApplyLog();

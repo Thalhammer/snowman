@@ -100,7 +100,7 @@ namespace snowboy {
 	}
 
 	void VectorBase::CopyFromVec(const VectorBase& param_1) {
-		if (m_data != param_1.m_data) {
+		if (m_data != param_1.m_data && m_data != nullptr && param_1.m_data != nullptr) {
 			memcpy(m_data, param_1.m_data, std::min(m_size, param_1.m_size) * sizeof(float));
 		}
 	}
@@ -274,70 +274,57 @@ namespace snowboy {
 			*os << "]\n";
 		} else {
 			WriteToken(binary, "FV", os);
-			WriteBasicType<int>(binary, m_size, os);
+			WriteBasicType<int32_t>(binary, m_size, os);
 			os->write(reinterpret_cast<const char*>(m_data), m_size * sizeof(float));
 		}
 		if (!*os) SNOWBOY_ERROR() << "Failed to write Vector to stream.";
 	}
 
+	bool VectorBase::HasNan() const {
+		for (size_t i = 0; i < size(); i++) {
+			if (m_data[i] != m_data[i]) return true;
+		}
+		return false;
+	}
+
+	bool VectorBase::HasInfinity() const {
+		for (size_t i = 0; i < size(); i++) {
+			if (std::isinf(m_data[i])) return true;
+		}
+		return false;
+	}
+
 	static size_t allocs = 0;
 	static size_t frees = 0;
 	void Vector::Resize(int size, MatrixResizeType resize) {
-		if (size <= m_size) {
+		SNOWBOY_ASSERT(m_size <= m_cap);
+		if (size <= m_cap) {
+#ifndef NDEBUG
+			for (uint32_t i = m_size; i < size; i++) {
+				m_data[i] = std::nanf("");
+			}
+#endif
 			m_size = size;
 			if (resize == MatrixResizeType::kSetZero) Set(0.0f);
 			return;
 		}
 
-		// The new size is larger than we currently are, so we need to reallocate.
-#if HAS_MALLOC_USABLE_SIZE
-		auto usable = malloc_usable_size(m_data);
-		if (usable >= size * sizeof(float)) {
-			if (resize == MatrixResizeType::kSetZero) {
-				memset(&m_data[m_size], 0, usable - m_size * sizeof(float));
-			}
-			m_size = size;
-			return;
+		allocs++;
+		auto ptr = static_cast<float*>(SnowboyMemalign(16, size * sizeof(float)));
+		if (ptr == nullptr) throw std::bad_alloc();
+		if (resize == MatrixResizeType::kCopyData)
+			memcpy(ptr, m_data, m_size * sizeof(float));
+		if (m_data) {
+			frees++;
+			free(m_data);
 		}
-#endif
-		// We dont have usable size or the allocated block was to small
-		if (resize == MatrixResizeType::kCopyData) {
-			// Since we would copy it anyway we can just call realloc and maybe save copying (e.g. if the next block is free).
-			auto ptr = static_cast<float*>(realloc(m_data, size * sizeof(float)));
-			if (ptr == nullptr) throw std::bad_alloc();
-			if (ptr != m_data && (reinterpret_cast<uintptr_t>(ptr) % 16) != 0) {
-				// realloc moved the data but the new buffer is not aligned correctly
-				allocs++;
-				frees++;
-				free(ptr);
-				allocs++;
-				ptr = static_cast<float*>(SnowboyMemalign(16, size * sizeof(float)));
-				if (ptr == nullptr) throw std::bad_alloc();
-				memcpy(ptr, m_data, sizeof(float) * m_size);
-			}
-			m_data = ptr;
-			memset(&m_data[m_size], 0, (size - m_size) * sizeof(float));
-		} else if (resize == MatrixResizeType::kSetZero) {
-			allocs++;
-			auto ptr = static_cast<float*>(SnowboyMemalign(16, size * sizeof(float)));
-			if (ptr == nullptr) throw std::bad_alloc();
-			if (m_data) {
-				frees++;
-				free(m_data);
-			}
+		if (resize == MatrixResizeType::kCopyData)
+			memset(&ptr[m_size], 0, (size - m_size) * sizeof(float));
+		else if (resize == MatrixResizeType::kSetZero)
 			memset(ptr, 0, size * sizeof(float));
-			m_data = ptr;
-		} else {
-			allocs++;
-			auto ptr = static_cast<float*>(SnowboyMemalign(16, size * sizeof(float)));
-			if (ptr == nullptr) throw std::bad_alloc();
-			if (m_data) {
-				frees++;
-				free(m_data);
-			}
-			m_data = ptr;
-		}
+		m_data = ptr;
 		m_size = size;
+		m_cap = size;
 	}
 
 	Vector::~Vector() {
@@ -401,7 +388,7 @@ namespace snowboy {
 		} else {
 			ExpectToken(binary, "FV", is);
 			int size;
-			ReadBasicType<int>(binary, &size, is);
+			ReadBasicType<int32_t>(binary, &size, is);
 			if (!add) {
 				Resize(size, MatrixResizeType::kUndefined);
 				if (size != 0) {
@@ -429,6 +416,9 @@ namespace snowboy {
 		auto tsize = other->m_size;
 		other->m_size = m_size;
 		m_size = tsize;
+		auto tcap = other->m_cap;
+		other->m_cap = m_cap;
+		m_cap = tcap;
 	}
 
 	void Vector::RemoveElement(int index) {
@@ -449,11 +439,14 @@ namespace snowboy {
 	}
 
 	SubVector::SubVector(const VectorBase& parent, int offset, int size) {
+		SNOWBOY_ASSERT(offset >= 0);
+		SNOWBOY_ASSERT(size >= 0);
 		m_data = parent.m_data + offset;
 		m_size = std::min<int>(parent.m_size - offset, size);
 	}
 
 	SubVector::SubVector(const MatrixBase& parent, int row) {
+		SNOWBOY_ASSERT(row >= 0);
 		m_data = parent.m_data + (row * parent.m_stride);
 		m_size = parent.m_cols;
 	}

@@ -73,7 +73,7 @@ namespace snowboy {
 			Nnet network;
 			std::vector<KeyWordInfo> keywords;
 			// License start
-			long license_start;
+			int64_t license_start;
 			// License days
 			float license_days;
 

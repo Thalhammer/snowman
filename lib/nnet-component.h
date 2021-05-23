@@ -69,8 +69,8 @@ namespace snowboy {
 		virtual bool HasDataRearragement() const;
 		virtual void Propagate(const ChunkInfo& in_info,
 							   const ChunkInfo& out_info,
-							   const MatrixBase& in,
-							   MatrixBase* out) const = 0;
+							   Matrix&& in,
+							   Matrix* out) const = 0;
 
 		virtual void Read(bool binary, std::istream* is) = 0;
 		virtual void Write(bool binary, std::ostream* os) const = 0;
@@ -99,8 +99,8 @@ namespace snowboy {
 		virtual int32_t OutputDim() const override;
 		virtual void Propagate(const ChunkInfo& in_info,
 							   const ChunkInfo& out_info,
-							   const MatrixBase& in,
-							   MatrixBase* out) const override;
+							   Matrix&& in,
+							   Matrix* out) const override;
 
 		virtual void Read(bool binary, std::istream* is) override;
 		virtual void Write(bool binary, std::ostream* os) const override;
@@ -119,8 +119,8 @@ namespace snowboy {
 		virtual int32_t OutputDim() const override;
 		virtual void Propagate(const ChunkInfo& in_info,
 							   const ChunkInfo& out_info,
-							   const MatrixBase& in,
-							   MatrixBase* out) const override;
+							   Matrix&& in,
+							   Matrix* out) const override;
 
 		virtual void Read(bool binary, std::istream* is) override;
 		virtual void Write(bool binary, std::ostream* os) const override;
@@ -139,8 +139,8 @@ namespace snowboy {
 		virtual int32_t OutputDim() const override;
 		virtual void Propagate(const ChunkInfo& in_info,
 							   const ChunkInfo& out_info,
-							   const MatrixBase& in,
-							   MatrixBase* out) const override;
+							   Matrix&& in,
+							   Matrix* out) const override;
 
 		virtual void Read(bool binary, std::istream* is) override;
 		virtual void Write(bool binary, std::ostream* os) const override;
@@ -160,8 +160,8 @@ namespace snowboy {
 		virtual int32_t OutputDim() const override;
 		virtual void Propagate(const ChunkInfo& in_info,
 							   const ChunkInfo& out_info,
-							   const MatrixBase& in,
-							   MatrixBase* out) const override;
+							   Matrix&& in,
+							   Matrix* out) const override;
 
 		virtual void Read(bool binary, std::istream* is) override;
 		virtual void Write(bool binary, std::ostream* os) const override;
@@ -179,8 +179,8 @@ namespace snowboy {
 		virtual int32_t OutputDim() const override;
 		virtual void Propagate(const ChunkInfo& in_info,
 							   const ChunkInfo& out_info,
-							   const MatrixBase& in,
-							   MatrixBase* out) const override;
+							   Matrix&& in,
+							   Matrix* out) const override;
 
 		virtual void Read(bool binary, std::istream* is) override;
 		virtual void Write(bool binary, std::ostream* os) const override;
@@ -198,8 +198,8 @@ namespace snowboy {
 		virtual int32_t OutputDim() const override;
 		virtual void Propagate(const ChunkInfo& in_info,
 							   const ChunkInfo& out_info,
-							   const MatrixBase& in,
-							   MatrixBase* out) const override;
+							   Matrix&& in,
+							   Matrix* out) const override;
 
 		virtual void Read(bool binary, std::istream* is) override;
 		virtual void Write(bool binary, std::ostream* os) const override;
@@ -221,8 +221,8 @@ namespace snowboy {
 		virtual bool HasDataRearragement() const override;
 		virtual void Propagate(const ChunkInfo& in_info,
 							   const ChunkInfo& out_info,
-							   const MatrixBase& in,
-							   MatrixBase* out) const override;
+							   Matrix&& in,
+							   Matrix* out) const override;
 
 		virtual void Read(bool binary, std::istream* is) override;
 		virtual void Write(bool binary, std::ostream* os) const override;
