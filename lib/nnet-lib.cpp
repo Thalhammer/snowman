@@ -268,8 +268,7 @@ namespace snowboy {
 			m_output_data.Resize(output_chunk_info.NumChunks() * output_chunk_info.ChunkSize(), output_chunk_info.NumCols());
 			m_components[c]->Propagate(input_chunk_info, output_chunk_info, m_input_data, &m_output_data);
 			if (c < m_components.size() - 1) {
-				m_input_data = m_output_data;
-				m_output_data.Resize(0, 0);
+				m_input_data = std::move(m_output_data);
 			} else {
 				m_input_data.Resize(0, 0);
 			}

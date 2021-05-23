@@ -175,6 +175,9 @@ namespace snowboy {
 			return std::numeric_limits<float>::max();
 		}
 
+		SNOWBOY_ASSERT(!param_2.HasNan() && !param_2.HasInfinity());
+		SNOWBOY_ASSERT(!param_3.HasNan() && !param_3.HasInfinity());
+
 		Matrix distances;
 		distances.Resize(param_2.rows(), param_3.rows());
 		for (auto row = 0; row < distances.rows(); row++) {
@@ -188,9 +191,10 @@ namespace snowboy {
 				}
 			}
 		}
+		SNOWBOY_ASSERT(!distances.HasNan() && !distances.HasInfinity());
 		Matrix local_1d8;
 		local_1d8.Resize(param_2.rows(), param_3.rows());
-		for (auto row = 0; row != local_1d8.rows(); row++) {
+		for (auto row = 0; row < local_1d8.rows(); row++) {
 			for (auto col = 0; col < local_1d8.cols(); col++) {
 				if (row == 0) {
 					local_1d8(0, col) = distances(0, col);
@@ -202,8 +206,10 @@ namespace snowboy {
 				}
 			}
 		}
+		SNOWBOY_ASSERT(!local_1d8.HasNan() && !local_1d8.HasInfinity());
 		int min_index = -1;
 		auto min_value = SubVector{local_1d8, local_1d8.rows() - 1}.Min(&min_index);
+		SNOWBOY_ASSERT(min_index >= 0);
 		if (param_4 != nullptr) {
 			for (int iVar11 = local_1d8.rows() - 1; iVar11 != 0;) {
 				// TODO: This is wrong

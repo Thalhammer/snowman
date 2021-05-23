@@ -119,6 +119,7 @@ namespace snowboy {
 	}
 
 	void TemplateContainer::AddTemplate(const MatrixBase& tpl) {
+		SNOWBOY_ASSERT(!tpl.HasNan() && !tpl.HasInfinity());
 		m_templates.emplace_back(tpl);
 	}
 

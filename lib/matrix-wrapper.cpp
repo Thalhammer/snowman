@@ -8,6 +8,7 @@ extern "C"
 #include <snowboy-io.h>
 #include <snowboy-utils.h>
 #include <vector-wrapper.h>
+#include <cmath>
 
 namespace snowboy {
 
@@ -245,6 +246,24 @@ namespace snowboy {
 		if (!*os) {
 			SNOWBOY_ERROR() << "Fail to write Matrix to stream.";
 		}
+	}
+
+	bool MatrixBase::HasNan() const {
+		for(size_t r = 0; r<rows(); r++) {
+			for(size_t c = 0; c<cols(); c++) {
+				if((*this)(r,c) != (*this)(r,c)) return true;
+			}
+		}
+		return false;
+	}
+
+	bool MatrixBase::HasInfinity() const {
+		for(size_t r = 0; r<rows(); r++) {
+			for(size_t c = 0; c<cols(); c++) {
+				if(std::isinf((*this)(r,c))) return true;
+			}
+		}
+		return false;
 	}
 
 	static size_t allocs = 0;

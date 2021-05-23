@@ -79,12 +79,8 @@ namespace snowboy {
 	float MelFilterBank::GetVtlnWarping(float param_1) const {
 		auto fVar1 = 1.0f / m_options.vtln_warping_factor;
 		float fVar3 = m_options.vtln_low_frequency / ((fVar1 < 1.0) ? fVar1 : 1.0);
-		auto fVar2 = fVar1;
-		if (fVar1 <= 1.0f) {
-			fVar2 = 1.0f;
-		}
 		if (fVar3 <= param_1) {
-			fVar2 = m_options.vtln_high_frequency / fVar2;
+			auto fVar2 = m_options.vtln_high_frequency / std::max(1.0f, fVar1);
 			if (fVar2 <= param_1) {
 				fVar3 = m_options.high_frequency;
 				return fVar3 - ((fVar3 - fVar1 * fVar2) / (fVar3 - fVar2)) * (fVar3 - param_1);
@@ -145,48 +141,53 @@ namespace snowboy {
 	}
 
 	void Fft::DoFft(bool inverse, Vector* data) const {
+		SNOWBOY_ASSERT(!data->HasNan());
 		if (m_options.field_x00) {
 			if (m_options.num_fft_points == 1) return;
 			if (inverse) {
 				DoProcessingForReal(true, data);
 				DoBitReversalSorting(m_bit_reversal_index, data);
 				DoDanielsonLanczos(true, data);
+				SNOWBOY_ASSERT(!data->HasNan() && !data->HasInfinity());
 				return;
 			}
 		}
 		DoBitReversalSorting(m_bit_reversal_index, data);
+		SNOWBOY_ASSERT(!data->HasNan() && !data->HasInfinity());
 		DoDanielsonLanczos(inverse, data);
+		SNOWBOY_ASSERT(!data->HasNan() && !data->HasInfinity());
 		if (m_options.field_x00 <= inverse) return;
 		DoProcessingForReal(inverse, data);
 	}
 
-	void Fft::DoDanielsonLanczos(bool inverse, Vector* data) const {
-		const auto uVar6 = data->m_size / 2;
-		const auto pfVar5 = data->m_data;
-		const auto iVar7 = snowboy::Fft::GetNumBits(uVar6);
+	void Fft::DoDanielsonLanczos(bool inverse, Vector* pdata) const {
+		auto& data = *pdata;
+		const auto iVar7 = snowboy::Fft::GetNumBits(data.size() / 2);
 		for (auto local_54 = 1; local_54 <= iVar7; local_54 += 1) {
 			const auto iVar9 = 1 << (local_54 & 0x1f);
-			for (auto local_68 = 0; local_68 < (int)uVar6; local_68 += iVar9) {
+			for (auto local_68 = 0; local_68 < data.size() / 2; local_68 += iVar9) {
 				long lVar14 = local_68 * 2 + 1 + iVar9;
 				long lVar15 = (local_68 * 2);
 				for (auto iVar11 = 0; iVar11 != iVar9 / 2; iVar11++) {
 					auto twiddle = snowboy::Fft::GetTwiddleFactor(iVar9, iVar11);
 					if (inverse) twiddle.second *= -1;
-					auto fVar16 = pfVar5[lVar15 + iVar9];
-					auto fVar18 = fVar16 * twiddle.first - twiddle.second * pfVar5[lVar14];
-					fVar16 = pfVar5[lVar14] * twiddle.first + fVar16 * twiddle.second;
-					pfVar5[lVar15 + iVar9] = pfVar5[lVar15] - fVar18;
-					pfVar5[lVar14] = pfVar5[lVar15 + 1] - fVar16;
-					pfVar5[lVar15] += fVar18;
-					pfVar5[lVar15 + 1] += fVar16;
+					auto fVar16 = data[lVar15 + iVar9];
+					auto fVar18 = fVar16 * twiddle.first - twiddle.second * data[lVar14];
+					fVar16 = data[lVar14] * twiddle.first + fVar16 * twiddle.second;
+					data[lVar15 + iVar9] = data[lVar15] - fVar18;
+					auto x = data[lVar15 + 1];
+					x = x - fVar16;
+					data[lVar14] = data[lVar15 + 1] - fVar16;
+					data[lVar15] += fVar18;
+					data[lVar15 + 1] += fVar16;
 					lVar14 += 2;
 					lVar15 += 2;
 				}
 			}
 		}
 		if (inverse) {
-			for (int i = 0; i < data->m_size; i++)
-				data->m_data[i] = data->m_data[i] / static_cast<float>(uVar6);
+			for (int i = 0; i < data.size(); i++)
+				data[i] = data[i] / static_cast<float>(data.size() / 2);
 		}
 	}
 

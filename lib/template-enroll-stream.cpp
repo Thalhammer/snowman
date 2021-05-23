@@ -29,12 +29,12 @@ namespace snowboy {
 			field_x60.RowRange(field_x60.m_rows - local_1f8.m_rows, local_1f8.m_rows).CopyFromMat(local_1f8, MatrixTransposeType::kNoTrans);
 		}
 		if ((res & 0x18) != 0) {
-			if (field_x60.m_rows < m_options.min_template_length) {
+			if (field_x60.rows() < m_options.min_template_length) {
 				field_x60.Resize(0, 0);
 				res |= 0x400;
 				return res;
 			}
-			if (field_x60.m_rows > m_options.max_template_length) {
+			if (field_x60.rows() > m_options.max_template_length) {
 				field_x60.Resize(0, 0);
 				res |= 0x200;
 				return res;

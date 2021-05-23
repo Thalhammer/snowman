@@ -54,6 +54,8 @@ namespace snowboy {
 		void SetUnit();
 		void Transpose();
 		void Write(bool, std::ostream*) const;
+		bool HasNan() const;
+		bool HasInfinity() const;
 	};
 	struct Matrix : MatrixBase {
 		Matrix() {}
