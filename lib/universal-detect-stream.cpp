@@ -2,9 +2,10 @@
 #include <limits>
 #include <math.h>
 #include <nnet-lib.h>
-#include <snowboy-debug.h>
+#include <snowboy-error.h>
 #include <snowboy-io.h>
 #include <snowboy-options.h>
+#include <sstream>
 #include <universal-detect-stream.h>
 
 namespace snowboy {
@@ -23,14 +24,10 @@ namespace snowboy {
 
 	UniversalDetectStream::UniversalDetectStream(const UniversalDetectStreamOptions& options) {
 		m_options = options;
-		if (m_options.model_str == "") {
-			SNOWBOY_ERROR() << "please specify models through --model-str.";
-			return;
-		}
-		if (m_options.slide_step < 1) {
-			SNOWBOY_ERROR() << "slide step size should be positive.";
-			return;
-		}
+		if (m_options.model_str == "")
+			throw snowboy_exception{"please specify models through --model-str"};
+		if (m_options.slide_step < 1)
+			throw snowboy_exception{"slide step size should be positive"};
 		field_x58 = m_options.min_detection_interval;
 		field_x5c = m_options.min_detection_interval;
 		// Note: in the original code there are resize(0) calls for each vector,
@@ -165,10 +162,8 @@ namespace snowboy {
 			time(&t);
 			auto diff = difftime(t, license_start);
 			auto expires = license_days;
-			if (expires < (diff / 86400.0f)) {
-				SNOWBOY_ERROR() << "Your license for Snowboy has been expired. Please contact KITT.AI at snowboy@kitt.ai";
-				return;
-			}
+			if (expires < (diff / 86400.0f))
+				throw snowboy_exception{"Your license for Snowboy has been expired. Please contact KITT.AI at snowboy@kitt.ai"};
 		}
 	}
 
@@ -182,10 +177,7 @@ namespace snowboy {
 		case 6: return HotwordViterbiSearchSoftFloor(param_1, param_2);
 		case 7: return HotwordViterbiSearchTraceback(param_1, param_2);
 		case 8: return HotwordViterbiSearchTracebackLog(param_1, param_2);
-		default: {
-			SNOWBOY_ERROR() << "search method has not been implemented.";
-			return 0.0f;
-		}
+		default: throw snowboy_exception{"search method has not been implemented"};
 		}
 	}
 
@@ -203,8 +195,7 @@ namespace snowboy {
 	}
 
 	float UniversalDetectStream::HotwordDtwSearch(int, int) const {
-		SNOWBOY_ERROR() << "Not implemented";
-		return 0.0f;
+		throw snowboy_exception{"Not implemented"};
 		// TODO:: This is unused in all models I have, but we should still implement it at some point
 	}
 
@@ -219,8 +210,7 @@ namespace snowboy {
 	}
 
 	float UniversalDetectStream::HotwordPiecewiseSearch(int, int) const {
-		SNOWBOY_ERROR() << "Not implemented";
-		return 0.0f;
+		throw snowboy_exception{"Not implemented"};
 		// TODO:: This is unused in all models I have, but we should still implement it at some point
 	}
 
@@ -254,26 +244,22 @@ namespace snowboy {
 	}
 
 	float UniversalDetectStream::HotwordViterbiSearch(int, int, int, const PieceInfo&) const {
-		SNOWBOY_ERROR() << "Not implemented";
-		return 0.0f;
+		throw snowboy_exception{"Not implemented"};
 		// TODO:: This is unused in all models I have, but we should still implement it at some point
 	}
 
 	float UniversalDetectStream::HotwordViterbiSearchReduplication(int, int, int) {
-		SNOWBOY_ERROR() << "Not implemented";
-		return 0.0f;
+		throw snowboy_exception{"Not implemented"};
 		// TODO:: This is unused in all models I have, but we should still implement it at some point
 	}
 
 	float UniversalDetectStream::HotwordViterbiSearchSoftFloor(int, int) const {
-		SNOWBOY_ERROR() << "Not implemented";
-		return 0.0f;
+		throw snowboy_exception{"Not implemented"};
 		// TODO:: This is unused in all models I have, but we should still implement it at some point
 	}
 
 	float UniversalDetectStream::HotwordViterbiSearchTraceback(int, int) const {
-		SNOWBOY_ERROR() << "Not implemented";
-		return 0.0f;
+		throw snowboy_exception{"Not implemented"};
 		// TODO:: This is unused in all models I have, but we should still implement it at some point
 	}
 
@@ -289,10 +275,9 @@ namespace snowboy {
 	int UniversalDetectStream::NumHotwords(int model_id) const {
 		if (model_id < m_model_info.size() && model_id >= 0) {
 			return m_model_info[model_id].NumHotwords();
-		} else {
-			SNOWBOY_ERROR() << "model_id runs out of range, expecting a value between [0," << m_model_info.size() << "], got " << model_id << " instead.";
-			return 0;
-		}
+		} else
+			throw snowboy_exception{"model_id runs out of range, expecting a value between [0,"
+									+ std::to_string(m_model_info.size()) + "], got " + std::to_string(model_id) + " instead."};
 	}
 
 	void UniversalDetectStream::PushSlideWindow(int param_1, const MatrixBase& param_2) {
@@ -388,7 +373,7 @@ namespace snowboy {
 		field_x250.resize(field_x250.size() + network.OutputDim());
 		field_x268.resize(field_x268.size() + network.OutputDim());
 		if (keywords[0].search_method == 4) {
-			SNOWBOY_ERROR() << "Not implemented!";
+			throw snowboy_exception{"Not implemented!"};
 			// TODO
 		}
 	}
@@ -396,10 +381,8 @@ namespace snowboy {
 	void UniversalDetectStream::ReadHotwordModel(const std::string& filename) {
 		std::vector<std::string> files;
 		SplitStringToVector(filename, global_snowboy_string_delimiter, &files);
-		if (files.empty()) {
-			SNOWBOY_ERROR() << "no model can be extracted from --model-str: " << filename;
-			return;
-		}
+		if (files.empty())
+			throw snowboy_exception{"no model can be extracted from --model-str: " + filename};
 		auto s = files.size();
 		m_model_info.resize(s);
 
@@ -454,12 +437,10 @@ namespace snowboy {
 					e.high_sensitivity = parts[i];
 				}
 			}
-		} else {
-			SNOWBOY_ERROR() << "Number of sensitivities does not match number of hotwords ("
-							<< parts.size() << " v.s. " << m_model_info.size()
-							<< "). Note that each universal model may have multiple hotwords.";
-			return;
-		}
+		} else
+			throw snowboy_exception{"Number of sensitivities does not match number of hotwords ("
+									+ std::to_string(parts.size()) + " v.s. " + std::to_string(m_model_info.size())
+									+ "). Note that each universal model may have multiple hotwords."};
 	}
 
 	void UniversalDetectStream::SetSensitivity(const std::string& param_1) {
@@ -477,12 +458,10 @@ namespace snowboy {
 					e.sensitivity = parts[i];
 				}
 			}
-		} else {
-			SNOWBOY_ERROR() << "Number of sensitivities does not match number of hotwords ("
-							<< parts.size() << " v.s. " << m_model_info.size()
-							<< "). Note that each universal model may have multiple hotwords.";
-			return;
-		}
+		} else
+			throw snowboy_exception{"Number of sensitivities does not match number of hotwords ("
+									+ std::to_string(parts.size()) + " v.s. " + std::to_string(m_model_info.size())
+									+ "). Note that each universal model may have multiple hotwords."};
 	}
 
 	void UniversalDetectStream::SetSlideWindowSize(const std::string& param_1) {

@@ -1,7 +1,7 @@
 #include <dtw-lib.h>
 #include <limits>
 #include <matrix-wrapper.h>
-#include <snowboy-debug.h>
+#include <snowboy-error.h>
 #include <vector-wrapper.h>
 
 namespace snowboy {
@@ -64,10 +64,8 @@ namespace snowboy {
 			m_distance_function = DistanceType::cosine;
 		else if (opts.distance_metric == "euclidean")
 			m_distance_function = DistanceType::euclidean;
-		else {
-			SNOWBOY_ERROR() << "Unknown distance type: " << opts.distance_metric;
-			return;
-		}
+		else
+			throw snowboy_exception{"Unknown distance type: " + opts.distance_metric};
 		m_options = opts;
 		field_x70 = m_options.band_width / 2;
 	}
@@ -101,10 +99,8 @@ namespace snowboy {
 	}
 
 	float SlidingDtw::ComputeDtwDistance(int param_1, const MatrixBase& param_2) {
-		if (m_reference == nullptr) {
-			SNOWBOY_ERROR() << "Reference file has not been set, call SetReference() first!";
-			return -1;
-		}
+		if (m_reference == nullptr)
+			throw snowboy_exception{"Reference file has not been set, call SetReference() first!"};
 		UpdateDistance(param_1, param_2);
 
 		std::vector<float> local_238;
@@ -186,9 +182,8 @@ namespace snowboy {
 					distances(row, col) = SubVector{param_2, row}.CosineDistance(SubVector{param_3, col});
 				} else if (param_1 == DistanceType::euclidean) {
 					distances(row, col) = SubVector{param_2, row}.EuclideanDistance(SubVector{param_3, col});
-				} else {
-					SNOWBOY_ERROR() << "Unknown distance type: " << param_1;
-				}
+				} else
+					throw snowboy_exception{"Unknown distance type: " + std::to_string(param_1)};
 			}
 		}
 		SNOWBOY_ASSERT(!distances.HasNan() && !distances.HasInfinity());

@@ -1,5 +1,4 @@
 #include <frame-info.h>
-#include <snowboy-debug.h>
 #include <snowboy-io.h>
 #include <snowboy-options.h>
 #include <vad-lib.h>
@@ -170,7 +169,7 @@ namespace snowboy {
 				m_someOtherMatrix.Swap(&local_98);
 				std::vector<FrameInfo> pFVar6;
 				pFVar6.resize(field_x28);
-				SNOWBOY_ASSERT(iVar2 <= field_x80.size());
+				iVar2 <= field_x80.size();
 				auto pfVar15 = field_x80.size() - iVar2;
 				for (auto pfVar5 = 0; iVar2 != pfVar5; pfVar5++) {
 					pFVar6[pfVar5] = field_x80[pfVar15 + pfVar5];

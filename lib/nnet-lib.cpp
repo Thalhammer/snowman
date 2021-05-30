@@ -4,7 +4,6 @@
 #include <nnet-component.h>
 #include <nnet-lib.h>
 #include <set>
-#include <snowboy-debug.h>
 #include <snowboy-io.h>
 
 namespace snowboy {

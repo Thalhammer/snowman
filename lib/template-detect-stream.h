@@ -19,7 +19,7 @@ namespace snowboy {
 	};
 	struct TemplateDetectStream : StreamItf {
 		TemplateDetectStreamOptions m_options;
-		std::vector<TemplateContainer> field_x40;
+		std::vector<TemplateContainer> m_models;
 		std::vector<std::vector<SlidingDtw>> field_x58;
 		int field_x70;
 		Matrix field_x78;

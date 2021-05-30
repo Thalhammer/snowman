@@ -1,13 +1,13 @@
 #include <audio-lib.h>
 #include <matrix-wrapper.h>
-#include <snowboy-debug.h>
+#include <snowboy-error.h>
 #include <wave-header.h>
 
 namespace snowboy {
 	float GetMaxWaveAmplitude(const WaveHeader& hdr) {
 #ifndef NDEBUG
 		if (hdr.wBitsPerSample != 8 && hdr.wBitsPerSample != 16 && hdr.wBitsPerSample != 32)
-			SNOWBOY_ERROR() << "Undefined bits_per_sample: " << hdr.wBitsPerSample << ". Expecting 8,16 or 32.";
+			throw snowboy_exception{"undefined bits_per_sample: " + std::to_string(hdr.wBitsPerSample) + ", expecting 8,16 or 32"};
 #endif
 		return (1 << hdr.wBitsPerSample) - 1;
 	}
@@ -15,7 +15,7 @@ namespace snowboy {
 	float GetMaxWaveAmplitude(int nbits) {
 #ifndef NDEBUG
 		if (nbits != 8 && nbits != 16 && nbits != 32)
-			SNOWBOY_ERROR() << "Undefined bits_per_sample: " << nbits << ". Expecting 8,16 or 32.";
+			throw snowboy_exception{"undefined bits_per_sample: " << nbits << ", expecting 8,16 or 32"};
 #endif
 		return (1 << nbits) - 1;
 	}
@@ -47,9 +47,8 @@ namespace snowboy {
 					dptr++;
 				}
 			}
-		} else {
-			SNOWBOY_ERROR() << "Undefined bits_per_sample: " << hdr.wBitsPerSample << ". Expecting 8,16 or 32.";
-		}
+		} else
+			throw snowboy_exception{"Undefined bits_per_sample: " + std::to_string(hdr.wBitsPerSample) + ", expecting 8,16 or 32."};
 	}
 
 	void WriteRawWaveToString(const WaveHeader& hdr, const MatrixBase& data, std::string* data_out) {
@@ -79,8 +78,7 @@ namespace snowboy {
 					dptr++;
 				}
 			}
-		} else {
-			SNOWBOY_ERROR() << "Undefined bits_per_sample: " << hdr.wBitsPerSample << ". Expecting 8,16 or 32.";
-		}
+		} else
+			throw snowboy_exception{"Undefined bits_per_sample: " + std::to_string(hdr.wBitsPerSample) + ", expecting 8,16 or 32"};
 	}
 } // namespace snowboy

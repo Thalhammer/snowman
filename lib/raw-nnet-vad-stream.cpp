@@ -1,7 +1,7 @@
 #include <frame-info.h>
 #include <nnet-lib.h>
 #include <raw-nnet-vad-stream.h>
-#include <snowboy-debug.h>
+#include <snowboy-error.h>
 #include <snowboy-io.h>
 #include <snowboy-options.h>
 
@@ -14,18 +14,15 @@ namespace snowboy {
 
 	RawNnetVadStream::RawNnetVadStream(const RawNnetVadStreamOptions& options) {
 		m_options = options;
-		if (m_options.model_filename == "") {
-			SNOWBOY_ERROR() << "please specify the neural network VAD model.";
-			return;
-		}
+		if (m_options.model_filename == "")
+			throw snowboy_exception{"please specify the neural network VAD model."};
 		m_nnet.reset(new Nnet(true));
 		Input model{m_options.model_filename};
 		m_nnet->Read(model.is_binary(), model.Stream());
 		auto dims = m_nnet->OutputDim();
-		if (dims <= m_options.non_voice_index || m_options.non_voice_index < 0) {
-			SNOWBOY_ERROR() << "index " << m_options.non_voice_index << " for non-voice label runs out of range (0 - " << dims << "), wrong index?";
-			return;
-		}
+		if (dims <= m_options.non_voice_index || m_options.non_voice_index < 0)
+			throw snowboy_exception{"index " + std::to_string(m_options.non_voice_index)
+									+ " for non-voice label runs out of range (0 - " + std::to_string(dims) + "), wrong index?"};
 	}
 
 	int RawNnetVadStream::Read(Matrix* mat, std::vector<FrameInfo>* info) {

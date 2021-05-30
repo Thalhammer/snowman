@@ -1,7 +1,7 @@
 #include <matrix-wrapper.h>
 #include <nnet-component.h>
 #include <ostream>
-#include <snowboy-debug.h>
+#include <snowboy-error.h>
 #include <snowboy-io.h>
 
 namespace snowboy {
@@ -104,18 +104,13 @@ namespace snowboy {
 	Component* Component::ReadNew(bool binary, std::istream* is) {
 		std::string token;
 		ReadToken(binary, &token, is);
-		if (token.size() <= 2) {
-			SNOWBOY_ERROR() << "Invalid component token " << token;
-			return nullptr;
-		}
+		if (token.size() <= 2)
+			throw snowboy_exception{"Invalid component token " + token};
 		// Remove leading < and following >
 		token = token.substr(1, token.size() - 2);
 		auto ptr = NewComponentOfType(token);
 		if (ptr == nullptr)
-		{
-			SNOWBOY_ERROR() << "Unknown component type " << token;
-			return nullptr;
-		}
+			throw snowboy_exception{"Unknown component type " + token};
 		ptr->Read(binary, is);
 		return ptr;
 	}
@@ -498,10 +493,7 @@ namespace snowboy {
 		auto input_dim = in_info.NumCols();
 
 		if (out_chunk_size <= 0)
-		{
-			SNOWBOY_ERROR() << "Zero output dimension in SpliceComponent.";
-			return;
-		}
+			throw snowboy_exception{"Zero output dimension in SpliceComponent"};
 
 		auto num_splice = m_context.size();
 		std::vector<std::vector<int32_t>> indexes(num_splice);

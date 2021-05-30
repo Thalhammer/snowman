@@ -2,7 +2,7 @@
 #include <framer-stream.h>
 #include <matrix-wrapper.h>
 #include <random>
-#include <snowboy-debug.h>
+#include <snowboy-error.h>
 #include <snowboy-options.h>
 
 namespace snowboy {
@@ -48,9 +48,8 @@ namespace snowboy {
 				v = pow((1.0f - v) * 0.5f, 0.85f);
 				data[i] = v;
 			}
-		} else {
-			SNOWBOY_ERROR() << "Window type " << m_options.window_type << " is not defined";
-		}
+		} else
+			throw snowboy_exception{"Window type " + m_options.window_type + " is not defined"};
 	}
 
 	void FramerStream::CreateFrames(const VectorBase& data, Matrix* mat) {
@@ -104,9 +103,6 @@ namespace snowboy {
 			mat->Resize(0, 0);
 			info->clear();
 			return sig;
-		}
-		if (matrix_in.m_rows > 1) {
-			SNOWBOY_WARNING() << "multiple channels detected for wave file; reading only the first channel";
 		}
 
 		Vector temp_vector;

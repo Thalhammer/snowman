@@ -1,7 +1,7 @@
 #include <map>
 #include <pipeline-itf.h>
 #include <pipeline-lib.h>
-#include <snowboy-debug.h>
+#include <snowboy-error.h>
 #include <snowboy-io.h>
 #include <snowboy-options.h>
 #include <snowboy-utils.h>
@@ -10,10 +10,8 @@
 
 namespace snowboy {
 	void PipelineItf::SetResource(const std::string& param_1) {
-		if (m_isInitialized) {
-			SNOWBOY_ERROR() << "class has already been initialized, you have to call SetResource before calling Init().";
-			return;
-		}
+		if (m_isInitialized)
+			throw snowboy_exception{"class has already been initialized, you have to call SetResource before calling Init()"};
 		ParseOptions opts{""};
 		std::string opts_out;
 		UnpackPipelineResource(param_1, &opts_out);
@@ -46,11 +44,9 @@ namespace snowboy {
 					filenames.push_back(opt_parts[1]);
 					opt = opt_parts[0] + "=" + std::to_string(id);
 				}
-			} else {
-				SNOWBOY_ERROR() << "Bad option in configuration string: \"" << opt
-								<< "\"; Supported format is --option=value, or --option for boolean types";
-				return;
-			}
+			} else
+				throw snowboy_exception{"Bad option in configuration string: \"" + opt
+										+ "\"; Supported format is --option=value, or --option for boolean types"};
 		}
 		Output out{filename, binary};
 		auto stream = out.Stream();
@@ -62,10 +58,8 @@ namespace snowboy {
 			WriteBasicType<int32_t>(binary, offset, stream);
 			struct stat stat_buf;
 			int rc = stat(e.c_str(), &stat_buf);
-			if (rc != 0) {
-				SNOWBOY_ERROR() << "Fail to open resource file \"" << e << "\"";
-				return;
-			}
+			if (rc != 0)
+				throw snowboy_exception{"Fail to open resource file \"" + e + "\""};
 			offset += stat_buf.st_size;
 		}
 		WriteToken(binary, "</ResourceFileOffsets>", stream);
@@ -77,10 +71,8 @@ namespace snowboy {
 		WriteToken(binary, "</Configuration>", stream);
 		for (const auto& e : filenames) {
 			std::ifstream file{e, std::ios::binary};
-			if (!file.is_open()) {
-				SNOWBOY_ERROR() << "Fail to open resource file \"" << e << "\"";
-				return;
-			}
+			if (!file.is_open())
+				throw snowboy_exception{"Fail to open resource file \"" + e + "\""};
 			*stream << file.rdbuf();
 		}
 	}
@@ -118,13 +110,14 @@ namespace snowboy {
 				if (pos != std::string::npos) {
 					auto idx = std::stoul(opt_parts[1]);
 					if (idx >= offsets.size()) {
-						SNOWBOY_ERROR() << "Bad config file, index " << idx << " exceeds number of offsets (" << offsets.size() << ")";
+						throw snowboy_exception{"Bad config file, index " + std::to_string(idx)
+												+ " exceeds number of offsets (" + std::to_string(offsets.size()) + ")"};
 					}
 					opt = opt_parts[0] + "=" + filename + global_snowboy_offset_delimiter + std::to_string(offsets[idx] + res_start);
 				}
 			} else {
-				SNOWBOY_ERROR() << "Bad option in configuration string: \"" << opt
-								<< "\"; Supported format is --option=value, or --option for boolean types";
+				throw snowboy_exception{"Bad option in configuration string: \"" + opt
+										+ "\"; Supported format is --option=value, or --option for boolean types"};
 				return;
 			}
 			reserve_size += opt.size();

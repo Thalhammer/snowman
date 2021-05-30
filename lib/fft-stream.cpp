@@ -2,7 +2,7 @@
 #include <fft-stream.h>
 #include <frame-info.h>
 #include <matrix-wrapper.h>
-#include <snowboy-debug.h>
+#include <snowboy-error.h>
 #include <snowboy-math.h>
 #include <snowboy-options.h>
 #include <srfft.h>
@@ -25,10 +25,8 @@ namespace snowboy {
 			m_fft.reset(new Fft(options));
 		} else if (m_options.method == "srfft") {
 			m_fft.reset(new SplitRadixFft(options));
-		} else {
-			SNOWBOY_ERROR() << "FFT method has not been implemented: " << m_options.method;
-			return;
-		}
+		} else
+			throw snowboy_exception{"FFT method has not been implemented: " + m_options.method};
 	}
 
 	FftStream::FftStream(const FftStreamOptions& options) {

@@ -7,19 +7,9 @@ extern "C"
 #include <limits>
 #include <matrix-wrapper.h>
 #include <random>
-#include <snowboy-debug.h>
+#include <snowboy-error.h>
 #include <snowboy-io.h>
 #include <vector-wrapper.h>
-
-// TODO: This should be detected by cmake instead of just assuming linux has it
-#ifdef __linux__
-#include <malloc.h>
-#define HAS_MALLOC_USABLE_SIZE 1
-#else
-#define HAS_MALLOC_USABLE_SIZE 0
-#endif
-
-#define DUMP() std::cout << __FUNCTION__ << std::endl;
 
 namespace snowboy {
 	void VectorBase::Add(float x) {
@@ -250,11 +240,11 @@ namespace snowboy {
 	}
 
 	void VectorBase::SetRandomGaussian() {
-		SNOWBOY_ERROR() << "Not implemented";
+		throw snowboy_exception{"Not implemented"};
 	}
 
 	void VectorBase::SetRandomUniform() {
-		SNOWBOY_ERROR() << "Not implemented";
+		throw snowboy_exception{"Not implemented"};
 	}
 
 	float VectorBase::Sum() const {
@@ -265,7 +255,7 @@ namespace snowboy {
 	}
 
 	void VectorBase::Write(bool binary, std::ostream* os) const {
-		if (!*os) SNOWBOY_ERROR() << "Failed to write Vector to stream.";
+		if (!*os) throw snowboy_exception{"Failed to write Vector to stream"};
 		if (!binary) {
 			*os << " [ ";
 			for (uint32_t i = 0; i < m_size; i++) {
@@ -277,7 +267,7 @@ namespace snowboy {
 			WriteBasicType<int32_t>(binary, m_size, os);
 			os->write(reinterpret_cast<const char*>(m_data), m_size * sizeof(float));
 		}
-		if (!*os) SNOWBOY_ERROR() << "Failed to write Vector to stream.";
+		if (!*os) throw snowboy_exception{"Failed to write Vector to stream"};
 	}
 
 	bool VectorBase::HasNan() const {
@@ -351,15 +341,14 @@ namespace snowboy {
 	void Vector::Read(bool binary, bool add, std::istream* is) {
 		if (!binary) {
 			// TODO: Is this still accurate ?
-			SNOWBOY_ERROR() << "Not implemented";
+			throw snowboy_exception{"Not implemented"};
 			ExpectToken(binary, "[", is);
 			uint32_t i = 0;
 			auto s = m_size;
 			for (; i < m_size; i++) {
 				float f = 0.0f;
 				if (!isspace(is->get())) {
-					SNOWBOY_ERROR() << "Expecting space after number";
-					return;
+					throw snowboy_exception{"Expecting space after number"};
 				}
 				if (is->peek() == ']') {
 					Resize(i, MatrixResizeType::kCopyData);
@@ -373,17 +362,14 @@ namespace snowboy {
 			}
 			if (i == s) {
 				if (!isspace(is->get())) {
-					SNOWBOY_ERROR() << "Expecting space after numbers";
-					return;
+					throw snowboy_exception{"Expecting space after numbers"};
 				}
 				if (is->get() != ']') {
-					SNOWBOY_ERROR() << "Expecting closing bracket after data";
-					return;
+					throw snowboy_exception{"Expecting closing bracket after data"};
 				}
 			}
 			if (is->get() != '\n') {
-				SNOWBOY_ERROR() << "Expecting newline after data";
-				return;
+				throw snowboy_exception{"Expecting newline after data"};
 			}
 		} else {
 			ExpectToken(binary, "FV", is);

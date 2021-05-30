@@ -1,6 +1,6 @@
 #include <gain-control-stream.h>
 #include <matrix-wrapper.h>
-#include <snowboy-debug.h>
+#include <snowboy-error.h>
 #include <snowboy-options.h>
 
 namespace snowboy {
@@ -62,14 +62,14 @@ namespace snowboy {
 
 	void GainControlStream::SetAudioGain(float gain) {
 		if (gain <= 0.0) {
-			SNOWBOY_ERROR() << "audio gain must be non-negative";
+			throw snowboy_exception{"audio gain must be non-negative"};
 		}
 		m_audioGain = gain;
 	}
 
 	void GainControlStream::SetMaxAudioAmplitude(float amp) {
 		if (amp <= 0.0) {
-			SNOWBOY_ERROR() << "max audio amplitude must be non-negative";
+			throw snowboy_exception{"max audio amplitude must be non-negative"};
 		}
 		m_maxAudioAmplitude = amp;
 	}

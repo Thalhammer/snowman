@@ -1,7 +1,6 @@
 #include <feat-lib.h>
 #include <math.h>
 #include <matrix-wrapper.h>
-#include <snowboy-debug.h>
 #include <snowboy-options.h>
 
 namespace snowboy {

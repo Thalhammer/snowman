@@ -27,8 +27,9 @@ set(SNOWMAN_SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/raw-energy-vad-stream.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/raw-nnet-vad-stream.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/snowboy-debug.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/snowboy-detect.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/snowboy-detect-c.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/snowboy-detect.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/snowboy-error.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/snowboy-io.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/snowboy-math.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/snowboy-options.cpp

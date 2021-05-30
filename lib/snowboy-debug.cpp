@@ -1,11 +1,8 @@
 #include <execinfo.h>
 #include <iostream>
-#include <snowboy-debug.h>
 #include <string>
 
 namespace snowboy {
-	int global_snowboy_verbose_level = 0;
-
 	std::string GetStackTrace() {
 		std::string res{"\n[stack trace: ]\n"};
 		void* buffer[50];
@@ -23,44 +20,9 @@ namespace snowboy {
 	}
 
 	void SnowboyAssertFailure(int line, const std::string& file, const std::string& func, const std::string& cond) {
-		snowboy::SnowboyLogMsg msg{line, file, func, snowboy::SnowboyLogType::ASSERT_FAIL, 0};
-		msg << cond;
-	}
-
-	SnowboyLogMsg::SnowboyLogMsg(int line, const std::string& file, const std::string& function, const SnowboyLogType& type, int)
-		: m_type{type}, m_stream{} {
-		switch (type)
-		{
-		case SnowboyLogType::ASSERT_FAIL:
-			m_stream << "ASSERT_FAILURE (";
-			break;
-		case SnowboyLogType::ERROR:
-			m_stream << "ERROR (";
-			break;
-		case SnowboyLogType::WARNING:
-			m_stream << "WARNING (";
-			break;
-		case SnowboyLogType::LOG:
-			m_stream << "LOG (";
-			break;
-		case SnowboyLogType::VLOG:
-			m_stream << "VLOG (";
-			break;
-		}
-		m_stream << function << "():" << file << ":" << line << ") ";
-	}
-
-	SnowboyLogMsg::~SnowboyLogMsg() noexcept(false) {
-		std::cerr << m_stream.str() << std::endl;
-		if (m_type == SnowboyLogType::ERROR)
-		{
-			m_stream << GetStackTrace();
-			// TODO: This isnt normally allowed....
-			throw std::runtime_error(m_stream.str());
-		} else if (m_type == SnowboyLogType::ASSERT_FAIL)
-		{
-			std::cerr << GetStackTrace();
-			std::abort();
-		}
+		std::cerr << "ASSERT_FAILURE (" << func << "():" << file << ":" << line << ")\n"
+				  << cond;
+		std::cerr << GetStackTrace();
+		std::abort();
 	}
 } // namespace snowboy

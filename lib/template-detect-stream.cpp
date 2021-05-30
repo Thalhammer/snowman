@@ -1,7 +1,7 @@
 #include <frame-info.h>
 #include <limits>
 #include <nnet-lib.h>
-#include <snowboy-debug.h>
+#include <snowboy-error.h>
 #include <snowboy-io.h>
 #include <snowboy-options.h>
 #include <template-detect-stream.h>
@@ -17,25 +17,20 @@ namespace snowboy {
 
 	TemplateDetectStream::TemplateDetectStream(const TemplateDetectStreamOptions& options) {
 		m_options = options;
-		if (m_options.model_str == "") {
-			SNOWBOY_ERROR() << "please specify models through --model-str.";
-			return;
-		}
-		if (m_options.slide_step < 1) {
-			SNOWBOY_ERROR() << "slide step size should be positive.";
-			return;
-		}
+		if (m_options.model_str == "")
+			throw snowboy_exception{"please specify models through --model-str"};
+		if (m_options.slide_step < 1)
+			throw snowboy_exception{"slide step size should be positive"};
 		field_x70 = 0;
 		field_x78.Resize(0, 0);
 		field_x90 = -100;
 		std::vector<std::string> models;
 		SplitStringToVector(m_options.model_str, ",", &models);
-		if (models.empty()) {
-			SNOWBOY_ERROR() << "no model can be extracted from --model-str:" << m_options.model_str;
-		}
-		field_x40.resize(models.size());
+		if (models.empty())
+			throw snowboy_exception{"no model can be extracted from --model-str:" + m_options.model_str};
+		m_models.resize(models.size());
 		for (size_t i = 0; i < models.size(); i++) {
-			field_x40[i].ReadHotwordModel(models[i]);
+			m_models[i].ReadHotwordModel(models[i]);
 		}
 		InitDtw();
 		if (m_options.sensitivity_str != "") {
@@ -65,7 +60,7 @@ namespace snowboy {
 						window_size = (iVar2 - window_size) + 1;
 						if (window_size < 0) window_size = 0;
 						auto distance = field_x58[model_id][template_id].ComputeDtwDistance(step, field_x78.RowRange(window_size, (iVar2 - window_size) + 1));
-						if (distance < field_x40[model_id].m_sensitivity) matched_templates++;
+						if (distance < m_models[model_id].m_sensitivity) matched_templates++;
 					}
 					if (field_x58[model_id].size() * 0.5f < matched_templates) {
 						mat->Resize(1, 1, MatrixResizeType::kSetZero);
@@ -113,13 +108,12 @@ namespace snowboy {
 		if (parts.size() != field_x58.size()) {
 			if (parts.size() == 1) {
 				parts.resize(field_x58.size(), parts[0]);
-			} else {
-				SNOWBOY_ERROR() << "Number of sensitivities does not match number of models (" << parts.size() << " v.s. " << field_x40.size() << ").";
-				return;
-			}
+			} else
+				throw snowboy_exception{"Number of sensitivities does not match number of models ("
+										+ std::to_string(parts.size()) + " v.s. " + std::to_string(m_models.size()) + ")"};
 		}
 		for (size_t i = 0; i < field_x58.size(); i++) {
-			field_x40[i].m_sensitivity = parts[i];
+			m_models[i].m_sensitivity = parts[i];
 			for (auto& e : field_x58[i]) {
 				e.SetEarlyStopThreshold(parts[i]);
 			}
@@ -128,33 +122,33 @@ namespace snowboy {
 
 	std::string TemplateDetectStream::GetSensitivity() const {
 		std::string res;
-		for (size_t i = 0; i < field_x40.size(); i++) {
+		for (size_t i = 0; i < m_models.size(); i++) {
 			if (!res.empty()) res += ", ";
-			res += std::to_string(field_x40[i].m_sensitivity);
+			res += std::to_string(m_models[i].m_sensitivity);
 		}
 		return res;
 	}
 
 	void TemplateDetectStream::InitDtw() {
-		field_x58.resize(field_x40.size());
-		for (size_t i = 0; i < field_x40.size(); i++) {
-			auto ntemplates = field_x40[i].NumTemplates();
+		field_x58.resize(m_models.size());
+		for (size_t i = 0; i < m_models.size(); i++) {
+			auto ntemplates = m_models[i].NumTemplates();
 			field_x58[i].resize(field_x58[i].size() + ntemplates);
 			for (size_t t = 0; t < ntemplates; t++) {
 				auto& e = field_x58[i][t];
 				e.SetOptions(m_options.dtw_options);
-				auto tmpl = field_x40[i].GetTemplate(t);
+				auto tmpl = m_models[i].GetTemplate(t);
 				e.SetReference(tmpl);
-				e.SetEarlyStopThreshold(field_x40[i].m_sensitivity);
+				e.SetEarlyStopThreshold(m_models[i].m_sensitivity);
 				field_x70 = std::max(e.GetWindowSize(), field_x70);
 			}
 		}
 	}
 
 	size_t TemplateDetectStream::NumHotwords(int model_id) const {
-		if (model_id >= field_x40.size() || model_id < 0) {
-			SNOWBOY_ERROR() << "model id runs out of range, expecting a value between [0, "
-							<< field_x40.size() << "] got " << model_id << " instead.";
+		if (model_id >= m_models.size() || model_id < 0) {
+			throw snowboy_exception{"model id runs out of range, expecting a value between [0, "
+									+ std::to_string(m_models.size()) + "] got " + std::to_string(model_id) + " instead."};
 			return 0;
 		}
 		// TODO: Why is this a constant 1 and not the number of templates in each model ?
@@ -164,8 +158,8 @@ namespace snowboy {
 	void TemplateDetectStream::UpdateModel() const {
 		std::vector<std::string> models;
 		SplitStringToVector(m_options.model_str, ",", &models);
-		for (size_t i = 0; i < models.size() && i < field_x40.size(); i++) {
-			field_x40[i].WriteHotwordModel(true, models[i]);
+		for (size_t i = 0; i < models.size() && i < m_models.size(); i++) {
+			m_models[i].WriteHotwordModel(true, models[i]);
 		}
 	}
 

@@ -10,7 +10,7 @@
 #include <nnet-stream.h>
 #include <pipeline-template-cut.h>
 #include <raw-nnet-vad-stream.h>
-#include <snowboy-debug.h>
+#include <snowboy-error.h>
 #include <snowboy-options.h>
 #include <vad-lib.h>
 
@@ -23,10 +23,8 @@ namespace snowboy {
 	}
 
 	void PipelineTemplateCut::RegisterOptions(const std::string& p, OptionsItf* opts) {
-		if (m_isInitialized) {
-			SNOWBOY_ERROR() << "pipeline has already been initialized, you have to call RegisterOptions() before Init().";
-			return;
-		}
+		if (m_isInitialized)
+			throw snowboy_exception{"pipeline has already been initialized, you have to call RegisterOptions() before Init()."};
 
 		auto prefix = p;
 		if (!prefix.empty()) prefix += ".";
@@ -46,10 +44,9 @@ namespace snowboy {
 	}
 
 	bool PipelineTemplateCut::Init() {
-		if (m_isInitialized) {
-			SNOWBOY_ERROR() << "class has already been initialized.";
-			return true;
-		}
+		if (m_isInitialized)
+			throw snowboy_exception{"class has already been initialized."};
+
 		m_framerStreamOptions.sample_rate = m_pipelineTemplateCutOptions.sample_rate;
 		m_mfccStreamOptions->mel_filter.sample_rate = m_pipelineTemplateCutOptions.sample_rate;
 
@@ -123,16 +120,15 @@ namespace snowboy {
 	}
 
 	int PipelineTemplateCut::CutTemplate(const MatrixBase& in, Matrix* out) {
-		if (!m_isInitialized) {
-			SNOWBOY_ERROR() << "class has not been initialized.";
-			return 2;
-		}
+		if (!m_isInitialized)
+			throw snowboy_exception{"class has not been initialized."};
+
 		std::vector<FrameInfo> info;
 		info.resize(in.m_rows);
 		m_interceptStream->SetData(in, info, SnowboySignal(8));
 		Matrix read_mat;
 		std::vector<FrameInfo> read_info;
-		auto read_res = m_rawNnetVadStream->Read(&read_mat, &read_info);
+		m_rawNnetVadStream->Read(&read_mat, &read_info);
 		read_mat.Resize(0, 0);
 		if (m_eavesdropMatrix.m_rows == 0) {
 			return 0x400;

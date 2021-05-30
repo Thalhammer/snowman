@@ -54,6 +54,7 @@ namespace snowboy {
 		std::string m_usage;
 		std::vector<std::string> m_arguments;
 		std::unordered_map<std::string, OptionInfo> m_options;
+		int m_verbose_level;
 
 	public:
 		ParseOptions(const std::string& usage);
