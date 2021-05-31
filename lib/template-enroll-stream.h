@@ -8,9 +8,9 @@ namespace snowboy {
 	struct OptionsItf;
 
 	struct TemplateEnrollStreamOptions {
-		int num_templates;
-		int min_template_length;
-		int max_template_length;
+		uint32_t num_templates;
+		uint32_t min_template_length;
+		uint32_t max_template_length;
 		std::string combine_distance_metric;
 		std::string model_filename;
 		void Register(const std::string&, OptionsItf*);

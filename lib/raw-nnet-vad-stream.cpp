@@ -62,8 +62,8 @@ namespace snowboy {
 			m_fieldx30.Resize(m.m_rows - nnet_output.m_rows, m.m_cols, MatrixResizeType::kUndefined);
 			m_fieldx30.CopyFromMat(m.RowRange(nnet_output.m_rows, m.m_cols - nnet_output.m_rows), MatrixTransposeType::kNoTrans);
 		}
-		for (int r = 0; r < nnet_output.m_rows; r++) {
-			auto f = nnet_output.m_data[r * nnet_output.m_stride + m_options.non_voice_index];
+		for (size_t r = 0; r < nnet_output.rows(); r++) {
+			auto f = nnet_output(r, m_options.non_voice_index);
 			if (f <= m_options.non_voice_threshold) {
 				info->at(r).flags |= 0x1;
 			} else

@@ -11,8 +11,8 @@ namespace snowboy {
 		bool init_bg_energy;
 		float bg_energy_threshold;
 		float bg_energy_cap;
-		int bg_buffer_size;
-		int raw_buffer_extra;
+		uint32_t bg_buffer_size;
+		uint32_t raw_buffer_extra;
 		void Register(const std::string&, OptionsItf*);
 	};
 	struct RawEnergyVadStream : StreamItf {

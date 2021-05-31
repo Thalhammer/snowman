@@ -69,16 +69,15 @@ namespace snowboy {
 			tinfo.push_back(e);
 		field_x50.clear();
 		int local_c8 = 1;
-		auto lVar7 = 0;
+		size_t lVar7 = 0;
 		if (!tinfo.empty()) {
-			auto iVar12 = this->field_xa4;
-			auto uVar4 = 0;
-			auto uVar10 = 0;
+			size_t uVar4 = 0;
+			size_t uVar10 = 0;
 			if (field_xa4 == 2) goto LAB_0016b789;
-			while (iVar12 != 1 || (tinfo[uVar4].flags & 1) != 0) {
+			while (field_xa4 != 1 || (tinfo[uVar4].flags & 1) != 0) {
 				while (true) {
 					if (uVar4 == tinfo.size() - 1) {
-						uVar10 = tinfo.size() & 0xffffffff;
+						uVar10 = tinfo.size();
 						this->field_xa4 = 2 - (tinfo.back().flags & 1U);
 					}
 					uVar4 += 1;
@@ -86,9 +85,8 @@ namespace snowboy {
 						lVar7 = uVar10;
 						goto LAB_0016b799;
 					}
-					iVar12 = field_xa4;
 					lVar7 = uVar4;
-					if (iVar12 != 2) break;
+					if (field_xa4 != 2) break;
 				LAB_0016b789:
 					if ((tinfo[uVar4].flags & 1) != 0) {
 						if (lVar7 != 0) goto LAB_0016b799;
@@ -139,10 +137,10 @@ namespace snowboy {
 				param_3->RowRange(m_someOtherMatrix.m_rows, lVar7).CopyFromMat(local_b8.RowRange(0, lVar7), MatrixTransposeType::kNoTrans);
 				m_someOtherMatrix.Resize(0, 0);
 				param_4->resize(lVar7 + field_x80.size());
-				for (auto lVar5 = 0; lVar5 < field_x80.size(); lVar5++) {
+				for (size_t lVar5 = 0; lVar5 < field_x80.size(); lVar5++) {
 					(*param_4)[lVar5] = field_x80[lVar5];
 				}
-				for (auto lVar5 = 0; lVar5 < lVar7; lVar5++) {
+				for (size_t lVar5 = 0; lVar5 < lVar7; lVar5++) {
 					(*param_4)[field_x80.size() + lVar5] = tinfo[lVar5];
 				}
 				field_x80.clear();
@@ -154,13 +152,13 @@ namespace snowboy {
 				m_someOtherMatrix.Resize(field_x28, local_b8.m_cols, MatrixResizeType::kUndefined);
 				m_someOtherMatrix.CopyFromMat(local_b8.RowRange(lVar7 - field_x28, field_x28), MatrixTransposeType::kNoTrans);
 				field_x80.resize(field_x28);
-				for (auto lVar5 = 0; lVar5 != field_x28; lVar5++) {
+				for (size_t lVar5 = 0; lVar5 != field_x28; lVar5++) {
 					field_x80[lVar5] = tinfo[lVar5 + lVar7 - field_x28];
 				}
 				// TODO: This might be a continue of the loop
 				goto LAB_0016b7aa;
 			}
-			if (field_x28 <= m_someOtherMatrix.m_rows + lVar7) {
+			if (field_x28 <= m_someOtherMatrix.rows() + lVar7) {
 				const auto iVar2 = field_x28 - lVar7;
 				Matrix local_98;
 				local_98.Resize(field_x28, local_b8.m_cols);
@@ -169,12 +167,11 @@ namespace snowboy {
 				m_someOtherMatrix.Swap(&local_98);
 				std::vector<FrameInfo> pFVar6;
 				pFVar6.resize(field_x28);
-				iVar2 <= field_x80.size();
 				auto pfVar15 = field_x80.size() - iVar2;
-				for (auto pfVar5 = 0; iVar2 != pfVar5; pfVar5++) {
+				for (size_t pfVar5 = 0; iVar2 != pfVar5; pfVar5++) {
 					pFVar6[pfVar5] = field_x80[pfVar15 + pfVar5];
 				}
-				for (int i = 0; i < lVar7; i++) {
+				for (size_t i = 0; i < lVar7; i++) {
 					pFVar6[iVar2 + i] = tinfo[i];
 				}
 				field_x80 = std::move(pFVar6);
@@ -186,7 +183,7 @@ namespace snowboy {
 				m_someOtherMatrix.RowRange(m_someOtherMatrix.m_rows - lVar7, lVar7).CopyFromMat(local_b8.RowRange(0, lVar7), MatrixTransposeType::kNoTrans);
 				auto old_size = field_x80.size();
 				field_x80.resize(lVar7 + field_x80.size());
-				for (auto lVar5 = 0; lVar5 < lVar7; lVar5++) {
+				for (size_t lVar5 = 0; lVar5 < lVar7; lVar5++) {
 					field_x80[old_size + lVar5] = tinfo[lVar5];
 				}
 				// TODO: This might be a continue of the loop

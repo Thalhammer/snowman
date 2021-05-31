@@ -49,14 +49,14 @@ namespace snowboy {
 			field_x78.Resize(read_mat.m_rows + old_f78_size, read_mat.m_cols, MatrixResizeType::kCopyData);
 			field_x78.RowRange(old_f78_size, read_mat.m_rows).CopyFromMat(read_mat, MatrixTransposeType::kNoTrans);
 
-			for (int slide_pos = 0; slide_pos < read_mat.m_rows; slide_pos += m_options.slide_step) {
-				for (int model_id = 0; model_id < field_x58.size(); model_id++) {
+			for (size_t slide_pos = 0; slide_pos < read_mat.rows(); slide_pos += m_options.slide_step) {
+				for (size_t model_id = 0; model_id < field_x58.size(); model_id++) {
 					auto matched_templates = 0;
-					for (int template_id = 0; template_id < field_x58[model_id].size(); template_id++) {
+					for (size_t template_id = 0; template_id < field_x58[model_id].size(); template_id++) {
 						auto step = m_options.slide_step;
 						if (read_mat.m_rows < slide_pos + step) step = read_mat.m_rows - slide_pos;
 						auto iVar2 = step - 1 + old_f78_size + slide_pos;
-						auto window_size = field_x58[model_id][template_id].GetWindowSize();
+						int window_size = field_x58[model_id][template_id].GetWindowSize();
 						window_size = (iVar2 - window_size) + 1;
 						if (window_size < 0) window_size = 0;
 						auto distance = field_x58[model_id][template_id].ComputeDtwDistance(step, field_x78.RowRange(window_size, (iVar2 - window_size) + 1));
@@ -74,7 +74,7 @@ namespace snowboy {
 				}
 			}
 		}
-		if (field_x70 < field_x78.m_rows) {
+		if (field_x70 < field_x78.rows()) {
 			auto x = field_x78.RowRange(field_x78.m_rows - field_x70, field_x70);
 			Matrix m;
 			m.Resize(x.m_rows, x.m_cols, MatrixResizeType::kUndefined);
@@ -140,12 +140,12 @@ namespace snowboy {
 				auto tmpl = m_models[i].GetTemplate(t);
 				e.SetReference(tmpl);
 				e.SetEarlyStopThreshold(m_models[i].m_sensitivity);
-				field_x70 = std::max(e.GetWindowSize(), field_x70);
+				field_x70 = std::max<size_t>(e.GetWindowSize(), field_x70);
 			}
 		}
 	}
 
-	size_t TemplateDetectStream::NumHotwords(int model_id) const {
+	size_t TemplateDetectStream::NumHotwords(size_t model_id) const {
 		if (model_id >= m_models.size() || model_id < 0) {
 			throw snowboy_exception{"model id runs out of range, expecting a value between [0, "
 									+ std::to_string(m_models.size()) + "] got " + std::to_string(model_id) + " instead."};

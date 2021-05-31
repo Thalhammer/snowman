@@ -40,7 +40,7 @@ namespace snowboy {
 	int FftStream::Read(Matrix* mat, std::vector<FrameInfo>* info) {
 		Matrix m;
 		auto res = m_connectedStream->Read(&m, info);
-		if ((res & 0xc2) != 0 || m.m_rows == 0) {
+		if ((res & 0xc2) != 0 || m.rows() == 0) {
 			mat->Resize(0, 0);
 			info->clear();
 			return res;
@@ -54,10 +54,10 @@ namespace snowboy {
 				num_fft_points = svec.m_size;
 			InitFft(num_fft_points);
 		}
-		mat->Resize(m.m_rows, num_fft_points);
+		mat->Resize(m.rows(), num_fft_points);
 		Vector v;
-		for (int r = 0; r < m.m_rows; r++) {
-			v.Resize(std::max<int>(m.cols(), num_fft_points));
+		for (size_t r = 0; r < m.rows(); r++) {
+			v.Resize(std::max<size_t>(m.cols(), num_fft_points));
 			v.CopyFromVec(SubVector{m, r});
 			m_fft->DoFft(&v);
 			// TODO: Cant we work directly on mat ?

@@ -4,6 +4,44 @@
 #include <sstream>
 
 namespace snowboy {
+	struct OptionInfo {
+		enum type {
+			kBool = 0x2,
+			kInt32 = 0x4,
+			kUint32 = 0x8,
+			kFloat = 0x10,
+			kString = 0x20,
+			kInt64 = 0x40,
+			kUint64 = 0x80,
+		};
+
+		std::string m_default_value;
+		std::string m_info;
+		union
+		{
+			bool* m_bool_value;
+			int32_t* m_int_value;
+			uint32_t* m_uint_value;
+			int64_t* m_int64_value;
+			uint64_t* m_uint64_value;
+			float* m_float_value;
+			std::string* m_string_value;
+		};
+		type m_type;
+
+		OptionInfo(bool* ptr);
+		OptionInfo(std::string* ptr);
+		OptionInfo(uint32_t* ptr);
+		OptionInfo(int32_t* ptr);
+		OptionInfo(uint64_t* ptr);
+		OptionInfo(int64_t* ptr);
+		OptionInfo(float* ptr);
+
+		std::string GetActualMessage() const;
+		std::string GetDefaultMessage() const;
+
+		void SetValue(const std::string& v);
+	};
 
 	OptionInfo::OptionInfo(bool* ptr) {
 		m_bool_value = ptr;
@@ -33,6 +71,20 @@ namespace snowboy {
 		m_info = {};
 	}
 
+	OptionInfo::OptionInfo(uint64_t* ptr) {
+		m_uint64_value = ptr;
+		m_type = kUint64;
+		m_default_value = std::to_string(*ptr);
+		m_info = {};
+	}
+
+	OptionInfo::OptionInfo(int64_t* ptr) {
+		m_int64_value = ptr;
+		m_type = kInt64;
+		m_default_value = std::to_string(*ptr);
+		m_info = {};
+	}
+
 	OptionInfo::OptionInfo(float* ptr) {
 		m_float_value = ptr;
 		m_type = kFloat;
@@ -47,6 +99,8 @@ namespace snowboy {
 		case kBool: ss << " (bool, current = " << (*m_bool_value); break;
 		case kInt32: ss << " (int32, current = " << (*m_int_value); break;
 		case kUint32: ss << " (uint32, current = " << (*m_uint_value); break;
+		case kInt64: ss << " (int64, current = " << (*m_int64_value); break;
+		case kUint64: ss << " (uint64, current = " << (*m_uint64_value); break;
 		case kFloat: ss << " (float, current = " << (*m_float_value); break;
 		case kString: ss << " (string, current = " << (*m_string_value); break;
 		default: throw snowboy_exception{"PointerType is not defined"};
@@ -96,59 +150,43 @@ namespace snowboy {
 
 	ParseOptions::~ParseOptions() {}
 
-	void ParseOptions::Register(const std::string& prefix, const std::string& name, const std::string& usage_info, bool* ptr) {
+	void ParseOptions::Register(const std::string& prefix, const std::string& name, const std::string usage_info, OptionInfo&& info) {
 		auto full_name = prefix;
 		if (!full_name.empty()) full_name += ".";
 		full_name += name;
 		full_name = NormalizeOptionName(full_name);
-		auto it = m_options.emplace(full_name, OptionInfo{ptr});
+		auto it = m_options.emplace(full_name, std::move(info));
 		if (!it.second)
 			throw snowboy_exception{"Option --" + full_name + " has already been registered, try to use a prefix if you have option conflicts?"};
 		it.first->second.m_info = usage_info;
+	}
+
+	void ParseOptions::Register(const std::string& prefix, const std::string& name, const std::string& usage_info, bool* ptr) {
+		Register(prefix, name, usage_info, OptionInfo{ptr});
 	}
 
 	void ParseOptions::Register(const std::string& prefix, const std::string& name, const std::string& usage_info, int32_t* ptr) {
-		auto full_name = prefix;
-		if (!full_name.empty()) full_name += ".";
-		full_name += name;
-		full_name = NormalizeOptionName(full_name);
-		auto it = m_options.emplace(full_name, OptionInfo{ptr});
-		if (!it.second)
-			throw snowboy_exception{"Option --" + full_name + " has already been registered, try to use a prefix if you have option conflicts?"};
-		it.first->second.m_info = usage_info;
+		Register(prefix, name, usage_info, OptionInfo{ptr});
 	}
 
 	void ParseOptions::Register(const std::string& prefix, const std::string& name, const std::string& usage_info, uint32_t* ptr) {
-		auto full_name = prefix;
-		if (!full_name.empty()) full_name += ".";
-		full_name += name;
-		full_name = NormalizeOptionName(full_name);
-		auto it = m_options.emplace(full_name, OptionInfo{ptr});
-		if (!it.second)
-			throw snowboy_exception{"Option --" + full_name + " has already been registered, try to use a prefix if you have option conflicts?"};
-		it.first->second.m_info = usage_info;
+		Register(prefix, name, usage_info, OptionInfo{ptr});
+	}
+
+	void ParseOptions::Register(const std::string& prefix, const std::string& name, const std::string& usage_info, int64_t* ptr) {
+		Register(prefix, name, usage_info, OptionInfo{ptr});
+	}
+
+	void ParseOptions::Register(const std::string& prefix, const std::string& name, const std::string& usage_info, uint64_t* ptr) {
+		Register(prefix, name, usage_info, OptionInfo{ptr});
 	}
 
 	void ParseOptions::Register(const std::string& prefix, const std::string& name, const std::string& usage_info, float* ptr) {
-		auto full_name = prefix;
-		if (!full_name.empty()) full_name += ".";
-		full_name += name;
-		full_name = NormalizeOptionName(full_name);
-		auto it = m_options.emplace(full_name, OptionInfo{ptr});
-		if (!it.second)
-			throw snowboy_exception{"Option --" + full_name + " has already been registered, try to use a prefix if you have option conflicts?"};
-		it.first->second.m_info = usage_info;
+		Register(prefix, name, usage_info, OptionInfo{ptr});
 	}
 
 	void ParseOptions::Register(const std::string& prefix, const std::string& name, const std::string& usage_info, std::string* ptr) {
-		auto full_name = prefix;
-		if (!full_name.empty()) full_name += ".";
-		full_name += name;
-		full_name = NormalizeOptionName(full_name);
-		auto it = m_options.emplace(full_name, OptionInfo{ptr});
-		if (!it.second)
-			throw snowboy_exception{"Option --" + full_name + " has already been registered, try to use a prefix if you have option conflicts?"};
-		it.first->second.m_info = usage_info;
+		Register(prefix, name, usage_info, OptionInfo{ptr});
 	}
 
 	void ParseOptions::Remove(const std::string& prefix, const std::string& name) {

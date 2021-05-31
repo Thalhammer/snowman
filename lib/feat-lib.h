@@ -7,9 +7,9 @@ namespace snowboy {
 	struct Matrix;
 	struct OptionsItf;
 	struct MelFilterBankOptions {
-		int num_bins;
-		int num_fft_points;
-		int sample_rate;
+		uint32_t num_bins;
+		uint32_t num_fft_points;
+		uint32_t sample_rate;
 		float low_frequency;
 		float high_frequency;
 		float vtln_low_frequency;
@@ -53,15 +53,15 @@ namespace snowboy {
 	struct Fft : FftItf {
 		FftOptions m_options;
 		int field_x10;
-		std::vector<int> m_bit_reversal_index;
+		std::vector<unsigned int> m_bit_reversal_index;
 		std::vector<float> m_twiddle_factors; // twiddle factors ?
 
 		Fft(const FftOptions& options);
 		void DoFft(bool inverse, Vector*) const;
 		void DoDanielsonLanczos(bool, Vector*) const;
-		void DoBitReversalSorting(const std::vector<int>&, Vector*) const;
+		void DoBitReversalSorting(const std::vector<unsigned int>&, Vector*) const;
 		void ComputeTwiddleFactor(int);
-		void ComputeBitReversalIndex(int, std::vector<int>*) const;
+		void ComputeBitReversalIndex(int, std::vector<unsigned int>*) const;
 		void DoProcessingForReal(bool, Vector*) const;
 		unsigned int GetNumBits(unsigned int) const;
 		std::pair<float, float> GetTwiddleFactor(int, int) const;

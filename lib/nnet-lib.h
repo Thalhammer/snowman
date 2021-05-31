@@ -20,7 +20,7 @@ namespace snowboy {
 		// Padding ?
 		int m_left_context;
 		int m_right_context;
-		int field_x18;
+		size_t field_x18;
 		// Padding ?
 		std::deque<FrameInfo> field_x20;
 		std::vector<ChunkInfo> m_chunkinfo;

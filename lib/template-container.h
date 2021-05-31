@@ -13,8 +13,8 @@ namespace snowboy {
 		void WriteHotwordModel(bool binary, const std::string& filename) const;
 		void ReadHotwordModel(const std::string& filename);
 		size_t NumTemplates() const;
-		const Matrix* GetTemplate(int index) const;
-		void DeleteTemplate(int index);
+		const Matrix* GetTemplate(size_t index) const;
+		void DeleteTemplate(size_t index);
 		void CombineTemplates(DistanceType distance);
 		void Clear();
 		void AddTemplate(const MatrixBase& tpl);

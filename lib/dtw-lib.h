@@ -31,7 +31,7 @@ namespace snowboy {
 		void SetOptions(const SlidingDtwOptions&);
 		void SetEarlyStopThreshold(float);
 		void Reset();
-		int GetWindowSize() const;
+		size_t GetWindowSize() const;
 		float GetDistance(int, int) const;
 		float ComputeVectorDistance(const VectorBase&, const VectorBase&) const;
 		float ComputeDtwDistance(int, const MatrixBase&);

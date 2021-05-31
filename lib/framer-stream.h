@@ -21,13 +21,13 @@ namespace snowboy {
 		int field_x38;
 		int field_x3c; // might be padding
 		Vector field_x40;
-		int m_frame_shift_samples;
-		int m_frame_length_samples;
+		size_t m_frame_shift_samples;
+		size_t m_frame_length_samples;
 		Vector m_window;
 
 		void CreateWindow();
 		void CreateFrames(const VectorBase& data, Matrix* mat);
-		int NumFrames(int p1) const;
+		size_t NumFrames(size_t p1) const;
 
 		FramerStream(const FramerStreamOptions& options);
 		virtual int Read(Matrix* mat, std::vector<FrameInfo>* info) override;

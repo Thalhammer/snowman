@@ -42,8 +42,8 @@ namespace snowboy {
 			InitMelFilterBank(field_x44);
 			field_x48 = logf(static_cast<float>(field_x44) * 0.5f);
 		}
-		mat->Resize(m.m_rows, m_options.num_cepstral_coeffs);
-		for (int r = 0; r < m.m_rows; r++) {
+		mat->Resize(m.rows(), m_options.num_cepstral_coeffs);
+		for (size_t r = 0; r < m.rows(); r++) {
 			SubVector svec{m, r};
 			float energy = 0.0f;
 			if (m_options.use_energy) {

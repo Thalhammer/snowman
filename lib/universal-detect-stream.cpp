@@ -363,7 +363,7 @@ namespace snowboy {
 			e.field_x1c0 = num_repeats;
 			e.field_x1d8 = 1;
 		}
-		for (size_t kw = 0; kw < num_kws; kw++) {
+		for (size_t kw = 0; kw < keywords.size(); kw++) {
 			keywords[kw].ReadKeyword(binary, is, slide_window);
 			keywords[kw].hotword_id = (*hotword_id)++;
 		}

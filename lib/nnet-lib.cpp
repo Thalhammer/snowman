@@ -235,7 +235,7 @@ namespace snowboy {
 	}
 
 	void Nnet::Propagate() {
-		for (int32_t c = 0; c < m_components.size(); c++) {
+		for (size_t c = 0; c < m_components.size(); c++) {
 			auto ctx = m_components[c]->Context();
 			auto inputDim = m_components[c]->InputDim();
 			if (ctx.size() > 1) {
@@ -290,7 +290,7 @@ namespace snowboy {
 	}
 
 	void Nnet::SetIndices() {
-		for (int32_t i = 0; i < m_components.size(); i++) {
+		for (size_t i = 0; i < m_components.size(); i++) {
 			m_components[i]->SetIndex(i);
 		}
 	}

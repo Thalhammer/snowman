@@ -12,23 +12,23 @@ extern "C"
 #include <vector-wrapper.h>
 
 namespace snowboy {
-	void VectorBase::Add(float x) {
-		for (int i = 0; i < m_size; i++) {
+	void VectorBase::Add(float x) noexcept {
+		for (size_t i = 0; i < m_size; i++) {
 			m_data[i] += x;
 		}
 	}
 
-	void VectorBase::AddDiagMat2(float param_1, const MatrixBase& param_2, MatrixTransposeType param_3, float param_4) {
+	void VectorBase::AddDiagMat2(float param_1, const MatrixBase& param_2, MatrixTransposeType param_3, float param_4) noexcept {
 		if (param_3 == MatrixTransposeType::kNoTrans) {
 			auto ptr = param_2.m_data;
-			for (int i = 0; i < m_size; i++) {
+			for (size_t i = 0; i < m_size; i++) {
 				auto fVar1 = m_data[i];
 				auto fVar7 = cblas_sdot(param_2.m_cols, ptr, 1, ptr, 1);
 				m_data[i] = fVar7 * param_1 + param_4 * fVar1;
 				ptr += param_2.m_stride;
 			}
 		} else {
-			for (int i = 0; i < m_size; i++) {
+			for (size_t i = 0; i < m_size; i++) {
 				auto fVar1 = m_data[i];
 				auto fVar7 = cblas_sdot(param_2.m_rows, &param_2.m_data[i], param_2.m_stride, &param_2.m_data[i], param_2.m_stride);
 				m_data[i] = fVar7 * param_1 + param_4 * fVar1;
@@ -36,41 +36,41 @@ namespace snowboy {
 		}
 	}
 
-	void VectorBase::AddMatVec(float param_1, const MatrixBase& param_2, MatrixTransposeType param_3, const VectorBase& param_4, float param_5) {
+	void VectorBase::AddMatVec(float param_1, const MatrixBase& param_2, MatrixTransposeType param_3, const VectorBase& param_4, float param_5) noexcept {
 		cblas_sgemv(CBLAS_ORDER::CblasRowMajor, static_cast<CBLAS_TRANSPOSE>(param_3),
 					param_2.m_rows, param_2.m_cols, param_1, param_2.m_data, param_2.m_stride, param_4.m_data, 1, param_5, m_data, 1);
 	}
 
-	void VectorBase::AddVec(float param_1, const VectorBase& param_2) {
-		SNOWBOY_ASSERT(param_2.m_size == m_size);
+	void VectorBase::AddVec(float param_1, const VectorBase& param_2) noexcept {
+		SNOWBOY_ASSERT(param_2.m_size >= m_size);
 		cblas_saxpy(m_size, param_1, param_2.m_data, 1, m_data, 1);
 	}
 
-	void VectorBase::AddVec2(float param_1, const VectorBase& param_2) {
-		SNOWBOY_ASSERT(m_size == param_2.m_size);
+	void VectorBase::AddVec2(float param_1, const VectorBase& param_2) noexcept {
+		SNOWBOY_ASSERT(param_2.m_size >= m_size);
 		for (size_t i = 0; i < m_size; i++)
 			m_data[i] += param_1 * param_2.m_data[i] * param_2.m_data[i];
 	}
 
-	void VectorBase::ApplyFloor(float param_1) {
+	void VectorBase::ApplyFloor(float param_1) noexcept {
 		for (size_t i = 0; i < m_size; i++) {
 			m_data[i] = std::max(param_1, m_data[i]);
 		}
 	}
 
-	void VectorBase::ApplyLog() {
+	void VectorBase::ApplyLog() noexcept {
 		for (size_t i = 0; i < m_size; i++) {
 			m_data[i] = logf(m_data[i]);
 		}
 	}
 
-	void VectorBase::ApplyPow(float param_1) {
+	void VectorBase::ApplyPow(float param_1) noexcept {
 		for (size_t i = 0; i < m_size; i++) {
 			m_data[i] = pow(m_data[i], param_1);
 		}
 	}
 
-	float VectorBase::ApplySoftmax() {
+	float VectorBase::ApplySoftmax() noexcept {
 		auto max = Max(), sum = 0.0f;
 		for (size_t i = 0; i < m_size; i++) {
 			m_data[i] = expf(m_data[i] - max);
@@ -80,29 +80,29 @@ namespace snowboy {
 		return logf(sum) + max;
 	}
 
-	void VectorBase::CopyColsFromMat(const MatrixBase& param_1) {
-		SNOWBOY_ASSERT(m_size >= param_1.m_rows * param_1.m_cols);
-		for (auto r = 0; r < param_1.m_rows; r += 1) {
-			for (auto c = 0; c < param_1.m_cols; c += 1) {
-				m_data[r + param_1.m_rows * c] = param_1.m_data[param_1.m_stride * r + c];
+	void VectorBase::CopyColsFromMat(const MatrixBase& param_1) noexcept {
+		SNOWBOY_ASSERT(m_size >= param_1.rows() * param_1.cols());
+		for (size_t r = 0; r < param_1.rows(); r += 1) {
+			for (size_t c = 0; c < param_1.cols(); c += 1) {
+				m_data[r + param_1.m_rows * c] = param_1(r,c);
 			}
 		}
 	}
 
-	void VectorBase::CopyFromVec(const VectorBase& param_1) {
+	void VectorBase::CopyFromVec(const VectorBase& param_1) noexcept {
 		if (m_data != param_1.m_data && m_data != nullptr && param_1.m_data != nullptr) {
 			memcpy(m_data, param_1.m_data, std::min(m_size, param_1.m_size) * sizeof(float));
 		}
 	}
 
-	void VectorBase::CopyRowsFromMat(const MatrixBase& param_1) {
-		SNOWBOY_ASSERT(m_size >= param_1.m_cols * param_1.m_rows);
-		if (param_1.m_cols != param_1.m_stride) {
-			for (auto r = 0; r != param_1.m_rows; r++) {
-				memcpy(&m_data[r * param_1.m_cols], &param_1.m_data[param_1.m_stride * r], param_1.m_cols * 4);
+	void VectorBase::CopyRowsFromMat(const MatrixBase& param_1) noexcept {
+		SNOWBOY_ASSERT(m_size >= param_1.cols() * param_1.rows());
+		if (param_1.cols() != param_1.stride()) {
+			for (size_t r = 0; r != param_1.rows(); r++) {
+				memcpy(&m_data[r * param_1.cols()], &param_1.m_data[param_1.stride() * r], param_1.cols() * sizeof(float));
 			}
 		} else {
-			memcpy(m_data, param_1.m_data, param_1.m_cols * param_1.m_rows * 4);
+			memcpy(m_data, param_1.m_data, param_1.cols() * param_1.rows() * sizeof(float));
 		}
 	}
 
@@ -123,7 +123,7 @@ namespace snowboy {
 		return sqrtf(sum);
 	}
 
-	bool VectorBase::IsZero(float cutoff) const {
+	bool VectorBase::IsZero(float cutoff) const noexcept {
 		auto max = 0.0f;
 		for (uint32_t i = 0; i < m_size; i++) {
 			max = std::max(std::abs(m_data[i]), max);
@@ -131,7 +131,7 @@ namespace snowboy {
 		return max <= cutoff;
 	}
 
-	float VectorBase::Max() const {
+	float VectorBase::Max() const noexcept {
 		auto max = -std::numeric_limits<float>::infinity();
 		for (uint32_t i = 0; i < m_size; i++) {
 			max = std::max(m_data[i], max);
@@ -139,7 +139,7 @@ namespace snowboy {
 		return max;
 	}
 
-	float VectorBase::Max(int* e) const {
+	float VectorBase::Max(int* e) const noexcept {
 		*e = -1;
 		auto max = -std::numeric_limits<float>::infinity();
 		for (uint32_t i = 0; i < m_size; i++) {
@@ -151,7 +151,7 @@ namespace snowboy {
 		return max;
 	}
 
-	float VectorBase::Min() const {
+	float VectorBase::Min() const noexcept {
 		auto min = std::numeric_limits<float>::infinity();
 		for (uint32_t i = 0; i < m_size; i++) {
 			min = std::min(m_data[i], min);
@@ -159,7 +159,7 @@ namespace snowboy {
 		return min;
 	}
 
-	float VectorBase::Min(int* e) const {
+	float VectorBase::Min(int* e) const noexcept {
 		*e = -1;
 		auto min = std::numeric_limits<float>::infinity();
 		for (uint32_t i = 0; i < m_size; i++) {
@@ -171,13 +171,13 @@ namespace snowboy {
 		return min;
 	}
 
-	void VectorBase::MulElements(const VectorBase& param_1) {
+	void VectorBase::MulElements(const VectorBase& param_1) noexcept {
 		for (uint32_t i = 0; i < std::min(m_size, param_1.m_size); i++) {
 			m_data[i] *= param_1.m_data[i];
 		}
 	}
 
-	float VectorBase::Norm(float p) const {
+	float VectorBase::Norm(float p) const noexcept {
 		// TODO: Float equal compare is bad
 		if (p == 0.0f) {
 			float sum = 0.0f;
@@ -220,20 +220,20 @@ namespace snowboy {
 		}
 	}
 
-	SubVector VectorBase::Range(int param_1, int param_2) const {
+	SubVector VectorBase::Range(int param_1, int param_2) const noexcept {
 		return SubVector(*this, param_1, param_2);
 	}
 
 	// TODO: Why do we need this one if the result is the same ?
-	SubVector VectorBase::Range(int param_1, int param_2) {
+	SubVector VectorBase::Range(int param_1, int param_2) noexcept {
 		return SubVector(*this, param_1, param_2);
 	}
 
-	void VectorBase::Scale(float factor) {
+	void VectorBase::Scale(float factor) noexcept {
 		cblas_sscal(m_size, factor, m_data, 1);
 	}
 
-	void VectorBase::Set(float val) {
+	void VectorBase::Set(float val) noexcept {
 		for (uint32_t i = 0; i < m_size; i++) {
 			m_data[i] = val;
 		}
@@ -247,7 +247,7 @@ namespace snowboy {
 		throw snowboy_exception{"Not implemented"};
 	}
 
-	float VectorBase::Sum() const {
+	float VectorBase::Sum() const noexcept {
 		auto sum = 0.0f;
 		for (uint32_t i = 0; i < m_size; i++)
 			sum += m_data[i];
@@ -270,14 +270,14 @@ namespace snowboy {
 		if (!*os) throw snowboy_exception{"Failed to write Vector to stream"};
 	}
 
-	bool VectorBase::HasNan() const {
+	bool VectorBase::HasNan() const noexcept {
 		for (size_t i = 0; i < size(); i++) {
 			if (m_data[i] != m_data[i]) return true;
 		}
 		return false;
 	}
 
-	bool VectorBase::HasInfinity() const {
+	bool VectorBase::HasInfinity() const noexcept {
 		for (size_t i = 0; i < size(); i++) {
 			if (std::isinf(m_data[i])) return true;
 		}
@@ -286,7 +286,7 @@ namespace snowboy {
 
 	static size_t allocs = 0;
 	static size_t frees = 0;
-	void Vector::Resize(int size, MatrixResizeType resize) {
+	void Vector::Resize(size_t size, MatrixResizeType resize) {
 		SNOWBOY_ASSERT(m_size <= m_cap);
 		if (size <= m_cap) {
 #ifndef NDEBUG
@@ -317,7 +317,7 @@ namespace snowboy {
 		m_cap = size;
 	}
 
-	Vector::~Vector() {
+	Vector::~Vector() noexcept {
 		if (m_data) {
 			SnowboyMemalignFree(m_data);
 			frees++;
@@ -395,19 +395,13 @@ namespace snowboy {
 		Read(binary, false, is);
 	}
 
-	void Vector::Swap(Vector* other) {
-		auto tdata = other->m_data;
-		other->m_data = m_data;
-		m_data = tdata;
-		auto tsize = other->m_size;
-		other->m_size = m_size;
-		m_size = tsize;
-		auto tcap = other->m_cap;
-		other->m_cap = m_cap;
-		m_cap = tcap;
+	void Vector::Swap(Vector* other) noexcept {
+		std::swap(m_data, other->m_data);
+		std::swap(m_size, other->m_size);
+		std::swap(m_cap, other->m_cap);
 	}
 
-	void Vector::RemoveElement(int index) {
+	void Vector::RemoveElement(size_t index) noexcept {
 		if (index >= m_size) return;
 		if (index < m_size - 1) {
 			memmove(&m_data[index], &m_data[index + 1], (m_size - index - 1) * sizeof(float));
@@ -424,20 +418,20 @@ namespace snowboy {
 		frees = 0;
 	}
 
-	SubVector::SubVector(const VectorBase& parent, int offset, int size) {
+	SubVector::SubVector(const VectorBase& parent, size_t offset, size_t size) noexcept {
 		SNOWBOY_ASSERT(offset >= 0);
 		SNOWBOY_ASSERT(size >= 0);
 		m_data = parent.m_data + offset;
-		m_size = std::min<int>(parent.m_size - offset, size);
+		m_size = std::min(parent.m_size - offset, size);
 	}
 
-	SubVector::SubVector(const MatrixBase& parent, int row) {
+	SubVector::SubVector(const MatrixBase& parent, size_t row) noexcept {
 		SNOWBOY_ASSERT(row >= 0);
 		m_data = parent.m_data + (row * parent.m_stride);
 		m_size = parent.m_cols;
 	}
 
-	SubVector::SubVector(const SubVector& other) {
+	SubVector::SubVector(const SubVector& other) noexcept {
 		m_data = other.m_data;
 		m_size = other.m_size;
 	}

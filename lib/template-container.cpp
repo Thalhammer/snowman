@@ -53,15 +53,15 @@ namespace snowboy {
 		return m_templates.size();
 	}
 
-	const Matrix* TemplateContainer::GetTemplate(int index) const {
-		if (index < 0 || index >= m_templates.size())
+	const Matrix* TemplateContainer::GetTemplate(size_t index) const {
+		if (index >= m_templates.size())
 			throw snowboy_exception{"template id runs out of range, expecting a value between [0, "
 									+ std::to_string(m_templates.size()) + "] got " + std::to_string(index) + " instead."};
 		return &m_templates[index];
 	}
 
-	void TemplateContainer::DeleteTemplate(int index) {
-		if (index < 0 || index >= m_templates.size())
+	void TemplateContainer::DeleteTemplate(size_t index) {
+		if (index >= m_templates.size())
 			throw snowboy_exception{"template id runs out of range, expecting a value between [0, "
 									+ std::to_string(m_templates.size()) + "] got " + std::to_string(index) + " instead."};
 		m_templates.erase(m_templates.begin() + index);
@@ -70,10 +70,10 @@ namespace snowboy {
 	void TemplateContainer::CombineTemplates(DistanceType distance) {
 		if (m_templates.size() < 2) return;
 		auto min_val = std::numeric_limits<float>::max();
-		auto min_idx = 0;
-		for (auto i = 0; i < m_templates.size(); i++) {
+		size_t min_idx = 0;
+		for (size_t i = 0; i < m_templates.size(); i++) {
 			auto sum = 0.0;
-			for (auto i2 = 0; i2 < m_templates.size(); i2++) {
+			for (size_t i2 = 0; i2 < m_templates.size(); i2++) {
 				if (i != i2) {
 					sum += snowboy::DtwAlign(distance, m_templates[i], m_templates[i2], nullptr);
 				}
@@ -86,25 +86,21 @@ namespace snowboy {
 		std::vector<int> local_a0;
 		local_a0.resize(m_templates[min_idx].m_rows, 1); // Not sure if int
 
-		if (m_templates.size() != 0) {
-			auto local_90 = 0;
-			do {
-				if (min_idx != (int)local_90) {
-					std::vector<std::vector<int>> local_58;
-					snowboy::DtwAlign(distance, m_templates[min_idx], m_templates[local_90], &local_58);
-					for (auto local_a8 = 0; local_a8 < m_templates[min_idx].m_rows; local_a8 += 1) {
-						if (local_58[local_a8].size() != 0) {
-							SubVector{m_templates[min_idx], local_a8}.Scale(local_a0[local_a8]);
-							for (auto uVar10 = 0; uVar10 < local_58[local_a8].size(); uVar10++) {
-								SubVector{m_templates[min_idx], local_a8}.AddVec(1.0, SubVector{m_templates[local_90], local_58[local_a8][uVar10]});
-							}
-							local_a0[local_a8] += local_58[local_a8].size();
-							SubVector{m_templates[min_idx], local_a8}.Scale(1.0f / (float)(local_a0[local_a8]));
+		for (size_t local_90 = 0; local_90 < m_templates.size(); local_90++) {
+			if (min_idx != local_90) {
+				std::vector<std::vector<int>> local_58;
+				snowboy::DtwAlign(distance, m_templates[min_idx], m_templates[local_90], &local_58);
+				for (size_t local_a8 = 0; local_a8 < m_templates[min_idx].rows(); local_a8 += 1) {
+					if (local_58[local_a8].size() != 0) {
+						SubVector{m_templates[min_idx], local_a8}.Scale(local_a0[local_a8]);
+						for (size_t uVar10 = 0; uVar10 < local_58[local_a8].size(); uVar10++) {
+							SubVector{m_templates[min_idx], local_a8}.AddVec(1.0, SubVector{m_templates[local_90], local_58[local_a8][uVar10]});
 						}
+						local_a0[local_a8] += local_58[local_a8].size();
+						SubVector{m_templates[min_idx], local_a8}.Scale(1.0f / (float)(local_a0[local_a8]));
 					}
 				}
-				local_90 += 1;
-			} while (local_90 < m_templates.size());
+			}
 		}
 		if (min_idx != 0) {
 			m_templates[0] = m_templates[min_idx];

@@ -34,13 +34,11 @@ namespace snowboy {
 	}
 
 	void ChunkInfo::CheckSize(const MatrixBase& mat) const {
-		SNOWBOY_ASSERT(mat.m_rows == NumRows() && mat.m_cols == NumCols());
+		SNOWBOY_ASSERT(mat.rows() == NumRows() && mat.cols() == NumCols());
 	}
 
 	void ChunkInfo::Check() const {
 		// Checking sanity of the ChunkInfo object
-		SNOWBOY_ASSERT((m_feat_dim > 0) && (m_num_chunks > 0));
-
 		if (!m_offsets.empty())
 		{
 			SNOWBOY_ASSERT((m_first_offset == m_offsets.front()) && (m_last_offset == m_offsets.back()));
@@ -424,7 +422,7 @@ namespace snowboy {
 
 		*out = std::move(in);
 		out_info.CheckSize(*out);
-		for (int i = 0; i < out->m_rows; i++)
+		for (size_t i = 0; i < out->rows(); i++)
 		{
 			SubVector vec{*out, i};
 			vec.ApplySoftmax();
@@ -496,21 +494,21 @@ namespace snowboy {
 			throw snowboy_exception{"Zero output dimension in SpliceComponent"};
 
 		auto num_splice = m_context.size();
-		std::vector<std::vector<int32_t>> indexes(num_splice);
+		std::vector<std::vector<ssize_t>> indexes(num_splice);
 		for (auto& e : indexes)
 			e.resize(out->m_rows);
 
 		auto const_dim = m_constComponentDim;
-		std::vector<int32_t> const_indexes;
+		std::vector<ssize_t> const_indexes;
 		const_indexes.resize((const_dim == 0) ? 0u : out->m_rows);
 
-		for (int32_t chunk = 0; chunk < in_info.NumChunks(); chunk++)
+		for (size_t chunk = 0; chunk < in_info.NumChunks(); chunk++)
 		{
 			if (chunk == 0)
 			{
 				// this branch could be used for all chunks in the matrix,
 				// but is restricted to chunk 0 for efficiency reasons
-				for (int32_t c = 0; c < num_splice; c++)
+				for (size_t c = 0; c < num_splice; c++)
 				{
 					for (int32_t out_index = 0; out_index < out_chunk_size; out_index++)
 					{
@@ -522,7 +520,7 @@ namespace snowboy {
 			} else
 			{ // just copy the indices from the previous chunk
 				// and offset these by input chunk size
-				for (int32_t c = 0; c < num_splice; c++)
+				for (size_t c = 0; c < num_splice; c++)
 				{
 					for (int32_t out_index = 0; out_index < out_chunk_size; out_index++)
 					{
@@ -540,7 +538,7 @@ namespace snowboy {
 			}
 		}
 
-		for (int32_t c = 0; c < num_splice; c++)
+		for (size_t c = 0; c < num_splice; c++)
 		{
 			int32_t dim = input_dim - const_dim; // dimension we
 			// are splicing

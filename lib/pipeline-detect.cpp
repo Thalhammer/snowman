@@ -122,7 +122,7 @@ namespace snowboy {
 				}
 				nuniversal++;
 			} else {
-				for (int x = 0; x < m_templateDetectStream->NumHotwords(npersonal); x++) {
+				for (size_t x = 0; x < m_templateDetectStream->NumHotwords(npersonal); x++) {
 					m_personal_kw_mapping.push_back(kwid);
 					kwid++;
 				}

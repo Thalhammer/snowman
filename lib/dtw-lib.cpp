@@ -78,7 +78,7 @@ namespace snowboy {
 		field_x18.clear();
 	}
 
-	int SlidingDtw::GetWindowSize() const {
+	size_t SlidingDtw::GetWindowSize() const {
 		if (m_reference) return m_reference->rows();
 		return 0;
 	}
@@ -105,11 +105,11 @@ namespace snowboy {
 
 		std::vector<float> local_238;
 		auto local_22c = std::numeric_limits<float>::max();
-		for (auto row = 0; row < param_2.rows(); row++) {
+		for (size_t row = 0; row < param_2.rows(); row++) {
 			/* try { // try from 00101d18 to 00101d74 has its CatchHandler @ 00102283 */
 			int local_1e8 = 0, local_1e4 = 0, local_1e0 = 0, local_1dc = 0;
 			snowboy::SlidingDtw::ComputeBandBoundary(row, &local_1e8, &local_1e4);
-			if (0 < row) {
+			if (0 != row) {
 				snowboy::SlidingDtw::ComputeBandBoundary(row - 1, &local_1e0, &local_1dc);
 			}
 			std::vector<float> __s;
@@ -176,8 +176,8 @@ namespace snowboy {
 
 		Matrix distances;
 		distances.Resize(param_2.rows(), param_3.rows());
-		for (auto row = 0; row < distances.rows(); row++) {
-			for (auto col = 0; col < distances.cols(); col++) {
+		for (size_t row = 0; row < distances.rows(); row++) {
+			for (size_t col = 0; col < distances.cols(); col++) {
 				if (param_1 == DistanceType::cosine) {
 					distances(row, col) = SubVector{param_2, row}.CosineDistance(SubVector{param_3, col});
 				} else if (param_1 == DistanceType::euclidean) {
@@ -189,8 +189,8 @@ namespace snowboy {
 		SNOWBOY_ASSERT(!distances.HasNan() && !distances.HasInfinity());
 		Matrix local_1d8;
 		local_1d8.Resize(param_2.rows(), param_3.rows());
-		for (auto row = 0; row < local_1d8.rows(); row++) {
-			for (auto col = 0; col < local_1d8.cols(); col++) {
+		for (size_t row = 0; row < local_1d8.rows(); row++) {
+			for (size_t col = 0; col < local_1d8.cols(); col++) {
 				if (row == 0) {
 					local_1d8(0, col) = distances(0, col);
 				} else if (col == 0) {
@@ -206,7 +206,7 @@ namespace snowboy {
 		auto min_value = SubVector{local_1d8, local_1d8.rows() - 1}.Min(&min_index);
 		SNOWBOY_ASSERT(min_index >= 0);
 		if (param_4 != nullptr) {
-			for (int iVar11 = local_1d8.rows() - 1; iVar11 != 0;) {
+			for (size_t iVar11 = local_1d8.rows() - 1; iVar11 != 0;) {
 				// TODO: This is wrong
 				// If I look at the code it should only be
 				// param_4->at(iVar11).push_back(min_index);

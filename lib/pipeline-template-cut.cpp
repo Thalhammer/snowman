@@ -153,12 +153,12 @@ namespace snowboy {
 
 	void PipelineTemplateCut::ComputeTemplateBoundary(const MatrixBase& param_1, const std::vector<FrameInfo>& param_2, int* param_3, int* param_4) const {
 		std::vector<float> temp;
-		temp.resize(param_1.m_rows);
-		for (auto iVar14 = 0; iVar14 < param_1.m_rows; iVar14++) {
-			auto fVar17 = SubVector{param_1, iVar14}.DotVec(SubVector{param_1, iVar14});
+		temp.resize(param_1.rows());
+		for (size_t row = 0; row < param_1.rows(); row++) {
+			auto fVar17 = SubVector{param_1, row}.DotVec(SubVector{param_1, row});
 			fVar17 = std::max(fVar17, std::numeric_limits<float>::min());
 			fVar17 = logf(fVar17);
-			temp[iVar14] = fVar17;
+			temp[row] = fVar17;
 		}
 
 		float avg_voice_energy = 0.0f;
@@ -190,7 +190,7 @@ namespace snowboy {
 		*param_3 = -1;
 		state.GetVoiceStates(local_98, &piStack88);
 
-		auto lVar6 = 1;
+		size_t lVar6 = 1;
 		auto lVar12 = piStack88.size();
 		if (lVar12 == 0) {
 		LAB_00155412:
@@ -233,23 +233,20 @@ namespace snowboy {
 			state.GetVoiceStates(local_98, &piStack88);
 			lVar12 = piStack88.size();
 			if (lVar12 != 0) {
-				int iVar7 = 0;
-				for (int i = 0; i < piStack88.size(); i++) {
+				size_t iVar7 = 0;
+				for (size_t i = 0; i < piStack88.size(); i++) {
 					if (piStack88[i] == 1) break;
 					iVar7 = i + 1;
 				}
 				if (iVar7 == piStack88.size()) {
-					*param_4 = ((int)lVar12 + -1) - *param_4;
+					*param_4 = ((int)lVar12 - 1) - *param_4;
 					return;
 				}
-				iVar7 -= m_pipelineTemplateCutOptions.min_voice_frames;
-				if (iVar7 < 0) {
-					iVar7 = 0;
-				}
-				*param_4 = ((int)lVar12 + -1) - iVar7;
+				iVar7 -= std::min<size_t>(iVar7, m_pipelineTemplateCutOptions.min_voice_frames);
+				*param_4 = ((int)lVar12 - 1) - iVar7;
 				return;
 			}
-			*param_4 = ((int)lVar12 + -1) - *param_4;
+			*param_4 = ((int)lVar12 - 1) - *param_4;
 		}
 	}
 } // namespace snowboy

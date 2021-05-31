@@ -47,11 +47,11 @@ namespace snowboy {
 		Matrix mat;
 		mat.Resize(wave_header_->wChannels, array_length / wave_header_->wChannels, MatrixResizeType::kSetZero);
 		// No idea if this is correct, but it looks right...
-		for (int c = 0; c < mat.m_cols; c++)
+		for (size_t c = 0; c < mat.cols(); c++)
 		{
-			for (int r = 0; r < mat.m_rows; r++)
+			for (size_t r = 0; r < mat.rows(); r++)
 			{
-				mat.m_data[r * mat.m_stride + c] = data[c * mat.m_rows + r];
+				mat(r,c) = data[c * mat.rows() + r];
 			}
 		}
 		mat.Scale(GetMaxWaveAmplitude(*wave_header_));
@@ -64,11 +64,11 @@ namespace snowboy {
 		Matrix mat;
 		mat.Resize(wave_header_->wChannels, array_length / wave_header_->wChannels, MatrixResizeType::kSetZero);
 		// No idea if this is correct, but it looks right...
-		for (int c = 0; c < mat.m_cols; c++)
+		for (size_t c = 0; c < mat.cols(); c++)
 		{
-			for (int r = 0; r < mat.m_rows; r++)
+			for (size_t r = 0; r < mat.rows(); r++)
 			{
-				mat.m_data[r * mat.m_stride + c] = data[c * mat.m_rows + r];
+				mat(r,c) = data[c * mat.rows() + r];
 			}
 		}
 		return detect_pipeline_->RunDetection(mat, is_end);
@@ -80,11 +80,11 @@ namespace snowboy {
 		Matrix mat;
 		mat.Resize(wave_header_->wChannels, array_length / wave_header_->wChannels, MatrixResizeType::kSetZero);
 		// No idea if this is correct, but it looks right...
-		for (int c = 0; c < mat.m_cols; c++)
+		for (size_t c = 0; c < mat.cols(); c++)
 		{
-			for (int r = 0; r < mat.m_rows; r++)
+			for (size_t r = 0; r < mat.rows(); r++)
 			{
-				mat.m_data[r * mat.m_stride + c] = data[c * mat.m_rows + r];
+				mat(r,c) = data[c * mat.rows() + r];
 			}
 		}
 		return detect_pipeline_->RunDetection(mat, is_end);
@@ -166,11 +166,11 @@ namespace snowboy {
 		Matrix mat;
 		mat.Resize(wave_header_->wChannels, array_length / wave_header_->wChannels, MatrixResizeType::kSetZero);
 		// No idea if this is correct, but it looks right...
-		for (int c = 0; c < mat.m_cols; c++)
+		for (size_t c = 0; c < mat.cols(); c++)
 		{
-			for (int r = 0; r < mat.m_rows; r++)
+			for (size_t r = 0; r < mat.rows(); r++)
 			{
-				mat.m_data[r * mat.m_stride + c] = data[c * mat.m_rows + r];
+				mat(r,c) = data[c * mat.rows() + r];
 			}
 		}
 		mat.Scale(GetMaxWaveAmplitude(*wave_header_));
@@ -183,11 +183,11 @@ namespace snowboy {
 		Matrix mat;
 		mat.Resize(wave_header_->wChannels, array_length / wave_header_->wChannels, MatrixResizeType::kSetZero);
 		// No idea if this is correct, but it looks right...
-		for (int c = 0; c < mat.m_cols; c++)
+		for (size_t c = 0; c < mat.cols(); c++)
 		{
-			for (int r = 0; r < mat.m_rows; r++)
+			for (size_t r = 0; r < mat.rows(); r++)
 			{
-				mat.m_data[r * mat.m_stride + c] = data[c * mat.m_rows + r];
+				mat(r,c) = data[c * mat.rows() + r];
 			}
 		}
 		return vad_pipeline_->RunVad(mat, is_end);
@@ -199,11 +199,11 @@ namespace snowboy {
 		Matrix mat;
 		mat.Resize(wave_header_->wChannels, array_length / wave_header_->wChannels, MatrixResizeType::kSetZero);
 		// No idea if this is correct, but it looks right...
-		for (int c = 0; c < mat.m_cols; c++)
+		for (size_t c = 0; c < mat.cols(); c++)
 		{
-			for (int r = 0; r < mat.m_rows; r++)
+			for (size_t r = 0; r < mat.rows(); r++)
 			{
-				mat.m_data[r * mat.m_stride + c] = data[c * mat.m_rows + r];
+				mat(r,c) = data[c * mat.rows() + r];
 			}
 		}
 		return vad_pipeline_->RunVad(mat, is_end);
@@ -254,11 +254,11 @@ namespace snowboy {
 		Matrix mat;
 		mat.Resize(wave_header_->wChannels, array_length / wave_header_->wChannels, MatrixResizeType::kSetZero);
 		// No idea if this is correct, but it looks right...
-		for (int c = 0; c < mat.m_cols; c++)
+		for (size_t c = 0; c < mat.cols(); c++)
 		{
-			for (int r = 0; r < mat.m_rows; r++)
+			for (size_t r = 0; r < mat.rows(); r++)
 			{
-				mat.m_data[r * mat.m_stride + c] = data[c * mat.m_rows + r];
+				mat(r,c) = data[c * mat.rows() + r];
 			}
 		}
 		mat.Scale(GetMaxWaveAmplitude(*wave_header_));
@@ -271,11 +271,11 @@ namespace snowboy {
 		Matrix mat;
 		mat.Resize(wave_header_->wChannels, array_length / wave_header_->wChannels, MatrixResizeType::kSetZero);
 		// No idea if this is correct, but it looks right...
-		for (int c = 0; c < mat.m_cols; c++)
+		for (size_t c = 0; c < mat.cols(); c++)
 		{
-			for (int r = 0; r < mat.m_rows; r++)
+			for (size_t r = 0; r < mat.rows(); r++)
 			{
-				mat.m_data[r * mat.m_stride + c] = data[c * mat.m_rows + r];
+				mat(r,c) = data[c * mat.rows() + r];
 			}
 		}
 		return RunEnrollment(mat);
@@ -287,11 +287,11 @@ namespace snowboy {
 		Matrix mat;
 		mat.Resize(wave_header_->wChannels, array_length / wave_header_->wChannels, MatrixResizeType::kSetZero);
 		// No idea if this is correct, but it looks right...
-		for (int c = 0; c < mat.m_cols; c++)
+		for (size_t c = 0; c < mat.cols(); c++)
 		{
-			for (int r = 0; r < mat.m_rows; r++)
+			for (size_t r = 0; r < mat.rows(); r++)
 			{
-				mat.m_data[r * mat.m_stride + c] = data[c * mat.m_rows + r];
+				mat(r,c) = data[c * mat.rows() + r];
 			}
 		}
 		return RunEnrollment(mat);
@@ -357,14 +357,14 @@ namespace snowboy {
 			throw snowboy_exception{"SnowboyPersonalEnroll: data or data_out is NULL"};
 		Matrix mat_data, mat_out;
 		mat_data.Resize(wave_header_->wChannels, array_length / wave_header_->wChannels, MatrixResizeType::kSetZero);
-		for (int c = 0; c < mat_data.cols(); c++)
-			for (int r = 0; r < mat_data.rows(); r++)
-				mat_data(r, c) = data[c * mat_data.m_rows + r];
+		for (size_t c = 0; c < mat_data.cols(); c++)
+			for (size_t r = 0; r < mat_data.rows(); r++)
+				mat_data(r, c) = data[c * mat_data.rows() + r];
 		mat_data.Scale(GetMaxWaveAmplitude(*wave_header_));
 		auto res = cut_pipeline_->CutTemplate(mat_data, &mat_out);
 		if ((res & 2) == 0) {
-			for (int c = 0; c < mat_out.cols(); c++)
-				for (int r = 0; r < mat_out.rows(); r++)
+			for (size_t c = 0; c < mat_out.cols(); c++)
+				for (size_t r = 0; r < mat_out.rows(); r++)
 					data_out[c * mat_out.rows() + r] = mat_out(r, c);
 			if (array_length_out) *array_length_out = mat_out.rows() * mat_out.cols();
 			return 0;
@@ -377,13 +377,13 @@ namespace snowboy {
 			throw snowboy_exception{"SnowboyPersonalEnroll: data or data_out is NULL"};
 		Matrix mat_data, mat_out;
 		mat_data.Resize(wave_header_->wChannels, array_length / wave_header_->wChannels, MatrixResizeType::kSetZero);
-		for (int c = 0; c < mat_data.cols(); c++)
-			for (int r = 0; r < mat_data.rows(); r++)
-				mat_data(r, c) = data[c * mat_data.m_rows + r];
+		for (size_t c = 0; c < mat_data.cols(); c++)
+			for (size_t r = 0; r < mat_data.rows(); r++)
+				mat_data(r, c) = data[c * mat_data.rows() + r];
 		auto res = cut_pipeline_->CutTemplate(mat_data, &mat_out);
 		if ((res & 2) == 0) {
-			for (int c = 0; c < mat_out.cols(); c++)
-				for (int r = 0; r < mat_out.rows(); r++)
+			for (size_t c = 0; c < mat_out.cols(); c++)
+				for (size_t r = 0; r < mat_out.rows(); r++)
 					data_out[c * mat_out.rows() + r] = mat_out(r, c);
 			if (array_length_out) *array_length_out = mat_out.rows() * mat_out.cols();
 			return 0;
@@ -396,14 +396,14 @@ namespace snowboy {
 			throw snowboy_exception{"SnowboyPersonalEnroll: data or data_out is NULL"};
 		Matrix mat_data, mat_out;
 		mat_data.Resize(wave_header_->wChannels, array_length / wave_header_->wChannels, MatrixResizeType::kSetZero);
-		for (int c = 0; c < mat_data.cols(); c++)
-			for (int r = 0; r < mat_data.rows(); r++)
-				mat_data(r, c) = data[c * mat_data.m_rows + r];
+		for (size_t c = 0; c < mat_data.cols(); c++)
+			for (size_t r = 0; r < mat_data.rows(); r++)
+				mat_data(r, c) = data[c * mat_data.rows() + r];
 		mat_data.Scale(GetMaxWaveAmplitude(*wave_header_));
 		auto res = cut_pipeline_->CutTemplate(mat_data, &mat_out);
 		if ((res & 2) == 0) {
-			for (int c = 0; c < mat_out.cols(); c++)
-				for (int r = 0; r < mat_out.rows(); r++)
+			for (size_t c = 0; c < mat_out.cols(); c++)
+				for (size_t r = 0; r < mat_out.rows(); r++)
 					data_out[c * mat_out.rows() + r] = mat_out(r, c);
 			if (array_length_out) *array_length_out = mat_out.rows() * mat_out.cols();
 			return 0;

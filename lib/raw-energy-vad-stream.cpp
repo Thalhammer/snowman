@@ -33,7 +33,7 @@ namespace snowboy {
 		if (!field_x2c) {
 			InitRawEnergyVad(mat, info);
 		} else {
-			for (int r = 0; r < mat->m_rows; r++) {
+			for (size_t r = 0; r < mat->rows(); r++) {
 				auto dot = SubVector{*mat, r}.DotVec(SubVector{*mat, r});
 				dot = std::max(std::numeric_limits<float>::min(), dot);
 				dot = logf(dot);
@@ -45,11 +45,11 @@ namespace snowboy {
 				}
 				field_x38.push_back({info->at(r).frame_id, dot});
 			}
-			while (field_x38.size() > mat->m_rows + m_options.raw_buffer_extra) {
+			while (field_x38.size() > mat->rows() + m_options.raw_buffer_extra) {
 				field_x38.pop_front();
 			}
 		}
-		if ((sig & 0x18) != 0 && m_someMatrix.m_rows != 0) {
+		if ((sig & 0x18) != 0 && m_someMatrix.rows() != 0) {
 			mat->Swap(&m_someMatrix);
 			info->swap(field_xf0);
 		}
@@ -84,8 +84,8 @@ namespace snowboy {
 		mat->Resize(0, 0);
 		info->clear();
 		if (m_someMatrix.m_rows >= m_options.bg_buffer_size) {
-			field_x38.resize(m_someMatrix.m_rows);
-			for (int r = 0; r < m_someMatrix.m_rows; r++) {
+			field_x38.resize(m_someMatrix.rows());
+			for (size_t r = 0; r < m_someMatrix.rows(); r++) {
 				auto dot = SubVector{m_someMatrix, r}.DotVec(SubVector{m_someMatrix, r});
 				dot = std::max(std::numeric_limits<float>::min(), dot);
 				dot = logf(dot);
@@ -94,7 +94,7 @@ namespace snowboy {
 				e.second = dot;
 			}
 			m_bg_energy = 0.0;
-			for (int i = m_options.bg_buffer_size / 2; i < field_x38.size(); i++) {
+			for (size_t i = m_options.bg_buffer_size / 2; i < field_x38.size(); i++) {
 				m_bg_energy += field_x38[i].second;
 			}
 			auto s = field_x38.size() - m_options.bg_buffer_size / 2;
@@ -103,7 +103,7 @@ namespace snowboy {
 			}
 			m_bg_energy /= static_cast<float>(s);
 			m_bg_energy = std::min(m_options.bg_energy_cap, m_bg_energy);
-			for (int i = m_options.bg_buffer_size / 2; i < field_x38.size(); i++) {
+			for (size_t i = m_options.bg_buffer_size / 2; i < field_x38.size(); i++) {
 				if (field_x38[i].second - m_bg_energy > m_options.bg_energy_threshold)
 					field_xf0[i].flags |= 1;
 				else
@@ -120,7 +120,7 @@ namespace snowboy {
 			auto ppVar7 = field_x38.begin();
 			while (field_x38.size() != 0) {
 				if (info[0].frame_id <= ppVar7->first) {
-					for (auto uVar20 = 0; info.size() <= uVar20; uVar20++) {
+					for (size_t uVar20 = 0; uVar20 < info.size(); uVar20++) {
 						if (info[uVar20].frame_id == ppVar7->first) {
 							if ((info[uVar20].flags & 1) == 0) {
 								field_x88.push_back(ppVar7->second);

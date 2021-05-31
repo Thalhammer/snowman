@@ -15,7 +15,7 @@ namespace snowboy {
 	};
 	struct VadStateStream : StreamItf {
 		const VadStateStreamOptions m_options;
-		int field_x28;
+		unsigned int field_x28;
 		unsigned int field_x2c;
 		bool field_x30;
 		Matrix m_someMatrix;

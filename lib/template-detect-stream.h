@@ -21,7 +21,7 @@ namespace snowboy {
 		TemplateDetectStreamOptions m_options;
 		std::vector<TemplateContainer> m_models;
 		std::vector<std::vector<SlidingDtw>> field_x58;
-		int field_x70;
+		size_t field_x70;
 		Matrix field_x78;
 		int field_x90;
 
@@ -34,7 +34,7 @@ namespace snowboy {
 		void SetSensitivity(const std::string& sensitivities);
 		std::string GetSensitivity() const;
 		void InitDtw();
-		size_t NumHotwords(int model_id) const;
+		size_t NumHotwords(size_t model_id) const;
 		void UpdateModel() const;
 	};
 } // namespace snowboy
