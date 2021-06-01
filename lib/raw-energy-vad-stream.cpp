@@ -97,7 +97,7 @@ namespace snowboy {
 			for (size_t i = m_options.bg_buffer_size / 2; i < field_x38.size(); i++) {
 				m_bg_energy += field_x38[i].second;
 			}
-			auto s = field_x38.size() - m_options.bg_buffer_size / 2;
+			auto s = static_cast<ssize_t>(field_x38.size()) - m_options.bg_buffer_size / 2;
 			if (s < 0) {
 				s *= 2;
 			}

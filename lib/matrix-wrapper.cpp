@@ -13,7 +13,7 @@ extern "C"
 
 namespace snowboy {
 
-	void MatrixBase::AddMat(float alpha, const MatrixBase& A, MatrixTransposeType transA) {
+	void MatrixBase::AddMat(float, const MatrixBase&, MatrixTransposeType) {
 		throw snowboy_exception{"Not implemented"};
 	}
 
@@ -145,7 +145,7 @@ namespace snowboy {
 		throw snowboy_exception{"Not implemented"};
 	}
 
-	bool MatrixBase::IsZero(float cutoff) const {
+	bool MatrixBase::IsZero(float) const {
 		throw snowboy_exception{"Not implemented"};
 	}
 

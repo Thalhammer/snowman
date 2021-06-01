@@ -419,14 +419,11 @@ namespace snowboy {
 	}
 
 	SubVector::SubVector(const VectorBase& parent, size_t offset, size_t size) noexcept {
-		SNOWBOY_ASSERT(offset >= 0);
-		SNOWBOY_ASSERT(size >= 0);
 		m_data = parent.m_data + offset;
 		m_size = std::min(parent.m_size - offset, size);
 	}
 
 	SubVector::SubVector(const MatrixBase& parent, size_t row) noexcept {
-		SNOWBOY_ASSERT(row >= 0);
 		m_data = parent.m_data + (row * parent.m_stride);
 		m_size = parent.m_cols;
 	}

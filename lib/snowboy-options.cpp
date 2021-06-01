@@ -253,7 +253,7 @@ namespace snowboy {
 		ReadConfigString(opts);
 	}
 
-	void ParseOptions::ReadConfigFile(const std::string& filename) {
+	void ParseOptions::ReadConfigFile(const std::string&) {
 		// TODO: Implement...
 		throw snowboy_exception{"Unimplemented!"};
 	}

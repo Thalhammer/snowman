@@ -28,7 +28,7 @@ namespace snowboy {
 			return offset;
 		} else
 		{
-			SNOWBOY_ASSERT((index >= 0) && (index < m_offsets.size()));
+			SNOWBOY_ASSERT(index < m_offsets.size());
 			return m_offsets[index];
 		}
 	}
@@ -44,7 +44,7 @@ namespace snowboy {
 			SNOWBOY_ASSERT((m_first_offset == m_offsets.front()) && (m_last_offset == m_offsets.back()));
 		} else
 		{
-			SNOWBOY_ASSERT((m_first_offset >= 0) && (m_last_offset >= m_first_offset));
+			SNOWBOY_ASSERT(m_last_offset >= m_first_offset);
 			// asserting the chunk is not contiguous, as offsets is not empty
 			SNOWBOY_ASSERT(m_last_offset - m_first_offset + 1 > m_offsets.size());
 		}

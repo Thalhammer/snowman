@@ -146,12 +146,11 @@ namespace snowboy {
 	}
 
 	size_t TemplateDetectStream::NumHotwords(size_t model_id) const {
-		if (model_id >= m_models.size() || model_id < 0) {
+		if (model_id >= m_models.size()) {
 			throw snowboy_exception{"model id runs out of range, expecting a value between [0, "
 									+ std::to_string(m_models.size()) + "] got " + std::to_string(model_id) + " instead."};
 			return 0;
 		}
-		// TODO: Why is this a constant 1 and not the number of templates in each model ?
 		return 1;
 	}
 

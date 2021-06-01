@@ -269,9 +269,7 @@ namespace snowboy {
 		return uVar6;
 	}
 
-	void VadStateStream::PrintVlog(SnowboySignal param_1, const std::vector<FrameInfo>& param_2) const {
-		//std::cout << std::hex << param_1 << std::endl;
-		//std::cout << std::dec << param_2 << std::endl;
+	void VadStateStream::PrintVlog(SnowboySignal, const std::vector<FrameInfo>&) const {
 	}
 
 	bool VadStateStream::Reset() {
