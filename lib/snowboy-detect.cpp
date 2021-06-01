@@ -51,7 +51,7 @@ namespace snowboy {
 		{
 			for (size_t r = 0; r < mat.rows(); r++)
 			{
-				mat(r,c) = data[c * mat.rows() + r];
+				mat(r, c) = data[c * mat.rows() + r];
 			}
 		}
 		mat.Scale(GetMaxWaveAmplitude(*wave_header_));
@@ -68,7 +68,7 @@ namespace snowboy {
 		{
 			for (size_t r = 0; r < mat.rows(); r++)
 			{
-				mat(r,c) = data[c * mat.rows() + r];
+				mat(r, c) = data[c * mat.rows() + r];
 			}
 		}
 		return detect_pipeline_->RunDetection(mat, is_end);
@@ -84,7 +84,7 @@ namespace snowboy {
 		{
 			for (size_t r = 0; r < mat.rows(); r++)
 			{
-				mat(r,c) = data[c * mat.rows() + r];
+				mat(r, c) = data[c * mat.rows() + r];
 			}
 		}
 		return detect_pipeline_->RunDetection(mat, is_end);
@@ -170,7 +170,7 @@ namespace snowboy {
 		{
 			for (size_t r = 0; r < mat.rows(); r++)
 			{
-				mat(r,c) = data[c * mat.rows() + r];
+				mat(r, c) = data[c * mat.rows() + r];
 			}
 		}
 		mat.Scale(GetMaxWaveAmplitude(*wave_header_));
@@ -187,7 +187,7 @@ namespace snowboy {
 		{
 			for (size_t r = 0; r < mat.rows(); r++)
 			{
-				mat(r,c) = data[c * mat.rows() + r];
+				mat(r, c) = data[c * mat.rows() + r];
 			}
 		}
 		return vad_pipeline_->RunVad(mat, is_end);
@@ -203,7 +203,7 @@ namespace snowboy {
 		{
 			for (size_t r = 0; r < mat.rows(); r++)
 			{
-				mat(r,c) = data[c * mat.rows() + r];
+				mat(r, c) = data[c * mat.rows() + r];
 			}
 		}
 		return vad_pipeline_->RunVad(mat, is_end);
@@ -258,7 +258,7 @@ namespace snowboy {
 		{
 			for (size_t r = 0; r < mat.rows(); r++)
 			{
-				mat(r,c) = data[c * mat.rows() + r];
+				mat(r, c) = data[c * mat.rows() + r];
 			}
 		}
 		mat.Scale(GetMaxWaveAmplitude(*wave_header_));
@@ -275,7 +275,7 @@ namespace snowboy {
 		{
 			for (size_t r = 0; r < mat.rows(); r++)
 			{
-				mat(r,c) = data[c * mat.rows() + r];
+				mat(r, c) = data[c * mat.rows() + r];
 			}
 		}
 		return RunEnrollment(mat);
@@ -291,7 +291,7 @@ namespace snowboy {
 		{
 			for (size_t r = 0; r < mat.rows(); r++)
 			{
-				mat(r,c) = data[c * mat.rows() + r];
+				mat(r, c) = data[c * mat.rows() + r];
 			}
 		}
 		return RunEnrollment(mat);

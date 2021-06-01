@@ -90,7 +90,7 @@ namespace snowboy {
 			}
 		} else {
 			for (size_t row = 0; row < m_rows; row++) {
-				memcpy(data(row), param_1.data(row), m_cols*sizeof(float));
+				memcpy(data(row), param_1.data(row), m_cols * sizeof(float));
 			}
 		}
 	}
@@ -102,7 +102,7 @@ namespace snowboy {
 	void MatrixBase::CopyRows(const MatrixBase& param_1, const std::vector<ssize_t>& param_2) {
 		SNOWBOY_ASSERT(param_2.size() >= m_rows);
 		for (size_t row = 0; row < m_rows; row++) {
-			if(param_2[row] < 0) {
+			if (param_2[row] < 0) {
 				memset(data(row), 0, m_cols * sizeof(float));
 			} else {
 				memcpy(data(row), param_1.data(param_2[row]), m_cols * sizeof(float));
@@ -161,7 +161,7 @@ namespace snowboy {
 		for (size_t row = 0; row < m_rows; row++) {
 			auto this_scale = param_1[row];
 			for (size_t col = 0; col < m_cols; col++) {
-				(*this)(row,col) *= this_scale;
+				(*this)(row, col) *= this_scale;
 			}
 		}
 	}

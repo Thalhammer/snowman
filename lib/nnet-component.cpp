@@ -22,7 +22,7 @@ namespace snowboy {
 
 	size_t ChunkInfo::GetOffset(size_t index) const {
 		if (m_offsets.empty())
-		{											 // if data is contiguous
+		{											// if data is contiguous
 			size_t offset = index + m_first_offset; // just offset by the first_offset_
 			SNOWBOY_ASSERT((offset <= m_last_offset) && (offset >= m_first_offset));
 			return offset;

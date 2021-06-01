@@ -1,6 +1,6 @@
 #pragma once
-#include <vector>
 #include <cstdint>
+#include <vector>
 
 namespace snowboy {
 	struct VadStateOptions {

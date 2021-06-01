@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdint>
-#include <string>
 #include <map>
+#include <string>
 #include <vector>
 
 namespace snowboy {
@@ -27,6 +27,7 @@ namespace snowboy {
 		int m_verbose_level;
 
 		void Register(const std::string& prefix, const std::string& name, const std::string usage_info, OptionInfo&& info);
+
 	public:
 		ParseOptions(const std::string& usage);
 		~ParseOptions();

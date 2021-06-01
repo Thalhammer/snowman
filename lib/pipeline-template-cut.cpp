@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <eavesdrop-stream.h>
@@ -190,63 +191,38 @@ namespace snowboy {
 		*param_3 = -1;
 		state.GetVoiceStates(local_98, &piStack88);
 
-		size_t lVar6 = 1;
-		auto lVar12 = piStack88.size();
-		if (lVar12 == 0) {
-		LAB_00155412:
-			if (*param_3 != -1) goto LAB_00155458;
-			*param_3 = 0;
-			*param_4 = 0;
-		} else {
-			lVar6 = 1;
-			int iVar7;
-			if (piStack88.front() == 1) {
-				iVar7 = 0;
-			} else {
-				auto piVar4 = piStack88.begin();
-				do {
-					iVar7 = (int)lVar6;
-					if (lVar6 == lVar12) goto LAB_00155412;
-					piVar4 = piStack88.begin() + lVar6;
-					lVar6 = lVar6 + 1;
-				} while (*piVar4 != 1);
-			}
-			iVar7 -= m_pipelineTemplateCutOptions.min_voice_frames;
-			*param_3 = std::max(iVar7, 0);
-		LAB_00155458:
-			*param_4 = 0;
-			if (local_98.size() > 1) {
-				auto piVar3 = local_98.end() - 1;
-				auto piVar4 = local_98.begin();
-				do {
-					iVar7 = *piVar4;
-					auto piVar5 = piVar4 + 1;
-					auto piVar10 = piVar3 + -1;
-					*piVar4 = *piVar3;
-					*piVar3 = static_cast<VoiceType>(iVar7);
-					piVar4 = piVar5;
-					piVar3 = piVar10;
-					if (piVar5 >= piVar10) break;
-				} while (true);
-			}
-			state.Reset();
-			state.GetVoiceStates(local_98, &piStack88);
-			lVar12 = piStack88.size();
-			if (lVar12 != 0) {
-				size_t iVar7 = 0;
-				for (size_t i = 0; i < piStack88.size(); i++) {
-					if (piStack88[i] == 1) break;
-					iVar7 = i + 1;
-				}
-				if (iVar7 == piStack88.size()) {
-					*param_4 = ((int)lVar12 - 1) - *param_4;
-					return;
-				}
-				iVar7 -= std::min<size_t>(iVar7, m_pipelineTemplateCutOptions.min_voice_frames);
-				*param_4 = ((int)lVar12 - 1) - iVar7;
+		size_t iVar7;
+		for (iVar7 = 0; piStack88[iVar7] != 1 && iVar7 != piStack88.size(); iVar7++) {
+		}
+		if (iVar7 == piStack88.size()) {
+			if (*param_3 == -1) {
+				*param_3 = 0;
+				*param_4 = 0;
 				return;
 			}
-			*param_4 = ((int)lVar12 - 1) - *param_4;
+		} else {
+			iVar7 -= std::min<size_t>(iVar7, m_pipelineTemplateCutOptions.min_voice_frames);
+			*param_3 = iVar7;
+		}
+
+		*param_4 = 0;
+		std::reverse(local_98.begin(), local_98.end());
+		state.Reset();
+		state.GetVoiceStates(local_98, &piStack88);
+		if (piStack88.size() != 0) {
+			size_t iVar7 = 0;
+			for (size_t i = 0; i < piStack88.size(); i++) {
+				if (piStack88[i] == 1) break;
+				iVar7 = i + 1;
+			}
+			if (iVar7 == piStack88.size()) {
+				*param_4 = ((int)piStack88.size() - 1) - *param_4;
+			} else {
+				iVar7 -= std::min<size_t>(iVar7, m_pipelineTemplateCutOptions.min_voice_frames);
+				*param_4 = ((int)piStack88.size() - 1) - iVar7;
+			}
+		} else {
+			*param_4 = ((int)piStack88.size() - 1) - *param_4;
 		}
 	}
 } // namespace snowboy

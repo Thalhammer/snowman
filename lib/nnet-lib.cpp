@@ -95,7 +95,7 @@ namespace snowboy {
 			m_output_data.Resize(0, 0);
 		} else {
 			m_unprocessed_buffer = m_input_data;
-			field_b8 = SubVector{m_input_data,m_input_data.rows() - 1};
+			field_b8 = SubVector{m_input_data, m_input_data.rows() - 1};
 			m_input_data.Resize(0, 0);
 			output->Resize(0, 0);
 		}

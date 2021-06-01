@@ -31,8 +31,8 @@ namespace snowboy {
 		}
 		auto iVar25 = field_x18.size() - param_2.rows();
 		if (iVar25 != 0) {
-			while (field_x18.size() > param_2.rows()) {
-				field_x18.pop_front();
+			if (field_x18.size() > param_2.rows()) {
+				field_x18.erase(field_x18.begin(), field_x18.begin() + (field_x18.size() - param_2.rows()));
 			}
 			for (size_t iVar13 = 0; iVar13 < param_2.rows() - param_1; iVar13++) {
 				size_t local_b4 = 0, local_b0 = 0, local_ac = 0, local_a8 = 0;
@@ -112,9 +112,9 @@ namespace snowboy {
 			if (0 != row) {
 				ComputeBandBoundary(row - 1, &local_1e0, &local_1dc);
 			}
+			if (local_1e4 < local_1e8) break;
 			std::vector<float> __s;
 			__s.resize((local_1e4 - local_1e8) + 1);
-			if (local_1e4 < local_1e8) break;
 			auto bVar3 = true;
 			for (auto uVar6 = local_1e8; uVar6 <= local_1e4; uVar6++) {
 				if (uVar6 == 0 && row == 0) {
@@ -124,22 +124,19 @@ namespace snowboy {
 				} else if (uVar6 == 0) {
 					__s[0] = GetDistance(0, 0) + local_238[0];
 				} else {
-					auto local_244 = std::numeric_limits<float>::max();
+					auto local_240 = std::numeric_limits<float>::max();
 					if (local_1e8 < uVar6 && uVar6 - 1 <= local_1e4) {
-						local_244 = __s[uVar6 - 1 - local_1e8];
+						local_240 = __s[uVar6 - 1 - local_1e8];
 					}
-					float fVar10 = std::numeric_limits<float>::max(), local_240 = std::numeric_limits<float>::max();
 					if (uVar6 >= local_1e0) {
 						if (uVar6 <= local_1dc) {
-							fVar10 = local_238[uVar6 - local_1e0];
+							local_240 = std::min(local_238[uVar6 - local_1e0], local_240);
 						}
 						if (local_1e0 < uVar6 && uVar6 - 1 <= local_1dc) {
-							local_240 = local_238[uVar6 - 1 - local_1e0];
+							local_240 = std::min(local_238[uVar6 - 1 - local_1e0], local_240);
 						}
 					}
-					auto fVar9 = GetDistance(row, uVar6);
-					local_240 = std::min(fVar10, std::min(local_240, local_244));
-					__s[uVar6 - local_1e8] = fVar9 + local_240;
+					__s[uVar6 - local_1e8] = GetDistance(row, uVar6) + local_240;
 				}
 				if (bVar3) {
 					if (__s[uVar6 - local_1e8] < m_reference->rows() * m_early_stop_threshold) {

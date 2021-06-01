@@ -84,7 +84,7 @@ namespace snowboy {
 		SNOWBOY_ASSERT(m_size >= param_1.rows() * param_1.cols());
 		for (size_t r = 0; r < param_1.rows(); r += 1) {
 			for (size_t c = 0; c < param_1.cols(); c += 1) {
-				m_data[r + param_1.m_rows * c] = param_1(r,c);
+				m_data[r + param_1.m_rows * c] = param_1(r, c);
 			}
 		}
 	}
