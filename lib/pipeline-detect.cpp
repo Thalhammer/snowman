@@ -116,7 +116,7 @@ namespace snowboy {
 		int kwid = 1;
 		for (size_t i = 0; i < m_is_personal_model.size(); i++) {
 			if (m_is_personal_model[i] == false) {
-				for (int x = 0; x < m_universalDetectStream->NumHotwords(nuniversal); x++) {
+				for (size_t x = 0; x < m_universalDetectStream->NumHotwords(nuniversal); x++) {
 					m_universal_kw_mapping.push_back(kwid);
 					kwid++;
 				}

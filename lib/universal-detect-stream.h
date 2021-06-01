@@ -79,9 +79,9 @@ namespace snowboy {
 
 			std::vector<std::vector<std::vector<PieceInfo>>> field_x1f0;
 			// Smooth window
-			int smooth_window;
+			size_t smooth_window;
 			// Slide window
-			int slide_window;
+			size_t slide_window;
 			std::vector<std::deque<float>> field_x238;
 			std::vector<std::deque<float>> field_x250;
 			std::vector<float> field_x268;
@@ -89,8 +89,8 @@ namespace snowboy {
 
 			void CheckLicense() const;
 			void SmoothPosterior(Matrix* param_2);
-			float HotwordNaiveSearch(int) const;
-			int NumHotwords() const;
+			float HotwordNaiveSearch(size_t keyword_id) const;
+			size_t NumHotwords() const;
 			void ReadHotwordModel(bool binary, std::istream* is, int num_repeats, int* hotword_id);
 			void WriteHotwordModel(bool binary, std::ostream* os) const;
 			void ResetDetection();
@@ -105,25 +105,25 @@ namespace snowboy {
 		virtual std::string Name() const override;
 		virtual ~UniversalDetectStream();
 
-		float GetHotwordPosterior(int, int, int);
+		float GetHotwordPosterior(size_t model_id, int, int);
 		std::string GetSensitivity() const;
 		float HotwordDtwSearch(int, int) const;
 		float HotwordPiecewiseSearch(int, int) const;
-		float HotwordViterbiSearch(int, int) const;
+		float HotwordViterbiSearch(size_t model_id, int) const;
 		float HotwordViterbiSearch(int, int, int, const PieceInfo&) const;
 		float HotwordViterbiSearchReduplication(int, int, int);
 		float HotwordViterbiSearchSoftFloor(int, int) const;
 		float HotwordViterbiSearchTraceback(int, int) const;
-		float HotwordViterbiSearchTracebackLog(int, int) const;
-		int NumHotwords(int) const;
-		void PushSlideWindow(int, const MatrixBase&);
+		float HotwordViterbiSearchTracebackLog(size_t model_id, int) const;
+		size_t NumHotwords(size_t model_id) const;
+		void PushSlideWindow(size_t model_id, const MatrixBase&);
 		void ReadHotwordModel(const std::string& filename);
 		void ResetDetection();
 		void SetHighSensitivity(const std::string&);
 		void SetSensitivity(const std::string&);
 		void SetSlideWindowSize(const std::string&);
 		void SetSmoothWindowSize(const std::string&);
-		void UpdateLicense(int, long, float);
+		void UpdateLicense(size_t model_id, long, float);
 		void UpdateModel() const;
 		void WriteHotwordModel(bool binary, const std::string& filename) const;
 	};

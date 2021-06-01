@@ -35,9 +35,9 @@ namespace snowboy {
 		float GetDistance(int, int) const;
 		float ComputeVectorDistance(const VectorBase&, const VectorBase&) const;
 		float ComputeDtwDistance(int, const MatrixBase&);
-		void ComputeBandBoundary(int, int*, int*) const;
+		void ComputeBandBoundary(int, size_t*, size_t*) const;
 		virtual ~SlidingDtw();
 	};
 
-	float DtwAlign(DistanceType, const MatrixBase&, const MatrixBase&, std::vector<std::vector<int>>*);
+	float DtwAlign(DistanceType, const MatrixBase&, const MatrixBase&, std::vector<std::vector<size_t>>*);
 } // namespace snowboy

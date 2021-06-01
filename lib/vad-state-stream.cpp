@@ -207,7 +207,7 @@ namespace snowboy {
 	}
 
 	VadStateStream::VadStateStream(const VadStateStreamOptions& options)
-		: m_options{options}, field_x28{std::max(0, m_options.extra_frame_adjust + m_options.min_voice_frames)},
+		: m_options{options}, field_x28{std::max(0u, m_options.extra_frame_adjust + m_options.min_voice_frames)},
 		  field_x2c{UINT32_MAX}, field_x30{0}, m_vadstate{new VadState({m_options.min_non_voice_frames, m_options.min_voice_frames})},
 		  field_xa0{1}, field_xa4{2} {}
 

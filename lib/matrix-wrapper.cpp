@@ -89,7 +89,7 @@ namespace snowboy {
 				}
 			}
 		} else {
-			for (auto row = 0; row < m_rows; row++) {
+			for (size_t row = 0; row < m_rows; row++) {
 				memcpy(data(row), param_1.data(row), m_cols*sizeof(float));
 			}
 		}
@@ -390,7 +390,7 @@ namespace snowboy {
 			int32_t rows, cols;
 			ReadBasicType<int32_t>(binary, &rows, is);
 			ReadBasicType<int32_t>(binary, &cols, is);
-			if (m_rows != rows || m_cols != cols) {
+			if (m_rows != static_cast<size_t>(rows) || m_cols != static_cast<size_t>(cols)) {
 				Resize(rows, cols, MatrixResizeType::kUndefined);
 			}
 			if (m_stride == m_cols) {

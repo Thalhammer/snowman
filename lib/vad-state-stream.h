@@ -7,10 +7,10 @@ namespace snowboy {
 	struct VadState;
 	struct OptionsItf;
 	struct VadStateStreamOptions {
-		int min_non_voice_frames;
-		int min_voice_frames;
+		uint32_t min_non_voice_frames;
+		uint32_t min_voice_frames;
 		bool remove_non_voice;
-		int extra_frame_adjust;
+		uint32_t extra_frame_adjust;
 		void Register(const std::string&, OptionsItf*);
 	};
 	struct VadStateStream : StreamItf {

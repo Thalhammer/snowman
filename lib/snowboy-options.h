@@ -40,7 +40,7 @@ namespace snowboy {
 		void Register(const std::string& prefix, const std::string& name, const std::string& usage_info, std::string* ptr) override;
 		void Remove(const std::string& prefix, const std::string& name) override;
 
-		std::string GetArgument(int index) const;
+		std::string GetArgument(size_t index) const;
 		bool IsValidOption(const std::string& opt) const;
 		std::string NormalizeOptionName(const std::string& option) const;
 		void ParseOneOption(const std::string& opt, std::string* out_name, std::string* out_value) const;

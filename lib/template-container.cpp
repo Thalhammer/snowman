@@ -88,7 +88,7 @@ namespace snowboy {
 
 		for (size_t local_90 = 0; local_90 < m_templates.size(); local_90++) {
 			if (min_idx != local_90) {
-				std::vector<std::vector<int>> local_58;
+				std::vector<std::vector<size_t>> local_58;
 				snowboy::DtwAlign(distance, m_templates[min_idx], m_templates[local_90], &local_58);
 				for (size_t local_a8 = 0; local_a8 < m_templates[min_idx].rows(); local_a8 += 1) {
 					if (local_58[local_a8].size() != 0) {

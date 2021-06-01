@@ -15,7 +15,7 @@ namespace snowboy {
 	float GetMaxWaveAmplitude(int nbits) {
 #ifndef NDEBUG
 		if (nbits != 8 && nbits != 16 && nbits != 32)
-			throw snowboy_exception{"undefined bits_per_sample: " << nbits << ", expecting 8,16 or 32"};
+			throw snowboy_exception{"undefined bits_per_sample: " + std::to_string(nbits) + ", expecting 8,16 or 32"};
 #endif
 		return (1 << nbits) - 1;
 	}

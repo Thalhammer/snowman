@@ -200,9 +200,9 @@ namespace snowboy {
 		m_options.erase(it);
 	}
 
-	std::string ParseOptions::GetArgument(int index) const {
+	std::string ParseOptions::GetArgument(size_t index) const {
 		// NOTE: Not in original and should never happen, but better be save than sorry...
-		if (index + 1 > m_arguments.size() || index < 0) return "";
+		if (index >= m_arguments.size()) return "";
 		return m_arguments[index];
 	}
 

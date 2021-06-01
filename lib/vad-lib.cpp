@@ -22,7 +22,7 @@ namespace snowboy {
 			auto VVar1 = *piVar9;
 			if (m_field_x10 != 0) {
 				if (VVar1 == 1) {
-					if (m_field_x14 > 0) m_field_x14 = 0;
+					m_field_x14 = 0;
 					*pVVar3 = VST_1;
 				} else if (VVar1 == 2) {
 					if (m_field_x14 < m_options.min_non_voice_frames) {
@@ -45,7 +45,7 @@ namespace snowboy {
 						*pVVar3 = VST_1;
 					}
 				} else if (VVar1 == 2) {
-					if (m_field_x14 > 0) m_field_x14 = 0;
+					m_field_x14 = 0;
 					*pVVar3 = VST_2;
 				}
 			}

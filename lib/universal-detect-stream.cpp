@@ -167,16 +167,16 @@ namespace snowboy {
 		}
 	}
 
-	float UniversalDetectStream::GetHotwordPosterior(int param_1, int param_2, int param_3) {
-		switch (m_model_info[param_1].keywords[param_2].search_method) {
-		case 1: return m_model_info[param_1].HotwordNaiveSearch(param_2);
-		case 2: return HotwordDtwSearch(param_1, param_2);
-		case 3: return HotwordViterbiSearch(param_1, param_2);
-		case 4: return HotwordPiecewiseSearch(param_1, param_2);
-		case 5: return HotwordViterbiSearchReduplication(param_1, param_2, param_3);
-		case 6: return HotwordViterbiSearchSoftFloor(param_1, param_2);
-		case 7: return HotwordViterbiSearchTraceback(param_1, param_2);
-		case 8: return HotwordViterbiSearchTracebackLog(param_1, param_2);
+	float UniversalDetectStream::GetHotwordPosterior(size_t model_id, int param_2, int param_3) {
+		switch (m_model_info[model_id].keywords[param_2].search_method) {
+		case 1: return m_model_info[model_id].HotwordNaiveSearch(param_2);
+		case 2: return HotwordDtwSearch(model_id, param_2);
+		case 3: return HotwordViterbiSearch(model_id, param_2);
+		case 4: return HotwordPiecewiseSearch(model_id, param_2);
+		case 5: return HotwordViterbiSearchReduplication(model_id, param_2, param_3);
+		case 6: return HotwordViterbiSearchSoftFloor(model_id, param_2);
+		case 7: return HotwordViterbiSearchTraceback(model_id, param_2);
+		case 8: return HotwordViterbiSearchTracebackLog(model_id, param_2);
 		default: throw snowboy_exception{"search method has not been implemented"};
 		}
 	}
@@ -199,14 +199,14 @@ namespace snowboy {
 		// TODO:: This is unused in all models I have, but we should still implement it at some point
 	}
 
-	float UniversalDetectStream::ModelInfo::HotwordNaiveSearch(int param_2) const {
+	float UniversalDetectStream::ModelInfo::HotwordNaiveSearch(size_t keyword_id) const {
 		float sum = 0.0f;
-		for (size_t i = 0; i < keywords[param_2].field_x88.size(); i++) {
-			auto& x = field_x250[keywords[param_2].field_x88[i]];
-			if (keywords[param_2].search_floor[i] > x.front()) return 0.0f;
+		for (size_t i = 0; i < keywords[keyword_id].field_x88.size(); i++) {
+			auto& x = field_x250[keywords[keyword_id].field_x88[i]];
+			if (keywords[keyword_id].search_floor[i] > x.front()) return 0.0f;
 			sum += logf(std::max(x.front(), std::numeric_limits<float>::min()));
 		}
-		return expf(sum / static_cast<float>(keywords[param_2].field_x88.size()));
+		return expf(sum / static_cast<float>(keywords[keyword_id].field_x88.size()));
 	}
 
 	float UniversalDetectStream::HotwordPiecewiseSearch(int, int) const {
@@ -214,25 +214,25 @@ namespace snowboy {
 		// TODO:: This is unused in all models I have, but we should still implement it at some point
 	}
 
-	float UniversalDetectStream::HotwordViterbiSearch(int param_1, int param_2) const {
-		return m_model_info[param_1].HotwordNaiveSearch(param_2);
+	float UniversalDetectStream::HotwordViterbiSearch(size_t model_id, int param_2) const {
+		return m_model_info[model_id].HotwordNaiveSearch(param_2);
 		// TODO: Implement Viterbi search
 		std::vector<float> x;
-		x.resize(m_model_info[param_1].keywords[param_2].field_x88.size(), -std::numeric_limits<float>::max());
+		x.resize(m_model_info[model_id].keywords[param_2].field_x88.size(), -std::numeric_limits<float>::max());
 		x[0] = 0.0f;
 		std::vector<float> x2;
-		x2.resize(m_model_info[param_1].keywords[param_2].field_x88.size(), 0);
-		auto& f250 = m_model_info[param_1].field_x250[0];
-		int i = f250.size() - m_model_info[param_1].keywords[param_2].search_mask.back();
+		x2.resize(m_model_info[model_id].keywords[param_2].field_x88.size(), 0);
+		auto& f250 = m_model_info[model_id].field_x250[0];
+		size_t i = f250.size() - m_model_info[model_id].keywords[param_2].search_mask.back();
 		do {
 			if (f250.size() <= i) {
-				auto fVar2 = m_model_info[param_1].keywords[param_2].search_floor.back();
+				auto fVar2 = m_model_info[model_id].keywords[param_2].search_floor.back();
 				if (fVar2 <= x2.back()) {
-					if (m_model_info[param_1].keywords[param_2].search_max && !x.empty()) {
+					if (m_model_info[model_id].keywords[param_2].search_max && !x.empty()) {
 						for (auto& e : x) {
 							fVar2 = std::max(e, fVar2);
 						}
-						return fVar2 / static_cast<float>(m_model_info[param_1].keywords[param_2].search_mask.back());
+						return fVar2 / static_cast<float>(m_model_info[model_id].keywords[param_2].search_mask.back());
 					}
 				}
 			}
@@ -263,30 +263,30 @@ namespace snowboy {
 		// TODO:: This is unused in all models I have, but we should still implement it at some point
 	}
 
-	float UniversalDetectStream::HotwordViterbiSearchTracebackLog(int param_1, int param_2) const {
+	float UniversalDetectStream::HotwordViterbiSearchTracebackLog(size_t model_id, int param_2) const {
 		// TODO: Implement this
-		return m_model_info[param_1].HotwordNaiveSearch(param_2);
+		return m_model_info[model_id].HotwordNaiveSearch(param_2);
 	}
 
-	int UniversalDetectStream::ModelInfo::NumHotwords() const {
+	size_t UniversalDetectStream::ModelInfo::NumHotwords() const {
 		return keywords.size();
 	}
 
-	int UniversalDetectStream::NumHotwords(int model_id) const {
-		if (model_id < m_model_info.size() && model_id >= 0) {
+	size_t UniversalDetectStream::NumHotwords(size_t model_id) const {
+		if (model_id < m_model_info.size()) {
 			return m_model_info[model_id].NumHotwords();
 		} else
 			throw snowboy_exception{"model_id runs out of range, expecting a value between [0,"
 									+ std::to_string(m_model_info.size()) + "], got " + std::to_string(model_id) + " instead."};
 	}
 
-	void UniversalDetectStream::PushSlideWindow(int param_1, const MatrixBase& param_2) {
+	void UniversalDetectStream::PushSlideWindow(size_t model_id, const MatrixBase& param_2) {
 		// TODO: Optimize this by calculating offsets and doing a memcpy
 		for (size_t r = 0; r < param_2.m_rows; r++) {
 			for (size_t c = 0; c < param_2.m_cols; c++) {
-				m_model_info[param_1].field_x250[c].push_back(param_2.m_data[r * param_2.m_stride + c]);
-				if (m_model_info[param_1].field_x250[c].size() > m_model_info.size()) {
-					m_model_info[param_1].field_x250[c].pop_front();
+				m_model_info[model_id].field_x250[c].push_back(param_2.m_data[r * param_2.m_stride + c]);
+				if (m_model_info[model_id].field_x250[c].size() > m_model_info.size()) {
+					m_model_info[model_id].field_x250[c].pop_front();
 				}
 			}
 		}
@@ -351,9 +351,12 @@ namespace snowboy {
 		}
 		ExpectToken(binary, "<KwInfo>", is);
 		ExpectToken(binary, "<SmoothWindow>", is);
-		ReadBasicType<int32_t>(binary, &smooth_window, is);
+		int32_t x;
+		ReadBasicType<int32_t>(binary, &x, is);
+		smooth_window = x;
 		ExpectToken(binary, "<SlideWindow>", is);
-		ReadBasicType<int32_t>(binary, &slide_window, is);
+		ReadBasicType<int32_t>(binary, &x, is);
+		slide_window = x;
 		ExpectToken(binary, "<NumKws>", is);
 		int num_kws;
 		ReadBasicType<int32_t>(binary, &num_kws, is);
@@ -499,8 +502,8 @@ namespace snowboy {
 		license_days = param_3;
 	}
 
-	void UniversalDetectStream::UpdateLicense(int param_1, long param_2, float param_3) {
-		m_model_info[param_1].UpdateLicense(param_2, param_3);
+	void UniversalDetectStream::UpdateLicense(size_t model_id, long param_2, float param_3) {
+		m_model_info[model_id].UpdateLicense(param_2, param_3);
 	}
 
 	void UniversalDetectStream::UpdateModel() const {

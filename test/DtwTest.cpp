@@ -11,7 +11,7 @@ TEST(DtwTest, RandomSelf) {
 	auto res = snowboy::DtwAlign(snowboy::cosine, m, m, nullptr);
 	ASSERT_FLOAT_EQ(res, 0.49959436);
 
-	std::vector<std::vector<int>> t;
+	std::vector<std::vector<size_t>> t;
 	res = snowboy::DtwAlign(snowboy::cosine, m, m, &t);
 	ASSERT_FLOAT_EQ(res, 0.49959436);
 	ASSERT_EQ(t.size(), 39);
@@ -29,7 +29,7 @@ TEST(DtwTest, RandomTwice) {
 	auto res = snowboy::DtwAlign(snowboy::cosine, m1, m2, nullptr);
 	ASSERT_FLOAT_EQ(res, 0.49965164);
 
-	std::vector<std::vector<int>> t;
+	std::vector<std::vector<size_t>> t;
 	res = snowboy::DtwAlign(snowboy::cosine, m1, m2, &t);
 	ASSERT_FLOAT_EQ(res, 0.49965164);
 	ASSERT_EQ(t.size(), 39);
@@ -58,7 +58,7 @@ TEST(DtwTest, Random2) {
 	auto res = snowboy::DtwAlign(snowboy::cosine, m1, m2, nullptr);
 	ASSERT_FLOAT_EQ(res, 0.49967793);
 
-	std::vector<std::vector<int>> t;
+	std::vector<std::vector<size_t>> t;
 	res = snowboy::DtwAlign(snowboy::cosine, m1, m2, &t);
 	ASSERT_FLOAT_EQ(res, 0.49967793);
 	ASSERT_EQ(t.size(), 45);
