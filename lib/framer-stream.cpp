@@ -2,7 +2,7 @@
 #include <framer-stream.h>
 #include <matrix-wrapper.h>
 #include <random>
-#include <snowboy-debug.h>
+#include <snowboy-error.h>
 #include <snowboy-options.h>
 
 namespace snowboy {
@@ -19,16 +19,16 @@ namespace snowboy {
 	FramerStream::FramerStream(const FramerStreamOptions& options)
 		: m_options{options} {
 		const auto frames_per_ms = static_cast<double>(m_options.sample_rate) * 0.001;
-		this->m_frame_length_samples = this->m_options.frame_length_ms * frames_per_ms;
-		this->m_frame_shift_samples = this->m_options.frame_shift_ms * frames_per_ms;
+		m_frame_length_samples = m_options.frame_length_ms * frames_per_ms;
+		m_frame_shift_samples = m_options.frame_shift_ms * frames_per_ms;
 		CreateWindow();
 		this->field_x38 = 1;
 	}
 
 	void FramerStream::CreateWindow() {
-		auto len = this->m_frame_length_samples;
-		this->m_window.Resize(len);
-		auto data = this->m_window.m_data;
+		auto len = m_frame_length_samples;
+		m_window.Resize(len);
+		auto data = m_window.data();
 		if (m_options.window_type == "hamming") {
 			for (size_t i = 0; i < len; i++) {
 				data[i] = 0.54 - 0.46 * cos((M_PI * 2.0f * static_cast<float>(i)) / static_cast<float>(len - 1));
@@ -48,18 +48,17 @@ namespace snowboy {
 				v = pow((1.0f - v) * 0.5f, 0.85f);
 				data[i] = v;
 			}
-		} else {
-			SNOWBOY_ERROR() << "Window type " << m_options.window_type << " is not defined";
-		}
+		} else
+			throw snowboy_exception{"Window type " + m_options.window_type + " is not defined"};
 	}
 
 	void FramerStream::CreateFrames(const VectorBase& data, Matrix* mat) {
 		const auto nframes = NumFrames(data.m_size);
-		mat->Resize(nframes, this->m_frame_length_samples);
+		mat->Resize(nframes, m_frame_length_samples);
 		std::mt19937 gen;
 		// This might have a different mean
 		std::uniform_real_distribution<float> dist;
-		for (int currentFrame = 0; currentFrame < nframes; currentFrame++) {
+		for (size_t currentFrame = 0; currentFrame < nframes; currentFrame++) {
 			SubVector sub{*mat, currentFrame};
 			sub.CopyFromVec(data.Range(this->m_frame_shift_samples * currentFrame, this->m_frame_length_samples));
 			if (this->m_options.dither_coeff != 0.0 && sub.m_size > 0) {
@@ -91,7 +90,7 @@ namespace snowboy {
 		}
 	}
 
-	int FramerStream::NumFrames(int p1) const {
+	size_t FramerStream::NumFrames(size_t p1) const {
 		if (this->m_frame_length_samples > p1) return 0;
 		return ((p1 - this->m_frame_length_samples) / this->m_frame_shift_samples) + 1;
 	}
@@ -104,9 +103,6 @@ namespace snowboy {
 			mat->Resize(0, 0);
 			info->clear();
 			return sig;
-		}
-		if (matrix_in.m_rows > 1) {
-			SNOWBOY_WARNING() << "multiple channels detected for wave file; reading only the first channel";
 		}
 
 		Vector temp_vector;

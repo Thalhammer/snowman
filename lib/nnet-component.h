@@ -9,11 +9,11 @@
 namespace snowboy {
 	struct MatrixBase;
 	class ChunkInfo {
-		int32_t m_feat_dim;
-		int32_t m_num_chunks;
-		int32_t m_first_offset;
-		int32_t m_last_offset;
-		std::vector<int32_t> m_offsets;
+		size_t m_feat_dim;
+		size_t m_num_chunks;
+		size_t m_first_offset;
+		size_t m_last_offset;
+		std::vector<size_t> m_offsets;
 		friend std::ostream& operator<<(std::ostream& os, const ChunkInfo& e);
 
 	public:
@@ -22,14 +22,14 @@ namespace snowboy {
 			  m_first_offset(0), m_last_offset(0),
 			  m_offsets() {}
 
-		ChunkInfo(int32_t feat_dim, int32_t num_chunks,
-				  int32_t first_offset, int32_t last_offset) noexcept
+		ChunkInfo(size_t feat_dim, size_t num_chunks,
+				  size_t first_offset, size_t last_offset) noexcept
 			: m_feat_dim(feat_dim), m_num_chunks(num_chunks),
 			  m_first_offset(first_offset), m_last_offset(last_offset),
 			  m_offsets() { Check(); }
 
-		ChunkInfo(int32_t feat_dim, int32_t num_chunks,
-				  const std::vector<int32_t> offsets)
+		ChunkInfo(size_t feat_dim, size_t num_chunks,
+				  const std::vector<size_t> offsets)
 			: m_feat_dim(feat_dim), m_num_chunks(num_chunks),
 			  m_first_offset(offsets.front()), m_last_offset(offsets.back()),
 			  m_offsets(offsets) {
@@ -38,17 +38,17 @@ namespace snowboy {
 			Check();
 		}
 
-		int32_t GetIndex(int32_t offset) const;
-		int32_t GetOffset(int32_t index) const;
+		size_t GetIndex(size_t offset) const;
+		size_t GetOffset(size_t index) const;
 
 		void CheckSize(const MatrixBase&) const;
 		void Check() const;
 
 		// Not in snowboy
-		int32_t NumRows() const { return m_num_chunks * ChunkSize(); }
-		int32_t NumCols() const { return m_feat_dim; }
-		int32_t NumChunks() const { return m_num_chunks; }
-		int32_t ChunkSize() const { return !m_offsets.empty() ? m_offsets.size() : (m_last_offset - m_first_offset + 1); }
+		size_t NumRows() const { return m_num_chunks * ChunkSize(); }
+		size_t NumCols() const { return m_feat_dim; }
+		size_t NumChunks() const { return m_num_chunks; }
+		size_t ChunkSize() const { return !m_offsets.empty() ? m_offsets.size() : (m_last_offset - m_first_offset + 1); }
 		void MakeOffsetsContiguous() {
 			m_offsets.clear();
 			Check();

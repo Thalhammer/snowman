@@ -10,7 +10,7 @@
 #include <pipeline-vad.h>
 #include <raw-energy-vad-stream.h>
 #include <raw-nnet-vad-stream.h>
-#include <snowboy-debug.h>
+#include <snowboy-error.h>
 #include <snowboy-io.h>
 #include <snowboy-options.h>
 #include <template-detect-stream.h>
@@ -25,10 +25,8 @@ namespace snowboy {
 	}
 
 	void PipelineVad::RegisterOptions(const std::string& p, OptionsItf* opts) {
-		if (m_isInitialized) {
-			SNOWBOY_ERROR() << "pipeline has already been initialized, you have to call RegisterOptions() before Init().";
-			return;
-		}
+		if (m_isInitialized)
+			throw snowboy_exception{"pipeline has already been initialized, you have to call RegisterOptions() before Init()."};
 
 		auto prefix = p;
 		if (!prefix.empty()) prefix += ".";
@@ -53,10 +51,9 @@ namespace snowboy {
 	}
 
 	bool PipelineVad::Init() {
-		if (m_isInitialized) {
-			SNOWBOY_ERROR() << "class has already been initialized.";
-			return true;
-		}
+		if (m_isInitialized)
+			throw snowboy_exception{"class has already been initialized."};
+
 		m_framerStreamOptions->sample_rate = m_pipelineVadOptions.sampleRate;
 		m_mfccStreamOptions->mel_filter.sample_rate = m_pipelineVadOptions.sampleRate;
 		field_xd1 = m_pipelineVadOptions.applyFrontend;
@@ -198,10 +195,9 @@ namespace snowboy {
 	}
 
 	int PipelineVad::RunVad(const MatrixBase& data, bool is_end) {
-		if (!m_isInitialized) {
-			SNOWBOY_ERROR() << "pipeline has not been initialized yet.";
-			return -1;
-		}
+		if (!m_isInitialized)
+			throw snowboy_exception{"pipeline has not been initialized yet."};
+
 		std::vector<FrameInfo> info;
 		info.resize(data.m_rows);
 		m_interceptStream->SetData(data, info, static_cast<SnowboySignal>(is_end ? 0x30 : 0x20));
@@ -223,18 +219,14 @@ namespace snowboy {
 	}
 
 	void PipelineVad::SetAudioGain(float gain) {
-		if (!m_isInitialized) {
-			SNOWBOY_ERROR() << "pipeline has not been initialized yet.";
-			return;
-		}
+		if (!m_isInitialized)
+			throw snowboy_exception{"pipeline has not been initialized yet."};
 		m_gainControlStream->SetAudioGain(gain);
 	}
 
 	void PipelineVad::SetMaxAudioAmplitude(float maxAmplitude) {
-		if (!m_isInitialized) {
-			SNOWBOY_ERROR() << "pipeline has not been initialized yet.";
-			return;
-		}
+		if (!m_isInitialized)
+			throw snowboy_exception{"pipeline has not been initialized yet."};
 		m_gainControlStream->SetMaxAudioAmplitude(maxAmplitude);
 	}
 

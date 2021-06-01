@@ -3,7 +3,7 @@
 #include <frontend-stream.h>
 #include <matrix-wrapper.h>
 #include <ns3.h>
-#include <snowboy-debug.h>
+#include <snowboy-error.h>
 #include <snowboy-options.h>
 
 #define ENABLE_FRONTEND_STREAM 0
@@ -84,31 +84,19 @@ namespace snowboy {
 		field_x60 = 0xa0;
 		int status;
 		m_ns3_instance = NS3_Init(16000, 0xa0, &status);
-		if (status != 1) {
-			SNOWBOY_ERROR() << "Failed to initialize NS.";
-			return false;
-		}
-		if (NS3_SetPara(m_ns3_instance, "NS_Power", m_ns_power.c_str()) != 1) {
-			SNOWBOY_ERROR() << "Failed to set NS_Power.";
-			return false;
-		}
-		if (NS3_SetPara(m_ns3_instance, "DR_Power", m_dr_power.c_str()) != 1) {
-			SNOWBOY_ERROR() << "Failed to set DR_Power.";
-			return false;
-		}
+		if (status != 1)
+			throw snowboy_exception{"Failed to initialize NS."};
+		if (NS3_SetPara(m_ns3_instance, "NS_Power", m_ns_power.c_str()) != 1)
+			throw snowboy_exception{"Failed to set NS_Power."};
+		if (NS3_SetPara(m_ns3_instance, "DR_Power", m_dr_power.c_str()) != 1)
+			throw snowboy_exception{"Failed to set DR_Power."};
 		m_agc_instance = AGC_Init(16000, field_x60, 1, &status);
-		if (status != 1) {
-			SNOWBOY_ERROR() << "Failed to initialize AGC.";
-			return false;
-		}
-		if (AGC_SetPara(m_agc_instance, "AGC_Level", m_agc_level.c_str()) != 1) {
-			SNOWBOY_ERROR() << "Failed to set AGC_Level.";
-			return false;
-		}
-		if (AGC_SetPara(m_agc_instance, "AGC_Power", m_agc_power.c_str()) != 1) {
-			SNOWBOY_ERROR() << "Failed to set AGC_Power.";
-			return false;
-		}
+		if (status != 1)
+			throw snowboy_exception{"Failed to initialize AGC."};
+		if (AGC_SetPara(m_agc_instance, "AGC_Level", m_agc_level.c_str()) != 1)
+			throw snowboy_exception{"Failed to set AGC_Level."};
+		if (AGC_SetPara(m_agc_instance, "AGC_Power", m_agc_power.c_str()) != 1)
+			throw snowboy_exception{"Failed to set AGC_Power."};
 		field_x64 = 0;
 #endif
 		return true;

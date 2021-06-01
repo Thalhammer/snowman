@@ -1,7 +1,6 @@
 #include <feat-lib.h>
 #include <math.h>
 #include <matrix-wrapper.h>
-#include <snowboy-debug.h>
 #include <snowboy-options.h>
 
 namespace snowboy {
@@ -30,7 +29,7 @@ namespace snowboy {
 		auto fVar14 = logf(m_options.high_frequency / 700.0f + 1.0f);
 		fVar14 = (fVar14 * 1127.0 - fVar13 * 1127.0) / static_cast<float>(m_options.num_bins + 1);
 		auto fVar17 = static_cast<float>(m_options.sample_rate) / static_cast<float>(m_options.num_fft_points);
-		for (int b = 0; b < m_options.num_bins; b++) {
+		for (size_t b = 0; b < m_options.num_bins; b++) {
 			auto local_60 = static_cast<float>(b) * fVar14 + fVar13 * 1127.0f;
 			auto local_68 = local_60 + fVar14;
 			auto local_5c = local_68 + fVar14;
@@ -93,7 +92,7 @@ namespace snowboy {
 
 	void MelFilterBank::ComputeMelFilterBankEnergy(const VectorBase& input, Vector& param_2) const {
 		if (m_options.num_bins != param_2.size()) param_2.Resize(m_options.num_bins);
-		for (int b = 0; b < param_2.size(); b++) {
+		for (size_t b = 0; b < param_2.size(); b++) {
 			param_2[b] = field_x40[b].DotVec(input.Range(field_x28[b], field_x40[b].size()));
 		}
 	}
@@ -103,13 +102,13 @@ namespace snowboy {
 	}
 
 	void ComputeDctMatrixTypeIII(Matrix* mat) {
-		if (mat->m_rows == 0 || mat->m_cols == 0) return;
-		auto fVar12 = sqrtf(1.0 / (float)mat->m_rows);
-		for (size_t c = 0; c < mat->m_cols; c++)
+		if (mat->empty()) return;
+		auto fVar12 = sqrtf(1.0 / (float)mat->rows());
+		for (size_t c = 0; c < mat->cols(); c++)
 			mat->m_data[c] = fVar12;
-		for (size_t r = 1; r < mat->m_rows; r++) {
-			auto sq = sqrtf(2.0 / mat->m_rows);
-			for (size_t c = 0; c < mat->m_cols; c++) {
+		for (size_t r = 1; r < mat->rows(); r++) {
+			auto sq = sqrtf(2.0 / mat->rows());
+			for (size_t c = 0; c < mat->cols(); c++) {
 				// TODO: In the name of performance we might wanna use cosf here.
 				// It does cause minor value differences but it should not impact anything
 				mat->m_data[r * mat->m_stride + c] = cos((c + 0.5) * (M_PI / mat->m_rows) * r) * sq;
@@ -118,7 +117,7 @@ namespace snowboy {
 	}
 
 	void ComputeCepstralLifterCoeffs(float param_1, Vector* param_2) {
-		for (int i = 0; i < param_2->m_size; i++) {
+		for (size_t i = 0; i < param_2->size(); i++) {
 			auto d = sin((static_cast<double>(i) * M_PI) / static_cast<double>(param_1));
 			param_2->m_data[i] = (d * (param_1 * 0.5) + 1.0);
 		}
@@ -127,7 +126,7 @@ namespace snowboy {
 	void ComputePowerSpectrumReal(Vector& data) {
 		if (data.empty()) return;
 		data[0] = data[0] * data[0];
-		for (int i = 0; i < data.size() / 2 - 1; i++) {
+		for (size_t i = 0; i < data.size() / 2 - 1; i++) {
 			data[i + 1] = data[i * 2 + 3] * data[i * 2 + 3] + data[i * 2 + 2] * data[i * 2 + 2];
 		}
 		data.Resize(data.size() / 2, MatrixResizeType::kCopyData);
@@ -163,9 +162,9 @@ namespace snowboy {
 	void Fft::DoDanielsonLanczos(bool inverse, Vector* pdata) const {
 		auto& data = *pdata;
 		const auto iVar7 = snowboy::Fft::GetNumBits(data.size() / 2);
-		for (auto local_54 = 1; local_54 <= iVar7; local_54 += 1) {
+		for (size_t local_54 = 1; local_54 <= iVar7; local_54 += 1) {
 			const auto iVar9 = 1 << (local_54 & 0x1f);
-			for (auto local_68 = 0; local_68 < data.size() / 2; local_68 += iVar9) {
+			for (size_t local_68 = 0; local_68 < data.size() / 2; local_68 += iVar9) {
 				long lVar14 = local_68 * 2 + 1 + iVar9;
 				long lVar15 = (local_68 * 2);
 				for (auto iVar11 = 0; iVar11 != iVar9 / 2; iVar11++) {
@@ -186,13 +185,13 @@ namespace snowboy {
 			}
 		}
 		if (inverse) {
-			for (int i = 0; i < data.size(); i++)
+			for (size_t i = 0; i < data.size(); i++)
 				data[i] = data[i] / static_cast<float>(data.size() / 2);
 		}
 	}
 
-	void Fft::DoBitReversalSorting(const std::vector<int>& reversal_index, Vector* data) const {
-		for (int i = 0; i < data->m_size; i++) {
+	void Fft::DoBitReversalSorting(const std::vector<unsigned int>& reversal_index, Vector* data) const {
+		for (size_t i = 0; i < data->size(); i++) {
 			if (i < reversal_index[i]) {
 				auto x = data->m_data[i];
 				data->m_data[i] = data->m_data[reversal_index[i]];
@@ -222,7 +221,7 @@ namespace snowboy {
 		ptr[len - 1] = tempa = tempb * _sin + tempa * _cos;
 	}
 
-	void Fft::ComputeBitReversalIndex(int len, std::vector<int>* index) const {
+	void Fft::ComputeBitReversalIndex(int len, std::vector<unsigned int>* index) const {
 		if (len == 0) {
 			index->clear();
 			return;

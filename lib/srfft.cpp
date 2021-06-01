@@ -39,8 +39,7 @@ namespace snowboy {
 				BitReversePermute(field_x14, param_3);
 				BitReversePermute(field_x14, param_2);
 			}
-			auto uVar2 = field_x10;
-			for (int i = 0; i < field_x10; i++) {
+			for (size_t i = 0; i < field_x10; i++) {
 				param_3[i] = param_3[i] / static_cast<float>(field_x10);
 				param_2[i] = param_2[i] / static_cast<float>(field_x10);
 			}
@@ -61,7 +60,7 @@ namespace snowboy {
 		auto uVar9 = field_x10 - 1;
 		if (-1 < (int)uVar9) {
 			auto lVar8 = field_x10 * sizeof(float) - 4;
-			auto lVar3 = 0;
+			ulong lVar3 = 0;
 			auto pfVar6 = ptr + (int)(uVar9 * 2);
 			do {
 				*pfVar6 = ptr[(lVar3 + lVar8) / 4];
@@ -94,9 +93,9 @@ namespace snowboy {
 	void SplitRadixFft::Init() {
 		field_x10 = m_options.num_fft_points;
 		if (m_options.field_x00) field_x10 /= 2;
-		auto temp = floor(log(field_x10) / 0.6931471805599453 + 0.5);
+		auto temp = floorf(logf(field_x10) / 0.6931471805599453 + 0.5);
 		field_x14 = temp;
-		temp = pow(2.0, temp);
+		temp = powf(2.0, temp);
 		if (field_x10 < temp) field_x14--;
 		ComputeTables();
 	}

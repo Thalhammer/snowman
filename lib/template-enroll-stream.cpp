@@ -1,6 +1,6 @@
 #include <frame-info.h>
 #include <iostream>
-#include <snowboy-debug.h>
+#include <snowboy-error.h>
 #include <snowboy-options.h>
 #include <template-enroll-stream.h>
 
@@ -49,7 +49,7 @@ namespace snowboy {
 			} else if (m_options.combine_distance_metric == "euclidean") {
 				field_x38.CombineTemplates(DistanceType::euclidean);
 			} else if (m_options.combine_distance_metric != "") {
-				SNOWBOY_ERROR() << "unknown distance metric \"" << m_options.combine_distance_metric << "\".";
+				throw snowboy_exception{"unknown distance metric \"" + m_options.combine_distance_metric + "\""};
 				return -1;
 			}
 			field_x38.WriteHotwordModel(true, m_options.model_filename);

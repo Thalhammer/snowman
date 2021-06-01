@@ -4,7 +4,6 @@
 #include <nnet-component.h>
 #include <nnet-lib.h>
 #include <set>
-#include <snowboy-debug.h>
 #include <snowboy-io.h>
 
 namespace snowboy {
@@ -90,13 +89,13 @@ namespace snowboy {
 				ComputeChunkInfo(num_effective_input_rows, 1);
 				field_x18 = num_effective_input_rows;
 			}
-			field_b8 = SubVector{m_input_data, static_cast<int32_t>(m_input_data.m_rows) - 1};
+			field_b8 = SubVector{m_input_data, m_input_data.rows() - 1};
 			Propagate();
 			*output = m_output_data;
 			m_output_data.Resize(0, 0);
 		} else {
 			m_unprocessed_buffer = m_input_data;
-			field_b8 = SubVector{m_input_data, static_cast<int32_t>(m_input_data.m_rows) - 1};
+			field_b8 = SubVector{m_input_data, m_input_data.rows() - 1};
 			m_input_data.Resize(0, 0);
 			output->Resize(0, 0);
 		}
@@ -118,9 +117,9 @@ namespace snowboy {
 
 	// Note: Adopted from kaldi
 	void Nnet::ComputeChunkInfo(int input_chunk_size, int num_chunks) {
-		const auto output_chunk_size = (input_chunk_size - m_left_context) - m_right_context;
+		const size_t output_chunk_size = (input_chunk_size - m_left_context) - m_right_context;
 		SNOWBOY_ASSERT(output_chunk_size > 0);
-		std::vector<int> current_output_inds;
+		std::vector<size_t> current_output_inds;
 		current_output_inds.resize(output_chunk_size);
 		for (size_t i = 0; i < output_chunk_size; i++)
 			current_output_inds[i] = i + m_left_context;
@@ -133,7 +132,6 @@ namespace snowboy {
 			num_chunks, current_output_inds.front(),
 			current_output_inds.back());
 
-		std::vector<int32_t> current_input_inds;
 		for (int32_t i = m_components.size() - 1; i >= 0; i--) {
 			std::vector<int32_t> current_context = m_components[i]->Context();
 			std::set<int32_t> current_input_ind_set;
@@ -236,7 +234,7 @@ namespace snowboy {
 	}
 
 	void Nnet::Propagate() {
-		for (int32_t c = 0; c < m_components.size(); c++) {
+		for (size_t c = 0; c < m_components.size(); c++) {
 			auto ctx = m_components[c]->Context();
 			auto inputDim = m_components[c]->InputDim();
 			if (ctx.size() > 1) {
@@ -257,13 +255,13 @@ namespace snowboy {
 			ChunkInfo input_chunk_info{
 				m_chunkinfo[c].NumCols(),
 				m_chunkinfo[c].NumChunks(),
-				last_offset - (static_cast<int32_t>(m_input_data.m_rows)) + 1,
+				last_offset - m_input_data.rows() + 1,
 				last_offset};
 			last_offset = m_chunkinfo[c + 1].GetOffset(m_chunkinfo[c + 1].ChunkSize() - 1);
 			ChunkInfo output_chunk_info{
 				m_chunkinfo[c + 1].NumCols(),
 				m_chunkinfo[c + 1].NumChunks(),
-				last_offset - static_cast<int32_t>(m_input_data.m_rows - (ctx.back() - ctx.front())) + 1,
+				last_offset - (m_input_data.rows() - (ctx.back() - ctx.front())) + 1,
 				last_offset};
 			m_components[c]->Propagate(input_chunk_info, output_chunk_info, std::move(m_input_data), &m_output_data);
 			if (c < m_components.size() - 1) {
@@ -291,7 +289,7 @@ namespace snowboy {
 	}
 
 	void Nnet::SetIndices() {
-		for (int32_t i = 0; i < m_components.size(); i++) {
+		for (size_t i = 0; i < m_components.size(); i++) {
 			m_components[i]->SetIndex(i);
 		}
 	}

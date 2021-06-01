@@ -5,15 +5,16 @@ extern "C"
 #include <cmath>
 #include <cstring>
 #include <matrix-wrapper.h>
-#include <snowboy-debug.h>
+#include <snowboy-error.h>
 #include <snowboy-io.h>
 #include <snowboy-utils.h>
+#include <sstream>
 #include <vector-wrapper.h>
 
 namespace snowboy {
 
-	void MatrixBase::AddMat(float alpha, const MatrixBase& A, MatrixTransposeType transA) {
-		SNOWBOY_ERROR() << "Not implemented";
+	void MatrixBase::AddMat(float, const MatrixBase&, MatrixTransposeType) {
+		throw snowboy_exception{"Not implemented"};
 	}
 
 	void MatrixBase::AddMatMat(float param_1, const MatrixBase& param_2, MatrixTransposeType param_3,
@@ -30,8 +31,8 @@ namespace snowboy {
 			temp.Set(1.0f);
 			AddVecVec(param_1, temp, param_2);
 		} else {
-			for (int row = 0; row < m_rows; row++) {
-				for (int col = 0; col < m_cols; col++) {
+			for (size_t row = 0; row < m_rows; row++) {
+				for (size_t col = 0; col < m_cols; col++) {
 					m_data[row * m_stride + col] += param_1 * param_2.m_data[col];
 				}
 			}
@@ -44,132 +45,128 @@ namespace snowboy {
 	}
 
 	void MatrixBase::ApplyFloor(float f) {
-		for (int r = 0; r < m_rows; r++) {
-			for (int c = 0; c < m_cols; c++) {
+		for (size_t r = 0; r < m_rows; r++) {
+			for (size_t c = 0; c < m_cols; c++) {
 				m_data[r * m_stride + c] = std::max(m_data[r * m_stride + c], f);
 			}
 		}
 	}
 
-	SubMatrix MatrixBase::ColRange(int param_1, int param_2) const {
+	SubMatrix MatrixBase::ColRange(size_t param_1, size_t param_2) const {
 		return SubMatrix{*this, 0, m_rows, param_1, param_2};
 	}
 
-	void MatrixBase::CopyColFromVec(const VectorBase& param_1, int param_2) {
-		for (int i = 0; i < m_rows; i++) {
+	void MatrixBase::CopyColFromVec(const VectorBase& param_1, size_t param_2) {
+		for (size_t i = 0; i < m_rows; i++) {
 			m_data[m_stride * i + param_2] = param_1.m_data[i];
 		}
 	}
 
-	void MatrixBase::CopyCols(const MatrixBase& param_1, const std::vector<int>& param_2) {
-		for (auto row = 0; row != m_rows; row++) {
-			for (auto col = 0; col < m_cols; col++) {
-				auto v = 0.0f;
-				if (param_2[col] != -1) {
-					v = param_1.m_data[param_2[col] + param_1.m_stride * row];
-				}
-				m_data[m_stride * row + col] = v;
+	void MatrixBase::CopyCols(const MatrixBase& param_1, const std::vector<ssize_t>& param_2) {
+		SNOWBOY_ASSERT(param_2.size() >= m_cols);
+		for (size_t row = 0; row < m_rows; row++) {
+			for (size_t col = 0; col < m_cols; col++) {
+				(*this)(row, col) = param_2[col] < 0 ? 0 : param_1(row, param_2[col]);
 			}
 		}
 	}
 
 	void MatrixBase::CopyColsFromVec(const VectorBase&) {
-		SNOWBOY_ERROR() << "Not implemented";
+		throw snowboy_exception{"Not implemented"};
 	}
 
 	void MatrixBase::CopyDiagFromVec(const VectorBase&) {
-		SNOWBOY_ERROR() << "Not implemented";
+		throw snowboy_exception{"Not implemented"};
 	}
 
 	void MatrixBase::CopyFromMat(const MatrixBase& param_1, MatrixTransposeType param_2) {
+		SNOWBOY_ASSERT(param_1.m_cols >= m_cols);
 		if (&param_1 == this) return;
 		if (param_2 == MatrixTransposeType::kTrans) {
-			for (auto row = 0; row < m_rows; row++) {
-				for (auto col = 0; col < m_cols; col++) {
-					m_data[m_stride * row + col] = param_1.m_data[row + col * param_1.m_stride];
+			for (size_t row = 0; row < m_rows; row++) {
+				for (size_t col = 0; col < m_cols; col++) {
+					(*this)(row, col) = param_1(col, row);
 				}
 			}
 		} else {
-			for (auto uVar8 = 0; uVar8 < m_rows; uVar8++) {
-				SubVector{*this, uVar8}.CopyFromVec(SubVector{param_1, uVar8});
+			for (size_t row = 0; row < m_rows; row++) {
+				memcpy(data(row), param_1.data(row), m_cols * sizeof(float));
 			}
 		}
 	}
 
-	void MatrixBase::CopyRowFromVec(const VectorBase&, int) {
-		SNOWBOY_ERROR() << "Not implemented";
+	void MatrixBase::CopyRowFromVec(const VectorBase&, size_t) {
+		throw snowboy_exception{"Not implemented"};
 	}
 
-	void MatrixBase::CopyRows(const MatrixBase& param_1, const std::vector<int>& param_2) {
-		for (auto row = 0; row < m_rows; row++) {
-			while (param_2[row] != -1) {
-				memcpy(&m_data[m_stride * row], param_1.m_data + (param_2[row] * param_1.m_stride), m_cols * sizeof(float));
-				row++;
-				if (row >= this->m_rows) return;
+	void MatrixBase::CopyRows(const MatrixBase& param_1, const std::vector<ssize_t>& param_2) {
+		SNOWBOY_ASSERT(param_2.size() >= m_rows);
+		for (size_t row = 0; row < m_rows; row++) {
+			if (param_2[row] < 0) {
+				memset(data(row), 0, m_cols * sizeof(float));
+			} else {
+				memcpy(data(row), param_1.data(param_2[row]), m_cols * sizeof(float));
 			}
-			memset(&m_data[m_stride * row], 0, m_cols * sizeof(float));
 		}
 	}
 
 	void MatrixBase::CopyRowsFromVec(const VectorBase& param_1) {
 		if (m_rows * m_cols == param_1.m_size) {
 			if (m_cols == m_stride) {
-				memcpy(this->m_data, param_1.m_data, (m_rows * m_cols) * sizeof(float));
+				memcpy(m_data, param_1.m_data, (m_rows * m_cols) * sizeof(float));
 			} else {
-				for (auto row = 0; row < m_rows; row++) {
-					memcpy(&m_data[param_1.m_size * row], &param_1.m_data[m_cols * row], m_cols * sizeof(float));
+				for (size_t row = 0; row < m_rows; row++) {
+					memcpy(data(row), &param_1.m_data[m_cols * row], m_cols * sizeof(float));
 				}
 			}
 		} else {
 			if (m_cols == param_1.m_size) {
-				for (auto row = 0; row < m_rows; row++) {
-					memcpy(&m_data[m_stride * row], param_1.m_data, m_cols * sizeof(float));
+				for (size_t row = 0; row < m_rows; row++) {
+					memcpy(data(row), param_1.m_data, m_cols * sizeof(float));
 				}
 			} else {
-				SNOWBOY_ERROR() << "Vector size should be NumRows() * NumCols() or NumCols(). Vector size is "
-								<< param_1.m_size << ", Matrix size is " << m_rows << " x " << m_cols;
+				std::stringstream ss;
+				ss << "Vector size should be NumRows() * NumCols() or NumCols(). Vector size is "
+				   << param_1.m_size << ", Matrix size is " << m_rows << " x " << m_cols;
+				throw snowboy_exception{ss.str()};
 			}
 		}
 	}
 
 	bool MatrixBase::IsDiagonal(float) const {
-		SNOWBOY_ERROR() << "Not implemented";
-		return false;
+		throw snowboy_exception{"Not implemented"};
 	}
 
 	bool MatrixBase::IsSymmetric(float) const {
-		SNOWBOY_ERROR() << "Not implemented";
-		return false;
+		throw snowboy_exception{"Not implemented"};
 	}
 
 	bool MatrixBase::IsUnit(float) const {
-		SNOWBOY_ERROR() << "Not implemented";
-		return false;
+		throw snowboy_exception{"Not implemented"};
 	}
 
-	bool MatrixBase::IsZero(float cutoff) const {
-		SNOWBOY_ERROR() << "Not implemented";
-		return false;
+	bool MatrixBase::IsZero(float) const {
+		throw snowboy_exception{"Not implemented"};
 	}
 
 	void MatrixBase::MulColsVec(const VectorBase& param_1) {
-		for (auto col = 0; col < m_cols; col++) {
-			for (auto row = 0; row != m_rows; row++) {
-				m_data[col + row * m_stride] *= param_1.m_data[col];
+		for (size_t row = 0; row < m_rows; row++) {
+			for (size_t col = 0; col < m_cols; col++) {
+				(*this)(row, col) *= param_1[col];
 			}
 		}
 	}
 
 	void MatrixBase::MulRowsVec(const VectorBase& param_1) {
-		for (int i = 0; i < m_rows; i++) {
-			auto this_scale = param_1.m_data[i];
-			for (int j = 0; j < m_cols; j++) {
-				m_data[i * m_stride + j] *= this_scale;
+		for (size_t row = 0; row < m_rows; row++) {
+			auto this_scale = param_1[row];
+			for (size_t col = 0; col < m_cols; col++) {
+				(*this)(row, col) *= this_scale;
 			}
 		}
 	}
 
-	SubMatrix MatrixBase::Range(int param_1, int param_2, int param_3, int param_4) const {
+	SubMatrix MatrixBase::Range(size_t param_1, size_t param_2, size_t param_3, size_t param_4) const {
 		return SubMatrix{*this, param_1, param_2, param_3, param_4};
 	}
 
@@ -178,9 +175,9 @@ namespace snowboy {
 		temp.Resize(m_rows, m_cols, MatrixResizeType::kUndefined);
 		temp.Read(binary, is);
 		if (m_rows != temp.m_rows || m_cols != temp.m_cols) {
-			SNOWBOY_ERROR() << "Failed to read Matrix: size mismatch " << m_rows << " x " << m_cols << " v.s. "
-							<< temp.m_rows << " x " << temp.m_cols;
-			return;
+			std::stringstream ss;
+			ss << "Failed to read Matrix: size mismatch " << m_rows << " x " << m_cols << " v.s. " << temp.m_rows << " x " << temp.m_cols;
+			throw snowboy_exception{ss.str()};
 		}
 		if (add) {
 			AddMat(1.0f, temp, MatrixTransposeType::kNoTrans);
@@ -192,7 +189,7 @@ namespace snowboy {
 		Read(binary, false, is);
 	}
 
-	SubMatrix MatrixBase::RowRange(int param_1, int param_2) const {
+	SubMatrix MatrixBase::RowRange(size_t param_1, size_t param_2) const {
 		return SubMatrix{*this, param_1, param_2, 0, m_cols};
 	}
 
@@ -201,50 +198,50 @@ namespace snowboy {
 		if (m_cols == this->m_stride) {
 			cblas_sscal(m_cols * m_rows, param_1, m_data, 1);
 		} else {
-			for (auto r = 0; r < m_rows; r++) {
+			for (size_t r = 0; r < m_rows; r++) {
 				cblas_sscal(m_cols, param_1, &m_data[r * m_stride], 1);
 			}
 		}
 	}
 
 	void MatrixBase::Set(float value) {
-		for (int r = 0; r < m_rows; r++) {
-			for (int c = 0; c < m_cols; c++) {
+		for (size_t r = 0; r < m_rows; r++) {
+			for (size_t c = 0; c < m_cols; c++) {
 				m_data[r * m_stride + c] = value;
 			}
 		}
 	}
 
 	void MatrixBase::SetRandomGaussian() {
-		SNOWBOY_ERROR() << "Not implemented";
+		throw snowboy_exception{"Not implemented"};
 	}
 
 	void MatrixBase::SetRandomUniform() {
-		SNOWBOY_ERROR() << "Not implemented";
+		throw snowboy_exception{"Not implemented"};
 	}
 
 	void MatrixBase::SetUnit() {
-		SNOWBOY_ERROR() << "Not implemented";
+		throw snowboy_exception{"Not implemented"};
 	}
 
 	void MatrixBase::Transpose() {
-		SNOWBOY_ERROR() << "Not implemented";
+		throw snowboy_exception{"Not implemented"};
 	}
 
 	void MatrixBase::Write(bool binary, std::ostream* os) const {
-		if (!binary) SNOWBOY_ERROR() << "Not implemented";
+		if (!binary) throw snowboy_exception{"Not implemented"};
 		WriteToken(binary, "FM", os);
 		WriteBasicType<int32_t>(binary, m_rows, os);
 		WriteBasicType<int32_t>(binary, m_cols, os);
 		if (m_cols == m_stride) {
 			os->write(reinterpret_cast<const char*>(m_data), m_rows * m_cols * sizeof(float));
 		} else {
-			for (int r = 0; r < m_rows; r++) {
+			for (size_t r = 0; r < m_rows; r++) {
 				os->write(reinterpret_cast<const char*>(&m_data[r * m_stride]), m_cols * sizeof(float));
 			}
 		}
 		if (!*os) {
-			SNOWBOY_ERROR() << "Fail to write Matrix to stream.";
+			throw snowboy_exception{"Fail to write Matrix to stream"};
 		}
 	}
 
@@ -274,7 +271,7 @@ namespace snowboy {
 		return (val + multi - 1) & ~(multi - 1);
 	}
 
-	void Matrix::Resize(int rows, int cols, MatrixResizeType resize) {
+	void Matrix::Resize(size_t rows, size_t cols, MatrixResizeType resize) {
 		if (cols == 0 && rows == 0) {
 			m_rows = 0;
 			m_cols = 0;
@@ -304,8 +301,8 @@ namespace snowboy {
 		if (resize == MatrixResizeType::kCopyData) {
 			Matrix temp;
 			temp.Resize(rows, cols, MatrixResizeType::kSetZero);
-			for (int r = 0; r < std::min(rows, (int)m_rows); r++) {
-				memcpy(&temp.m_data[r * temp.m_stride], &m_data[r * m_stride], std::min((int)m_cols, cols) * sizeof(float));
+			for (size_t r = 0; r < std::min<size_t>(rows, m_rows); r++) {
+				memcpy(&temp.m_data[r * temp.m_stride], &m_data[r * m_stride], std::min<size_t>(m_cols, cols) * sizeof(float));
 			}
 			temp.Swap(this);
 		} else {
@@ -315,7 +312,7 @@ namespace snowboy {
 		}
 	}
 
-	void Matrix::AllocateMatrixMemory(int rows, int cols) {
+	void Matrix::AllocateMatrixMemory(size_t rows, size_t cols) {
 		if (rows == 0 || cols == 0) {
 			m_data = nullptr;
 			m_stride = 0;
@@ -367,46 +364,45 @@ namespace snowboy {
 		return *this;
 	}
 
-	void Matrix::RemoveRow(int row) {
+	void Matrix::RemoveRow(size_t row) {
 		// TODO: This could be a memmove
-		for (auto r = row + 1; r < (int)m_rows; r++) {
+		for (size_t r = row + 1; r < m_rows; r++) {
 			SubVector{*this, r - 1}.CopyFromVec(SubVector{*this, r});
 		}
 		m_rows -= 1;
 	}
 
 	void Matrix::Read(bool binary, bool add, std::istream* is) {
-		if (!binary) {
-			SNOWBOY_ERROR() << "Not implemented";
-		}
+		if (!binary) throw snowboy_exception{"Not implemented"};
 		if (add) {
 			Matrix temp;
 			temp.Read(binary, false, is);
 			if (m_rows == 0)
 				Resize(temp.m_rows, temp.m_cols);
 			else if (m_rows != temp.m_rows) {
-				SNOWBOY_ERROR() << "Fail to read Matrix: size mismatch " << temp.m_rows << " x " << temp.m_cols << " v.s. " << m_rows << " x " << m_cols;
-				return;
+				std::stringstream ss;
+				ss << "Fail to read Matrix: size mismatch " << temp.m_rows << " x " << temp.m_cols << " v.s. " << m_rows << " x " << m_cols;
+				throw snowboy_exception{ss.str()};
 			}
 			AddMat(1.0f, temp, MatrixTransposeType::kNoTrans);
 		} else {
 			ExpectToken(binary, "FM", is);
-			int rows, cols;
+			int32_t rows, cols;
 			ReadBasicType<int32_t>(binary, &rows, is);
 			ReadBasicType<int32_t>(binary, &cols, is);
-			if (m_rows != rows || m_cols != cols) {
+			if (m_rows != static_cast<size_t>(rows) || m_cols != static_cast<size_t>(cols)) {
 				Resize(rows, cols, MatrixResizeType::kUndefined);
 			}
 			if (m_stride == m_cols) {
 				is->read(reinterpret_cast<char*>(m_data), m_rows * m_cols * sizeof(float));
 			} else {
-				for (int r = 0; r < m_rows; r++) {
+				for (size_t r = 0; r < m_rows; r++) {
 					is->read(reinterpret_cast<char*>(&m_data[r * m_stride]), m_cols * sizeof(float));
 				}
 			}
 		}
 		if (!*is) {
-			SNOWBOY_ERROR() << "Fail to read Matrix.";
+			throw snowboy_exception{"Fail to read Matrix"};
 		}
 	}
 
@@ -433,7 +429,7 @@ namespace snowboy {
 		}
 	}
 
-	SubMatrix::SubMatrix(const MatrixBase& parent, int rowoffset, int rows, int coloffset, int cols) {
+	SubMatrix::SubMatrix(const MatrixBase& parent, size_t rowoffset, size_t rows, size_t coloffset, size_t cols) {
 		m_stride = parent.m_stride;
 		m_rows = rows;
 		m_cols = cols;
@@ -445,9 +441,9 @@ namespace snowboy {
 		s << std::fixed;
 		s.precision(3);
 		s << "mat<" << o.m_rows << "," << o.m_cols << ">{\n";
-		for (int r = 0; r < o.m_rows; r++) {
+		for (size_t r = 0; r < o.m_rows; r++) {
 			s << "{ ";
-			for (int c = 0; c < o.m_cols; c++)
+			for (size_t c = 0; c < o.m_cols; c++)
 				s << o.m_data[r * o.m_stride + c] << " ";
 			s << " }\n";
 		}

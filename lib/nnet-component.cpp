@@ -1,12 +1,12 @@
 #include <matrix-wrapper.h>
 #include <nnet-component.h>
 #include <ostream>
-#include <snowboy-debug.h>
+#include <snowboy-error.h>
 #include <snowboy-io.h>
 
 namespace snowboy {
 
-	int32_t ChunkInfo::GetIndex(int32_t offset) const {
+	size_t ChunkInfo::GetIndex(size_t offset) const {
 		if (m_offsets.empty())
 		{ // if data is contiguous
 			SNOWBOY_ASSERT((offset <= m_last_offset) && (offset >= m_first_offset));
@@ -16,37 +16,35 @@ namespace snowboy {
 			auto iter = std::lower_bound(m_offsets.begin(), m_offsets.end(), offset);
 			// make sure offset is present in the vector
 			SNOWBOY_ASSERT(iter != m_offsets.end() && *iter == offset);
-			return static_cast<int32_t>(iter - m_offsets.begin());
+			return static_cast<size_t>(iter - m_offsets.begin());
 		}
 	}
 
-	int32_t ChunkInfo::GetOffset(int32_t index) const {
+	size_t ChunkInfo::GetOffset(size_t index) const {
 		if (m_offsets.empty())
-		{											 // if data is contiguous
-			int32_t offset = index + m_first_offset; // just offset by the first_offset_
+		{											// if data is contiguous
+			size_t offset = index + m_first_offset; // just offset by the first_offset_
 			SNOWBOY_ASSERT((offset <= m_last_offset) && (offset >= m_first_offset));
 			return offset;
 		} else
 		{
-			SNOWBOY_ASSERT((index >= 0) && (index < m_offsets.size()));
+			SNOWBOY_ASSERT(index < m_offsets.size());
 			return m_offsets[index];
 		}
 	}
 
 	void ChunkInfo::CheckSize(const MatrixBase& mat) const {
-		SNOWBOY_ASSERT(mat.m_rows == NumRows() && mat.m_cols == NumCols());
+		SNOWBOY_ASSERT(mat.rows() == NumRows() && mat.cols() == NumCols());
 	}
 
 	void ChunkInfo::Check() const {
 		// Checking sanity of the ChunkInfo object
-		SNOWBOY_ASSERT((m_feat_dim > 0) && (m_num_chunks > 0));
-
 		if (!m_offsets.empty())
 		{
 			SNOWBOY_ASSERT((m_first_offset == m_offsets.front()) && (m_last_offset == m_offsets.back()));
 		} else
 		{
-			SNOWBOY_ASSERT((m_first_offset >= 0) && (m_last_offset >= m_first_offset));
+			SNOWBOY_ASSERT(m_last_offset >= m_first_offset);
 			// asserting the chunk is not contiguous, as offsets is not empty
 			SNOWBOY_ASSERT(m_last_offset - m_first_offset + 1 > m_offsets.size());
 		}
@@ -104,18 +102,13 @@ namespace snowboy {
 	Component* Component::ReadNew(bool binary, std::istream* is) {
 		std::string token;
 		ReadToken(binary, &token, is);
-		if (token.size() <= 2) {
-			SNOWBOY_ERROR() << "Invalid component token " << token;
-			return nullptr;
-		}
+		if (token.size() <= 2)
+			throw snowboy_exception{"Invalid component token " + token};
 		// Remove leading < and following >
 		token = token.substr(1, token.size() - 2);
 		auto ptr = NewComponentOfType(token);
 		if (ptr == nullptr)
-		{
-			SNOWBOY_ERROR() << "Unknown component type " << token;
-			return nullptr;
-		}
+			throw snowboy_exception{"Unknown component type " + token};
 		ptr->Read(binary, is);
 		return ptr;
 	}
@@ -429,7 +422,7 @@ namespace snowboy {
 
 		*out = std::move(in);
 		out_info.CheckSize(*out);
-		for (int i = 0; i < out->m_rows; i++)
+		for (size_t i = 0; i < out->rows(); i++)
 		{
 			SubVector vec{*out, i};
 			vec.ApplySoftmax();
@@ -498,29 +491,26 @@ namespace snowboy {
 		auto input_dim = in_info.NumCols();
 
 		if (out_chunk_size <= 0)
-		{
-			SNOWBOY_ERROR() << "Zero output dimension in SpliceComponent.";
-			return;
-		}
+			throw snowboy_exception{"Zero output dimension in SpliceComponent"};
 
 		auto num_splice = m_context.size();
-		std::vector<std::vector<int32_t>> indexes(num_splice);
+		std::vector<std::vector<ssize_t>> indexes(num_splice);
 		for (auto& e : indexes)
 			e.resize(out->m_rows);
 
 		auto const_dim = m_constComponentDim;
-		std::vector<int32_t> const_indexes;
+		std::vector<ssize_t> const_indexes;
 		const_indexes.resize((const_dim == 0) ? 0u : out->m_rows);
 
-		for (int32_t chunk = 0; chunk < in_info.NumChunks(); chunk++)
+		for (size_t chunk = 0; chunk < in_info.NumChunks(); chunk++)
 		{
 			if (chunk == 0)
 			{
 				// this branch could be used for all chunks in the matrix,
 				// but is restricted to chunk 0 for efficiency reasons
-				for (int32_t c = 0; c < num_splice; c++)
+				for (size_t c = 0; c < num_splice; c++)
 				{
-					for (int32_t out_index = 0; out_index < out_chunk_size; out_index++)
+					for (size_t out_index = 0; out_index < out_chunk_size; out_index++)
 					{
 						int32_t out_offset = out_info.GetOffset(out_index);
 						int32_t in_index = in_info.GetIndex(out_offset + m_context[c]);
@@ -530,9 +520,9 @@ namespace snowboy {
 			} else
 			{ // just copy the indices from the previous chunk
 				// and offset these by input chunk size
-				for (int32_t c = 0; c < num_splice; c++)
+				for (size_t c = 0; c < num_splice; c++)
 				{
-					for (int32_t out_index = 0; out_index < out_chunk_size; out_index++)
+					for (size_t out_index = 0; out_index < out_chunk_size; out_index++)
 					{
 						int32_t last_value = indexes[c][(chunk - 1) * out_chunk_size + out_index];
 						indexes[c][chunk * out_chunk_size + out_index] = (last_value == -1 ? -1 : last_value + in_chunk_size);
@@ -541,16 +531,16 @@ namespace snowboy {
 			}
 			if (const_dim != 0)
 			{
-				for (int32_t out_index = 0; out_index < out_chunk_size; out_index++)
+				for (size_t out_index = 0; out_index < out_chunk_size; out_index++)
 					const_indexes[chunk * out_chunk_size + out_index] = chunk * in_chunk_size + out_index; // there is
 																										   // an arbitrariness here; since we assume the const_component
 																										   // is constant within a chunk, it doesn't matter from where we copy.
 			}
 		}
 
-		for (int32_t c = 0; c < num_splice; c++)
+		for (size_t c = 0; c < num_splice; c++)
 		{
-			int32_t dim = input_dim - const_dim; // dimension we
+			size_t dim = input_dim - const_dim; // dimension we
 			// are splicing
 			SubMatrix in_part(in, 0, in.m_rows, 0, dim);
 			SubMatrix out_part(*out, 0, out->m_rows, c * dim, dim);

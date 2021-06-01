@@ -9,15 +9,16 @@ namespace snowboy {
 	struct VectorBase;
 	struct SubMatrix;
 	struct MatrixBase {
-		uint32_t m_rows{0};
-		uint32_t m_cols{0};
-		uint32_t m_stride{0};
+		size_t m_rows{0};
+		size_t m_cols{0};
+		size_t m_stride{0};
 		float* m_data{nullptr};
 
 		size_t rows() const noexcept { return m_rows; }
 		size_t cols() const noexcept { return m_cols; }
 		size_t stride() const noexcept { return m_stride; }
 		float* data() const noexcept { return m_data; }
+		float* data(size_t row) const noexcept { return m_data + (row * stride()); }
 		float& operator()(size_t row, size_t col) const noexcept { return m_data[row * m_stride + col]; }
 		bool empty() const noexcept { return rows() == 0 || cols() == 0; }
 
@@ -26,14 +27,14 @@ namespace snowboy {
 		void AddVecToRows(float, const VectorBase&);
 		void AddVecVec(float, const VectorBase&, const VectorBase&);
 		void ApplyFloor(float);
-		SubMatrix ColRange(int, int) const;
-		void CopyColFromVec(const VectorBase&, int);
-		void CopyCols(const MatrixBase&, const std::vector<int>&);
+		SubMatrix ColRange(size_t, size_t) const;
+		void CopyColFromVec(const VectorBase&, size_t);
+		void CopyCols(const MatrixBase&, const std::vector<ssize_t>&);
 		void CopyColsFromVec(const VectorBase&);
 		void CopyDiagFromVec(const VectorBase&);
 		void CopyFromMat(const MatrixBase&, MatrixTransposeType transposeType);
-		void CopyRowFromVec(const VectorBase&, int);
-		void CopyRows(const MatrixBase&, const std::vector<int>&);
+		void CopyRowFromVec(const VectorBase&, size_t);
+		void CopyRows(const MatrixBase&, const std::vector<ssize_t>&);
 		void CopyRowsFromVec(const VectorBase&);
 		bool IsDiagonal(float) const;
 		bool IsSymmetric(float) const;
@@ -43,10 +44,10 @@ namespace snowboy {
 		bool IsZero(float cutoff = 0.00001) const;
 		void MulColsVec(const VectorBase&);
 		void MulRowsVec(const VectorBase&);
-		SubMatrix Range(int, int, int, int) const;
+		SubMatrix Range(size_t, size_t, size_t, size_t) const;
 		void Read(bool, bool, std::istream*);
 		void Read(bool, std::istream*); // Read(p1, false, p2);
-		SubMatrix RowRange(int, int) const;
+		SubMatrix RowRange(size_t, size_t) const;
 		void Scale(float factor);
 		void Set(float value);
 		void SetRandomGaussian();
@@ -77,8 +78,8 @@ namespace snowboy {
 			other.m_stride = 0;
 			other.m_cols = 0;
 		}
-		void Resize(int rows, int cols, MatrixResizeType resize = MatrixResizeType::kSetZero);
-		void AllocateMatrixMemory(int rows, int cols);
+		void Resize(size_t rows, size_t cols, MatrixResizeType resize = MatrixResizeType::kSetZero);
+		void AllocateMatrixMemory(size_t rows, size_t cols);
 		void ReleaseMatrixMemory(); // NOTE: Called destroy in kaldi
 		~Matrix() { ReleaseMatrixMemory(); }
 
@@ -89,7 +90,7 @@ namespace snowboy {
 			return *this;
 		}
 
-		void RemoveRow(int row);
+		void RemoveRow(size_t row);
 		void Read(bool, bool, std::istream*);
 		void Read(bool, std::istream*);
 		void Swap(Matrix* other);
@@ -99,7 +100,7 @@ namespace snowboy {
 		static void ResetAllocStats();
 	};
 	struct SubMatrix : MatrixBase {
-		SubMatrix(const MatrixBase& parent, int rowoffset, int rows, int coloffset, int cols);
+		SubMatrix(const MatrixBase& parent, size_t rowoffset, size_t rows, size_t coloffset, size_t cols);
 	};
 
 	std::ostream& operator<<(std::ostream&, const MatrixBase&);

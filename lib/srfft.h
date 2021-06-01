@@ -5,7 +5,7 @@ namespace snowboy {
 
 	struct SplitRadixFft : FftItf {
 		FftOptions m_options;
-		int field_x10;
+		size_t field_x10;
 		int field_x14;
 		std::vector<int> field_x18;
 		std::vector<std::vector<float>> field_x30;
@@ -25,5 +25,5 @@ namespace snowboy {
 		virtual void DoIfft(Vector*) const override;
 		virtual ~SplitRadixFft();
 	};
-	static_assert(sizeof(SplitRadixFft) == 0x48);
+	//static_assert(sizeof(SplitRadixFft) == 0x48);
 } // namespace snowboy

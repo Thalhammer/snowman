@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <eavesdrop-stream.h>
@@ -10,7 +11,7 @@
 #include <nnet-stream.h>
 #include <pipeline-template-cut.h>
 #include <raw-nnet-vad-stream.h>
-#include <snowboy-debug.h>
+#include <snowboy-error.h>
 #include <snowboy-options.h>
 #include <vad-lib.h>
 
@@ -23,10 +24,8 @@ namespace snowboy {
 	}
 
 	void PipelineTemplateCut::RegisterOptions(const std::string& p, OptionsItf* opts) {
-		if (m_isInitialized) {
-			SNOWBOY_ERROR() << "pipeline has already been initialized, you have to call RegisterOptions() before Init().";
-			return;
-		}
+		if (m_isInitialized)
+			throw snowboy_exception{"pipeline has already been initialized, you have to call RegisterOptions() before Init()."};
 
 		auto prefix = p;
 		if (!prefix.empty()) prefix += ".";
@@ -46,10 +45,9 @@ namespace snowboy {
 	}
 
 	bool PipelineTemplateCut::Init() {
-		if (m_isInitialized) {
-			SNOWBOY_ERROR() << "class has already been initialized.";
-			return true;
-		}
+		if (m_isInitialized)
+			throw snowboy_exception{"class has already been initialized."};
+
 		m_framerStreamOptions.sample_rate = m_pipelineTemplateCutOptions.sample_rate;
 		m_mfccStreamOptions->mel_filter.sample_rate = m_pipelineTemplateCutOptions.sample_rate;
 
@@ -123,16 +121,15 @@ namespace snowboy {
 	}
 
 	int PipelineTemplateCut::CutTemplate(const MatrixBase& in, Matrix* out) {
-		if (!m_isInitialized) {
-			SNOWBOY_ERROR() << "class has not been initialized.";
-			return 2;
-		}
+		if (!m_isInitialized)
+			throw snowboy_exception{"class has not been initialized."};
+
 		std::vector<FrameInfo> info;
 		info.resize(in.m_rows);
 		m_interceptStream->SetData(in, info, SnowboySignal(8));
 		Matrix read_mat;
 		std::vector<FrameInfo> read_info;
-		auto read_res = m_rawNnetVadStream->Read(&read_mat, &read_info);
+		m_rawNnetVadStream->Read(&read_mat, &read_info);
 		read_mat.Resize(0, 0);
 		if (m_eavesdropMatrix.m_rows == 0) {
 			return 0x400;
@@ -157,12 +154,12 @@ namespace snowboy {
 
 	void PipelineTemplateCut::ComputeTemplateBoundary(const MatrixBase& param_1, const std::vector<FrameInfo>& param_2, int* param_3, int* param_4) const {
 		std::vector<float> temp;
-		temp.resize(param_1.m_rows);
-		for (auto iVar14 = 0; iVar14 < param_1.m_rows; iVar14++) {
-			auto fVar17 = SubVector{param_1, iVar14}.DotVec(SubVector{param_1, iVar14});
+		temp.resize(param_1.rows());
+		for (size_t row = 0; row < param_1.rows(); row++) {
+			auto fVar17 = SubVector{param_1, row}.DotVec(SubVector{param_1, row});
 			fVar17 = std::max(fVar17, std::numeric_limits<float>::min());
 			fVar17 = logf(fVar17);
-			temp[iVar14] = fVar17;
+			temp[row] = fVar17;
 		}
 
 		float avg_voice_energy = 0.0f;
@@ -194,66 +191,38 @@ namespace snowboy {
 		*param_3 = -1;
 		state.GetVoiceStates(local_98, &piStack88);
 
-		auto lVar6 = 1;
-		auto lVar12 = piStack88.size();
-		if (lVar12 == 0) {
-		LAB_00155412:
-			if (*param_3 != -1) goto LAB_00155458;
-			*param_3 = 0;
-			*param_4 = 0;
-		} else {
-			lVar6 = 1;
-			int iVar7;
-			if (piStack88.front() == 1) {
-				iVar7 = 0;
-			} else {
-				auto piVar4 = piStack88.begin();
-				do {
-					iVar7 = (int)lVar6;
-					if (lVar6 == lVar12) goto LAB_00155412;
-					piVar4 = piStack88.begin() + lVar6;
-					lVar6 = lVar6 + 1;
-				} while (*piVar4 != 1);
-			}
-			iVar7 -= m_pipelineTemplateCutOptions.min_voice_frames;
-			*param_3 = std::max(iVar7, 0);
-		LAB_00155458:
-			*param_4 = 0;
-			if (local_98.size() > 1) {
-				auto piVar3 = local_98.end() - 1;
-				auto piVar4 = local_98.begin();
-				do {
-					iVar7 = *piVar4;
-					auto piVar5 = piVar4 + 1;
-					auto piVar10 = piVar3 + -1;
-					*piVar4 = *piVar3;
-					*piVar3 = static_cast<VoiceType>(iVar7);
-					piVar4 = piVar5;
-					piVar3 = piVar10;
-					if (piVar5 >= piVar10) break;
-				} while (true);
-			}
-			state.Reset();
-			state.GetVoiceStates(local_98, &piStack88);
-			lVar12 = piStack88.size();
-			if (lVar12 != 0) {
-				int iVar7 = 0;
-				for (int i = 0; i < piStack88.size(); i++) {
-					if (piStack88[i] == 1) break;
-					iVar7 = i + 1;
-				}
-				if (iVar7 == piStack88.size()) {
-					*param_4 = ((int)lVar12 + -1) - *param_4;
-					return;
-				}
-				iVar7 -= m_pipelineTemplateCutOptions.min_voice_frames;
-				if (iVar7 < 0) {
-					iVar7 = 0;
-				}
-				*param_4 = ((int)lVar12 + -1) - iVar7;
+		size_t iVar7;
+		for (iVar7 = 0; piStack88[iVar7] != 1 && iVar7 != piStack88.size(); iVar7++) {
+		}
+		if (iVar7 == piStack88.size()) {
+			if (*param_3 == -1) {
+				*param_3 = 0;
+				*param_4 = 0;
 				return;
 			}
-			*param_4 = ((int)lVar12 + -1) - *param_4;
+		} else {
+			iVar7 -= std::min<size_t>(iVar7, m_pipelineTemplateCutOptions.min_voice_frames);
+			*param_3 = iVar7;
+		}
+
+		*param_4 = 0;
+		std::reverse(local_98.begin(), local_98.end());
+		state.Reset();
+		state.GetVoiceStates(local_98, &piStack88);
+		if (piStack88.size() != 0) {
+			size_t iVar7 = 0;
+			for (size_t i = 0; i < piStack88.size(); i++) {
+				if (piStack88[i] == 1) break;
+				iVar7 = i + 1;
+			}
+			if (iVar7 == piStack88.size()) {
+				*param_4 = ((int)piStack88.size() - 1) - *param_4;
+			} else {
+				iVar7 -= std::min<size_t>(iVar7, m_pipelineTemplateCutOptions.min_voice_frames);
+				*param_4 = ((int)piStack88.size() - 1) - iVar7;
+			}
+		} else {
+			*param_4 = ((int)piStack88.size() - 1) - *param_4;
 		}
 	}
 } // namespace snowboy

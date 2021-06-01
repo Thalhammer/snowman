@@ -8,7 +8,7 @@ namespace snowboy {
 	struct MatrixBase;
 	struct SubVector;
 	struct VectorBase {
-		uint32_t m_size{0};
+		size_t m_size{0};
 		float* m_data{nullptr};
 
 		float* begin() const noexcept { return m_data; }
@@ -25,44 +25,44 @@ namespace snowboy {
 		}
 		bool empty() const noexcept { return size() == 0; }
 
-		void Add(float x);
-		void AddDiagMat2(float, const MatrixBase&, MatrixTransposeType, float);
-		void AddMatVec(float, const MatrixBase&, MatrixTransposeType, const VectorBase&, float);
-		void AddVec(float, const VectorBase&);
-		void AddVec2(float, const VectorBase&);
-		void ApplyFloor(float);
-		void ApplyLog();
-		void ApplyPow(float);
-		float ApplySoftmax();
-		void CopyColsFromMat(const MatrixBase&);
-		void CopyFromVec(const VectorBase&);
-		void CopyRowsFromMat(const MatrixBase&);
+		void Add(float x) noexcept;
+		void AddDiagMat2(float, const MatrixBase&, MatrixTransposeType, float) noexcept;
+		void AddMatVec(float alpha, const MatrixBase& a, MatrixTransposeType trans, const VectorBase& x, float beta) noexcept;
+		void AddVec(float, const VectorBase&) noexcept;
+		void AddVec2(float, const VectorBase&) noexcept;
+		void ApplyFloor(float) noexcept;
+		void ApplyLog() noexcept;
+		void ApplyPow(float) noexcept;
+		float ApplySoftmax() noexcept;
+		void CopyColsFromMat(const MatrixBase&) noexcept;
+		void CopyFromVec(const VectorBase&) noexcept;
+		void CopyRowsFromMat(const MatrixBase&) noexcept;
 		float CosineDistance(const VectorBase&) const;
 		float DotVec(const VectorBase&) const;
 		float EuclideanDistance(const VectorBase&) const;
-		bool IsZero(float) const;
-		float Max() const;
-		float Max(int* e) const;
-		float Min() const;
-		float Min(int* e) const;
-		void MulElements(const VectorBase&);
-		float Norm(float) const;
-		SubVector Range(int, int) const;
-		SubVector Range(int, int);
-		void Scale(float);
-		void Set(float);
+		bool IsZero(float cutoff) const noexcept;
+		float Max() const noexcept;
+		float Max(int* e) const noexcept;
+		float Min() const noexcept;
+		float Min(int* e) const noexcept;
+		void MulElements(const VectorBase&) noexcept;
+		float Norm(float) const noexcept;
+		SubVector Range(int, int) const noexcept;
+		SubVector Range(int, int) noexcept;
+		void Scale(float) noexcept;
+		void Set(float) noexcept;
 		void SetRandomGaussian();
 		void SetRandomUniform();
-		float Sum() const;
+		float Sum() const noexcept;
 		void Write(bool, std::ostream*) const;
 
-		bool HasNan() const;
-		bool HasInfinity() const;
+		bool HasNan() const noexcept;
+		bool HasInfinity() const noexcept;
 	};
 	struct Vector : VectorBase {
-		uint32_t m_cap{0};
+		size_t m_cap{0};
 
-		Vector() {}
+		Vector() noexcept {}
 		Vector(const VectorBase& other) {
 			Resize(other.m_size, MatrixResizeType::kUndefined);
 			CopyFromVec(other);
@@ -71,7 +71,7 @@ namespace snowboy {
 			Resize(other.m_size, MatrixResizeType::kUndefined);
 			CopyFromVec(other);
 		}
-		Vector(Vector&& other) {
+		Vector(Vector&& other) noexcept {
 			m_size = other.m_size;
 			m_cap = other.m_cap;
 			m_data = other.m_data;
@@ -81,28 +81,27 @@ namespace snowboy {
 		}
 
 		size_t capacity() const noexcept { return m_cap; }
-		void Resize(int size, MatrixResizeType resize = MatrixResizeType::kSetZero);
-		~Vector();
+		void Resize(size_t size, MatrixResizeType resize = MatrixResizeType::kSetZero);
+		~Vector() noexcept;
 
 		Vector& operator=(const Vector& other);
 		Vector& operator=(const VectorBase& other);
-		Vector& operator=(Vector&& other) {
+		Vector& operator=(Vector&& other) noexcept {
 			Swap(&other);
 			return *this;
 		}
 
 		void Read(bool, bool, std::istream*);
 		void Read(bool, std::istream*);
-		void Swap(Vector* other);
-		void RemoveElement(int index);
+		void Swap(Vector* other) noexcept;
+		void RemoveElement(size_t index) noexcept;
 
 		static void PrintAllocStats(std::ostream&);
 		static void ResetAllocStats();
 	};
 	struct SubVector : VectorBase {
-		// TODO: Those int should be size_t or at least uint
-		SubVector(const VectorBase& parent, int, int);
-		SubVector(const MatrixBase& parent, int);
-		SubVector(const SubVector& other);
+		SubVector(const VectorBase& parent, size_t offset, size_t size) noexcept;
+		SubVector(const MatrixBase& parent, size_t row) noexcept;
+		SubVector(const SubVector& other) noexcept;
 	};
 } // namespace snowboy

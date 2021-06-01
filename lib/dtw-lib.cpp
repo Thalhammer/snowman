@@ -1,7 +1,7 @@
 #include <dtw-lib.h>
 #include <limits>
 #include <matrix-wrapper.h>
-#include <snowboy-debug.h>
+#include <snowboy-error.h>
 #include <vector-wrapper.h>
 
 namespace snowboy {
@@ -19,7 +19,7 @@ namespace snowboy {
 	void SlidingDtw::UpdateDistance(int param_1, const MatrixBase& param_2) {
 		// TODO: This seems to generate the right results but I have no fucking clue whats going on
 		for (auto iVar25 = param_2.rows() - param_1; iVar25 < param_2.rows(); iVar25++) {
-			int local_b0, local_ac;
+			size_t local_b0 = 0, local_ac = 0;
 			ComputeBandBoundary(iVar25, &local_b0, &local_ac);
 			std::deque<float> local_88;
 			local_88.resize(local_ac - local_b0 + 1);
@@ -31,24 +31,24 @@ namespace snowboy {
 		}
 		auto iVar25 = field_x18.size() - param_2.rows();
 		if (iVar25 != 0) {
-			while (field_x18.size() > param_2.rows()) {
-				field_x18.pop_front();
+			if (field_x18.size() > param_2.rows()) {
+				field_x18.erase(field_x18.begin(), field_x18.begin() + (field_x18.size() - param_2.rows()));
 			}
-			for (auto iVar13 = 0; iVar13 < param_2.rows() - param_1; iVar13++) {
-				int local_b4, local_b0, local_ac, local_a8;
+			for (size_t iVar13 = 0; iVar13 < param_2.rows() - param_1; iVar13++) {
+				size_t local_b4 = 0, local_b0 = 0, local_ac = 0, local_a8 = 0;
 				ComputeBandBoundary(iVar13, &local_b4, &local_b0);
 				ComputeBandBoundary(iVar25 + iVar13, &local_ac, &local_a8);
-				auto iVar14 = local_b0;
 				if (local_b0 < local_ac) {
 					field_x18[iVar13].pop_back();
 				} else {
-					for (iVar14 = local_b0 + 1; iVar14 <= local_a8; iVar14++) {
+					for (auto i = local_b0 + 1; i <= local_a8; i++) {
 						field_x18[iVar13].pop_back();
 					}
-					iVar14 = local_ac + -1;
 				}
-				for (; local_b4 <= iVar14; iVar14--) {
-					auto fVar27 = ComputeVectorDistance(SubVector{*m_reference, iVar14}, SubVector{param_2, iVar13});
+				// TODO
+				size_t i = (local_b0 < local_ac) ? (local_b0 + 1) : (local_ac);
+				for (; i >= local_b4 + 1; i--) {
+					auto fVar27 = ComputeVectorDistance(SubVector{*m_reference, i - 1}, SubVector{param_2, iVar13});
 					field_x18[iVar13].push_front(fVar27);
 				}
 			}
@@ -64,10 +64,8 @@ namespace snowboy {
 			m_distance_function = DistanceType::cosine;
 		else if (opts.distance_metric == "euclidean")
 			m_distance_function = DistanceType::euclidean;
-		else {
-			SNOWBOY_ERROR() << "Unknown distance type: " << opts.distance_metric;
-			return;
-		}
+		else
+			throw snowboy_exception{"Unknown distance type: " + opts.distance_metric};
 		m_options = opts;
 		field_x70 = m_options.band_width / 2;
 	}
@@ -80,13 +78,13 @@ namespace snowboy {
 		field_x18.clear();
 	}
 
-	int SlidingDtw::GetWindowSize() const {
+	size_t SlidingDtw::GetWindowSize() const {
 		if (m_reference) return m_reference->rows();
 		return 0;
 	}
 
 	float SlidingDtw::GetDistance(int param_1, int param_2) const {
-		int local_20, local_1c;
+		size_t local_20, local_1c;
 		ComputeBandBoundary(param_1, &local_20, &local_1c);
 		// Is this correct ?
 		return field_x18[param_1][param_2 - local_20];
@@ -101,49 +99,44 @@ namespace snowboy {
 	}
 
 	float SlidingDtw::ComputeDtwDistance(int param_1, const MatrixBase& param_2) {
-		if (m_reference == nullptr) {
-			SNOWBOY_ERROR() << "Reference file has not been set, call SetReference() first!";
-			return -1;
-		}
+		if (m_reference == nullptr)
+			throw snowboy_exception{"Reference file has not been set, call SetReference() first!"};
 		UpdateDistance(param_1, param_2);
 
 		std::vector<float> local_238;
 		auto local_22c = std::numeric_limits<float>::max();
-		for (auto row = 0; row < param_2.rows(); row++) {
+		for (size_t row = 0; row < param_2.rows(); row++) {
 			/* try { // try from 00101d18 to 00101d74 has its CatchHandler @ 00102283 */
-			int local_1e8 = 0, local_1e4 = 0, local_1e0 = 0, local_1dc = 0;
-			snowboy::SlidingDtw::ComputeBandBoundary(row, &local_1e8, &local_1e4);
-			if (0 < row) {
-				snowboy::SlidingDtw::ComputeBandBoundary(row - 1, &local_1e0, &local_1dc);
+			size_t local_1e8 = 0, local_1e4 = 0, local_1e0 = 0, local_1dc = 0;
+			ComputeBandBoundary(row, &local_1e8, &local_1e4);
+			if (0 != row) {
+				ComputeBandBoundary(row - 1, &local_1e0, &local_1dc);
 			}
+			if (local_1e4 < local_1e8) break;
 			std::vector<float> __s;
 			__s.resize((local_1e4 - local_1e8) + 1);
-			if (local_1e4 < local_1e8) break;
 			auto bVar3 = true;
 			for (auto uVar6 = local_1e8; uVar6 <= local_1e4; uVar6++) {
 				if (uVar6 == 0 && row == 0) {
-					__s[0] = snowboy::SlidingDtw::GetDistance(0, 0);
+					__s[0] = GetDistance(0, 0);
 				} else if (row == 0) {
-					__s[uVar6 - local_1e8] = snowboy::SlidingDtw::GetDistance(0, uVar6) + __s[(uVar6 - 1) - local_1e8];
+					__s[uVar6 - local_1e8] = GetDistance(0, uVar6) + __s[(uVar6 - 1) - local_1e8];
 				} else if (uVar6 == 0) {
-					__s[0] = snowboy::SlidingDtw::GetDistance(0, 0) + local_238[0];
+					__s[0] = GetDistance(0, 0) + local_238[0];
 				} else {
-					auto local_244 = std::numeric_limits<float>::max();
+					auto local_240 = std::numeric_limits<float>::max();
 					if (local_1e8 < uVar6 && uVar6 - 1 <= local_1e4) {
-						local_244 = __s[uVar6 - 1 - local_1e8];
+						local_240 = __s[uVar6 - 1 - local_1e8];
 					}
-					float fVar10 = std::numeric_limits<float>::max(), local_240 = std::numeric_limits<float>::max();
 					if (uVar6 >= local_1e0) {
 						if (uVar6 <= local_1dc) {
-							fVar10 = local_238[uVar6 - local_1e0];
+							local_240 = std::min(local_238[uVar6 - local_1e0], local_240);
 						}
 						if (local_1e0 < uVar6 && uVar6 - 1 <= local_1dc) {
-							local_240 = local_238[uVar6 - 1 - local_1e0];
+							local_240 = std::min(local_238[uVar6 - 1 - local_1e0], local_240);
 						}
 					}
-					auto fVar9 = snowboy::SlidingDtw::GetDistance(row, uVar6);
-					local_240 = std::min(fVar10, std::min(local_240, local_244));
-					__s[uVar6 - local_1e8] = fVar9 + local_240;
+					__s[uVar6 - local_1e8] = GetDistance(row, uVar6) + local_240;
 				}
 				if (bVar3) {
 					if (__s[uVar6 - local_1e8] < m_reference->rows() * m_early_stop_threshold) {
@@ -162,14 +155,14 @@ namespace snowboy {
 		return local_22c / static_cast<float>(this->m_reference->rows());
 	}
 
-	void SlidingDtw::ComputeBandBoundary(int param_1, int* param_2, int* param_3) const {
-		*param_2 = std::max(param_1 - field_x70, 0);
-		*param_3 = std::min<int>(m_reference->rows() - 1, param_1 + field_x70);
+	void SlidingDtw::ComputeBandBoundary(int param_1, size_t* param_2, size_t* param_3) const {
+		*param_2 = std::max<ssize_t>(param_1 - field_x70, 0);
+		*param_3 = std::min<ssize_t>(m_reference->rows() - 1, param_1 + field_x70);
 	}
 
 	SlidingDtw::~SlidingDtw() {}
 
-	float DtwAlign(DistanceType param_1, const MatrixBase& param_2, const MatrixBase& param_3, std::vector<std::vector<int>>* param_4) {
+	float DtwAlign(DistanceType param_1, const MatrixBase& param_2, const MatrixBase& param_3, std::vector<std::vector<size_t>>* param_4) {
 		if (param_4 != nullptr) param_4->resize(param_2.rows());
 		if (param_2.rows() == 0 || param_3.rows() == 0) {
 			return std::numeric_limits<float>::max();
@@ -180,22 +173,21 @@ namespace snowboy {
 
 		Matrix distances;
 		distances.Resize(param_2.rows(), param_3.rows());
-		for (auto row = 0; row < distances.rows(); row++) {
-			for (auto col = 0; col < distances.cols(); col++) {
+		for (size_t row = 0; row < distances.rows(); row++) {
+			for (size_t col = 0; col < distances.cols(); col++) {
 				if (param_1 == DistanceType::cosine) {
 					distances(row, col) = SubVector{param_2, row}.CosineDistance(SubVector{param_3, col});
 				} else if (param_1 == DistanceType::euclidean) {
 					distances(row, col) = SubVector{param_2, row}.EuclideanDistance(SubVector{param_3, col});
-				} else {
-					SNOWBOY_ERROR() << "Unknown distance type: " << param_1;
-				}
+				} else
+					throw snowboy_exception{"Unknown distance type: " + std::to_string(param_1)};
 			}
 		}
 		SNOWBOY_ASSERT(!distances.HasNan() && !distances.HasInfinity());
 		Matrix local_1d8;
 		local_1d8.Resize(param_2.rows(), param_3.rows());
-		for (auto row = 0; row < local_1d8.rows(); row++) {
-			for (auto col = 0; col < local_1d8.cols(); col++) {
+		for (size_t row = 0; row < local_1d8.rows(); row++) {
+			for (size_t col = 0; col < local_1d8.cols(); col++) {
 				if (row == 0) {
 					local_1d8(0, col) = distances(0, col);
 				} else if (col == 0) {
@@ -211,7 +203,7 @@ namespace snowboy {
 		auto min_value = SubVector{local_1d8, local_1d8.rows() - 1}.Min(&min_index);
 		SNOWBOY_ASSERT(min_index >= 0);
 		if (param_4 != nullptr) {
-			for (int iVar11 = local_1d8.rows() - 1; iVar11 != 0;) {
+			for (size_t iVar11 = local_1d8.rows() - 1; iVar11 != 0;) {
 				// TODO: This is wrong
 				// If I look at the code it should only be
 				// param_4->at(iVar11).push_back(min_index);

@@ -1,7 +1,7 @@
 #include <frame-info.h>
 #include <nnet-lib.h>
 #include <nnet-stream.h>
-#include <snowboy-debug.h>
+#include <snowboy-error.h>
 #include <snowboy-io.h>
 #include <snowboy-options.h>
 
@@ -14,10 +14,8 @@ namespace snowboy {
 
 	NnetStream::NnetStream(const NnetStreamOptions& options) {
 		m_options = options;
-		if (m_options.model_filename == "") {
-			SNOWBOY_ERROR() << "please specify the neural network model.";
-			return;
-		}
+		if (m_options.model_filename == "")
+			throw snowboy_exception{"please specify the neural network model"};
 		m_nnet.reset(new Nnet(m_options.pad_context));
 
 		Input model{m_options.model_filename};

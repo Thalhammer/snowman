@@ -1,4 +1,4 @@
-#include <snowboy-debug.h>
+#include <snowboy-error.h>
 #include <snowboy-utils.h>
 #include <string>
 
@@ -43,8 +43,7 @@ namespace snowboy {
 		Trim(&v);
 		if (v == "true") return true;
 		if (v == "false") return false;
-		SNOWBOY_ERROR() << "ConvertStringTo<bool>: Bad value for boolean type: " << val;
-		return false;
+		throw snowboy_exception{"ConvertStringTo<bool>: Bad value for boolean type: " + val};
 	}
 
 	template <>
@@ -54,8 +53,7 @@ namespace snowboy {
 		try {
 			return std::stof(v, nullptr);
 		} catch (const std::exception& e) {
-			SNOWBOY_ERROR() << "ConvertStringTo<float>: Bad value for boolean type: " << val;
-			return 0.0;
+			throw snowboy_exception{"ConvertStringTo<float>: Bad value for boolean type: " + val};
 		}
 	}
 
@@ -66,8 +64,7 @@ namespace snowboy {
 		try {
 			return std::stoi(v, nullptr);
 		} catch (const std::exception& e) {
-			SNOWBOY_ERROR() << "ConvertStringTo<int32_t>: Bad value for boolean type: " << val;
-			return 0.0;
+			throw snowboy_exception{"ConvertStringTo<int32_t>: Bad value for boolean type: " + val};
 		}
 	}
 
@@ -78,8 +75,7 @@ namespace snowboy {
 		try {
 			return std::stoul(v, nullptr);
 		} catch (const std::exception& e) {
-			SNOWBOY_ERROR() << "ConvertStringTo<uint32_t>: Bad value for boolean type: " << val;
-			return 0.0;
+			throw snowboy_exception{"ConvertStringTo<uint32_t>: Bad value for boolean type: " + val};
 		}
 	}
 

@@ -1,6 +1,5 @@
 #include <intercept-stream.h>
 #include <matrix-wrapper.h>
-#include <snowboy-debug.h>
 
 namespace snowboy {
 

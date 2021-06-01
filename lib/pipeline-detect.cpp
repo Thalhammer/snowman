@@ -10,9 +10,10 @@
 #include <pipeline-detect.h>
 #include <raw-energy-vad-stream.h>
 #include <raw-nnet-vad-stream.h>
-#include <snowboy-debug.h>
+#include <snowboy-error.h>
 #include <snowboy-io.h>
 #include <snowboy-options.h>
+#include <sstream>
 #include <template-detect-stream.h>
 #include <universal-detect-stream.h>
 #include <vad-state-stream.h>
@@ -25,10 +26,8 @@ namespace snowboy {
 	}
 
 	void PipelineDetect::RegisterOptions(const std::string& p, OptionsItf* opts) {
-		if (m_isInitialized) {
-			SNOWBOY_ERROR() << "pipeline has already been initialized, you have to call RegisterOptions() before Init().";
-			return;
-		}
+		if (m_isInitialized)
+			throw snowboy_exception{"pipeline has already been initialized, you have to call RegisterOptions() before Init()"};
 
 		auto prefix = p;
 		if (!prefix.empty()) prefix += ".";
@@ -60,14 +59,12 @@ namespace snowboy {
 	}
 
 	bool PipelineDetect::Init() {
-		if (m_isInitialized) {
-			SNOWBOY_ERROR() << "class has already been initialized.";
-			return true;
-		}
-		if (m_templateDetectStreamOptions->model_str == "" && m_universalDetectStreamOptions->model_str == "") {
-			SNOWBOY_ERROR() << "no model detected! You have to provide at least one personal or one universal model by calling SetModel().";
-			return true;
-		}
+		if (m_isInitialized)
+			throw snowboy_exception{"class has already been initialized"};
+
+		if (m_templateDetectStreamOptions->model_str == "" && m_universalDetectStreamOptions->model_str == "")
+			throw snowboy_exception{"no model detected! You have to provide at least one personal or one universal model by calling SetModel()"};
+
 		m_framerStreamOptions->sample_rate = m_pipelineDetectOptions.sampleRate;
 		m_mfccStreamOptions->mel_filter.sample_rate = m_pipelineDetectOptions.sampleRate;
 		m_frontend_enabled = m_pipelineDetectOptions.applyFrontend;
@@ -119,13 +116,13 @@ namespace snowboy {
 		int kwid = 1;
 		for (size_t i = 0; i < m_is_personal_model.size(); i++) {
 			if (m_is_personal_model[i] == false) {
-				for (int x = 0; x < m_universalDetectStream->NumHotwords(nuniversal); x++) {
+				for (size_t x = 0; x < m_universalDetectStream->NumHotwords(nuniversal); x++) {
 					m_universal_kw_mapping.push_back(kwid);
 					kwid++;
 				}
 				nuniversal++;
 			} else {
-				for (int x = 0; x < m_templateDetectStream->NumHotwords(npersonal); x++) {
+				for (size_t x = 0; x < m_templateDetectStream->NumHotwords(npersonal); x++) {
 					m_personal_kw_mapping.push_back(kwid);
 					kwid++;
 				}
@@ -173,9 +170,7 @@ namespace snowboy {
 		return "detectp";
 	}
 
-	PipelineDetect::~PipelineDetect() {
-		// TODO: They destruct them all depending on the mode, but I think default destruction should work identical
-	}
+	PipelineDetect::~PipelineDetect() {}
 
 	PipelineDetect::PipelineDetect(const PipelineDetectOptions& options) {
 		m_pipelineDetectOptions = options;
@@ -300,9 +295,8 @@ namespace snowboy {
 			return true;
 		} else if (token == "<UniversalModel>") {
 			return false;
-		} else {
-			SNOWBOY_ERROR() << "undefined model type detected. Most likely you provided the wrong model.";
 		}
+		throw snowboy_exception{"undefined model type detected. Most likely you provided the wrong model"};
 	}
 
 	void PipelineDetect::ClassifySensitivities(const std::string& param_1, std::string* param_2, std::string* param_3) const {
@@ -310,7 +304,7 @@ namespace snowboy {
 		param_3->clear();
 		std::vector<std::string> parts;
 		SplitStringToVector(param_1, global_snowboy_string_delimiter, &parts);
-		auto num_personal = m_templateDetectStream == nullptr ? 0 : m_templateDetectStream->field_x40.size();
+		auto num_personal = m_templateDetectStream == nullptr ? 0 : m_templateDetectStream->m_models.size();
 		auto num_universal = 0;
 		if (m_universalDetectStream != nullptr
 			&& !m_universalDetectStream->m_model_info.empty()
@@ -318,10 +312,11 @@ namespace snowboy {
 			num_universal = m_universalDetectStream->m_model_info.back().keywords.back().hotword_id;
 		}
 		if (num_universal + num_personal < parts.size()) {
-			SNOWBOY_ERROR() << "number of hotwords and number of sensitivities mismatch, expecting sensitivities for "
-							<< num_personal << " personal hotwords, and " << num_universal << " universal hotwords, got "
-							<< parts.size() << " sensitivities instead.";
-			return;
+			std::stringstream ss;
+			ss << "number of hotwords and number of sensitivities mismatch, expecting sensitivities for "
+			   << num_personal << " personal hotwords, and " << num_universal << " universal hotwords, got "
+			   << parts.size() << " sensitivities instead";
+			throw snowboy_exception{ss.str()};
 		}
 		for (size_t i = 0; i < m_is_personal_model.size(); i++) {
 			if (m_is_personal_model[i]) {
@@ -335,10 +330,9 @@ namespace snowboy {
 	}
 
 	uint64_t PipelineDetect::GetDetectedFrameId() const {
-		if (!m_isInitialized) {
-			SNOWBOY_ERROR() << "pipeline has not been initialized yet.";
-			return 0;
-		}
+		if (!m_isInitialized)
+			throw snowboy_exception{"pipeline has not been initialized yet"};
+
 		int id = 0;
 		if (m_universalDetectStream) {
 			id = m_universalDetectStream->field_x5c;
@@ -350,10 +344,9 @@ namespace snowboy {
 	}
 
 	std::string PipelineDetect::GetSensitivity() const {
-		if (!m_isInitialized) {
-			SNOWBOY_ERROR() << "pipeline has not been initialized yet.";
-			return "";
-		}
+		if (!m_isInitialized)
+			throw snowboy_exception{"pipeline has not been initialized yet"};
+
 		std::vector<std::string> personal;
 		std::vector<std::string> universal;
 		if (m_templateDetectStream) SplitStringToVector(m_templateDetectStream->GetSensitivity(), global_snowboy_string_delimiter, &personal);
@@ -375,22 +368,20 @@ namespace snowboy {
 	}
 
 	int PipelineDetect::NumHotwords() const {
-		if (!m_isInitialized) {
-			SNOWBOY_ERROR() << "pipeline has not been initialized yet.";
-			return 0;
-		}
+		if (!m_isInitialized)
+			throw snowboy_exception{"pipeline has not been initialized yet"};
+
 		int num_hotwords = 0;
-		if (m_templateDetectStream) num_hotwords += m_templateDetectStream->field_x40.size();
+		if (m_templateDetectStream) num_hotwords += m_templateDetectStream->m_models.size();
 		if (m_universalDetectStream && !m_universalDetectStream->m_model_info.empty() && !m_universalDetectStream->m_model_info.back().keywords.empty())
 			num_hotwords += m_universalDetectStream->m_model_info.back().keywords.back().hotword_id;
 		return num_hotwords;
 	}
 
 	int PipelineDetect::RunDetection(const MatrixBase& data, bool is_end) {
-		if (!m_isInitialized) {
-			SNOWBOY_ERROR() << "pipeline has not been initialized yet.";
-			return -1;
-		}
+		if (!m_isInitialized)
+			throw snowboy_exception{"pipeline has not been initialized yet"};
+
 		std::vector<FrameInfo> info;
 		info.resize(data.m_rows);
 		m_interceptStream->SetData(data, info, static_cast<SnowboySignal>(is_end ? 0x30 : 0x20));
@@ -440,18 +431,14 @@ namespace snowboy {
 	}
 
 	void PipelineDetect::SetAudioGain(float gain) {
-		if (!m_isInitialized) {
-			SNOWBOY_ERROR() << "pipeline has not been initialized yet.";
-			return;
-		}
+		if (!m_isInitialized)
+			throw snowboy_exception{"pipeline has not been initialized yet"};
 		m_gainControlStream->SetAudioGain(gain);
 	}
 
 	void PipelineDetect::SetHighSensitivity(const std::string& param_1) {
-		if (!m_isInitialized) {
-			SNOWBOY_ERROR() << "pipeline has not been initialized yet.";
-			return;
-		}
+		if (!m_isInitialized)
+			throw snowboy_exception{"pipeline has not been initialized yet"};
 		if (!m_universalDetectStream) return;
 		std::string personal, universal;
 		ClassifySensitivities(param_1, &personal, &universal);
@@ -459,26 +446,20 @@ namespace snowboy {
 	}
 
 	void PipelineDetect::SetMaxAudioAmplitude(float maxAmplitude) {
-		if (!m_isInitialized) {
-			SNOWBOY_ERROR() << "pipeline has not been initialized yet.";
-			return;
-		}
+		if (!m_isInitialized)
+			throw snowboy_exception{"pipeline has not been initialized yet"};
 		m_gainControlStream->SetMaxAudioAmplitude(maxAmplitude);
 	}
 
 	void PipelineDetect::SetModel(const std::string& model) {
-		if (m_isInitialized) {
-			SNOWBOY_ERROR() << "pipeline has already been initialized, you have to call SetModel() before Init().";
-			return;
-		}
+		if (m_isInitialized)
+			throw snowboy_exception{"pipeline has already been initialized, you have to call SetModel() before Init()"};
 		ClassifyModels(model, &m_templateDetectStreamOptions->model_str, &m_universalDetectStreamOptions->model_str);
 	}
 
 	void PipelineDetect::SetSensitivity(const std::string& param_1) {
-		if (!m_isInitialized) {
-			SNOWBOY_ERROR() << "pipeline has not been initialized yet.";
-			return;
-		}
+		if (!m_isInitialized)
+			throw snowboy_exception{"pipeline has not been initialized yet"};
 		std::string personal, universal;
 		ClassifySensitivities(param_1, &personal, &universal);
 		if (m_templateDetectStream) m_templateDetectStream->SetSensitivity(personal);
@@ -486,10 +467,8 @@ namespace snowboy {
 	}
 
 	void PipelineDetect::UpdateModel() const {
-		if (!m_isInitialized) {
-			SNOWBOY_ERROR() << "pipeline has not been initialized yet.";
-			return;
-		}
+		if (!m_isInitialized)
+			throw snowboy_exception{"pipeline has not been initialized yet"};
 		if (m_templateDetectStream) m_templateDetectStream->UpdateModel();
 		if (m_universalDetectStream) m_universalDetectStream->UpdateModel();
 	}

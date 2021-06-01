@@ -4,7 +4,7 @@
 #include <mfcc-stream.h>
 #include <nnet-stream.h>
 #include <pipeline-personal-enroll.h>
-#include <snowboy-debug.h>
+#include <snowboy-error.h>
 #include <snowboy-options.h>
 #include <template-enroll-stream.h>
 
@@ -14,10 +14,8 @@ namespace snowboy {
 	}
 
 	void PipelinePersonalEnroll::RegisterOptions(const std::string& p, OptionsItf* opts) {
-		if (m_isInitialized) {
-			SNOWBOY_ERROR() << "pipeline has already been initialized, you have to call RegisterOptions() before Init().";
-			return;
-		}
+		if (m_isInitialized)
+			throw snowboy_exception{"pipeline has already been initialized, you have to call RegisterOptions() before Init()."};
 
 		auto prefix = p;
 		if (!prefix.empty()) prefix += ".";
@@ -38,10 +36,8 @@ namespace snowboy {
 	}
 
 	bool PipelinePersonalEnroll::Init() {
-		if (m_isInitialized) {
-			SNOWBOY_ERROR() << "class has already been initialized.";
-			return true;
-		}
+		if (m_isInitialized)
+			throw snowboy_exception{"class has already been initialized."};
 		m_framerStreamOptions->sample_rate = m_pipelinePersonalEnrollOptions.sample_rate;
 		m_mfccStreamOptions->mel_filter.sample_rate = m_pipelinePersonalEnrollOptions.sample_rate;
 
@@ -139,15 +135,9 @@ namespace snowboy {
 	}
 
 	int PipelinePersonalEnroll::GetNumTemplates() const {
-		if (!m_isInitialized) {
-			SNOWBOY_ERROR() << "pipeline has not been initialized, you have to call GetNumTemplates() after Init().";
-			return 0;
-		}
+		if (!m_isInitialized)
+			throw snowboy_exception{"pipeline has not been initialized, you have to call GetNumTemplates() after Init()."};
 		return m_templateEnrollStream->m_options.num_templates;
 	}
 
 } // namespace snowboy
-
-// Mfcc = 8
-// Nnet = 8
-// Enroll = 8
