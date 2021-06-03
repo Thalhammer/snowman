@@ -33,15 +33,15 @@ namespace snowboy {
 		} else {
 			for (size_t row = 0; row < m_rows; row++) {
 				for (size_t col = 0; col < m_cols; col++) {
-					m_data[row * m_stride + col] += param_1 * param_2.m_data[col];
+					m_data[row * m_stride + col] += param_1 * param_2[col];
 				}
 			}
 		}
 	}
 
 	void MatrixBase::AddVecVec(float param_1, const VectorBase& param_2, const VectorBase& param_3) {
-		cblas_sger(CBLAS_ORDER::CblasRowMajor, param_2.m_size, param_3.m_size, param_1, param_2.m_data,
-				   1, param_3.m_data, 1, m_data, m_stride);
+		cblas_sger(CBLAS_ORDER::CblasRowMajor, param_2.size(), param_3.size(), param_1, param_2.data(),
+				   1, param_3.data(), 1, m_data, m_stride);
 	}
 
 	void MatrixBase::ApplyFloor(float f) {
@@ -58,7 +58,7 @@ namespace snowboy {
 
 	void MatrixBase::CopyColFromVec(const VectorBase& param_1, size_t param_2) {
 		for (size_t i = 0; i < m_rows; i++) {
-			m_data[m_stride * i + param_2] = param_1.m_data[i];
+			m_data[m_stride * i + param_2] = param_1[i];
 		}
 	}
 
@@ -111,23 +111,23 @@ namespace snowboy {
 	}
 
 	void MatrixBase::CopyRowsFromVec(const VectorBase& param_1) {
-		if (m_rows * m_cols == param_1.m_size) {
+		if (m_rows * m_cols == param_1.size()) {
 			if (m_cols == m_stride) {
-				memcpy(m_data, param_1.m_data, (m_rows * m_cols) * sizeof(float));
+				memcpy(m_data, param_1.data(), (m_rows * m_cols) * sizeof(float));
 			} else {
 				for (size_t row = 0; row < m_rows; row++) {
-					memcpy(data(row), &param_1.m_data[m_cols * row], m_cols * sizeof(float));
+					memcpy(data(row), param_1.data() + (m_cols * row), m_cols * sizeof(float));
 				}
 			}
 		} else {
-			if (m_cols == param_1.m_size) {
+			if (m_cols == param_1.size()) {
 				for (size_t row = 0; row < m_rows; row++) {
-					memcpy(data(row), param_1.m_data, m_cols * sizeof(float));
+					memcpy(data(row), param_1.data(), m_cols * sizeof(float));
 				}
 			} else {
 				std::stringstream ss;
 				ss << "Vector size should be NumRows() * NumCols() or NumCols(). Vector size is "
-				   << param_1.m_size << ", Matrix size is " << m_rows << " x " << m_cols;
+				   << param_1.size() << ", Matrix size is " << m_rows << " x " << m_cols;
 				throw snowboy_exception{ss.str()};
 			}
 		}

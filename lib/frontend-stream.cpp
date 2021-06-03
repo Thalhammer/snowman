@@ -59,11 +59,11 @@ namespace snowboy {
 		}
 		if ((res & 0xc2) == 0 && m.m_rows != 0) {
 			Vector v;
-			v.Resize(field_x50.m_size + m.m_cols);
-			v.Range(0, field_x50.m_size).CopyFromVec(field_x50);
-			v.Range(field_x50.m_size, m.m_cols).CopyFromVec(SubVector{m, 0});
+			v.Resize(field_x50.size() + m.m_cols);
+			v.Range(0, field_x50.size()).CopyFromVec(field_x50);
+			v.Range(field_x50.size(), m.m_cols).CopyFromVec(SubVector{m, 0});
 			field_x50.Resize(0);
-			auto x = v.m_size / field_x60;
+			auto x = v.size() / field_x60;
 			mat->Resize(1, x * field_x60);
 			// TODO: More code between here
 			if (x > 0) {

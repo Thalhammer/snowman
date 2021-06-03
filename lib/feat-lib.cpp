@@ -65,19 +65,19 @@ namespace snowboy {
 					if (fVar15 <= local_68) break;
 					iVar12 += 1;
 					iVar9 += 1;
-					field_x40[b].m_data[idx] = (local_5c - fVar15) / (local_5c - local_68);
+					field_x40[b][idx] = (local_5c - fVar15) / (local_5c - local_68);
 				} while (iVar12 <= iVar4);
 				if (iVar12 > iVar4) break;
 				iVar12 += 1;
 				iVar9 += 1;
-				field_x40[b].m_data[idx] = (fVar15 - local_60) / (local_68 - local_60);
+				field_x40[b][idx] = (fVar15 - local_60) / (local_68 - local_60);
 			}
 		}
 	}
 
 	float MelFilterBank::GetVtlnWarping(float param_1) const {
 		auto fVar1 = 1.0f / m_options.vtln_warping_factor;
-		float fVar3 = m_options.vtln_low_frequency / ((fVar1 < 1.0) ? fVar1 : 1.0);
+		float fVar3 = m_options.vtln_low_frequency / std::max(fVar1, 1.0f);
 		if (fVar3 <= param_1) {
 			auto fVar2 = m_options.vtln_high_frequency / std::max(1.0f, fVar1);
 			if (fVar2 <= param_1) {
@@ -119,7 +119,7 @@ namespace snowboy {
 	void ComputeCepstralLifterCoeffs(float param_1, Vector* param_2) {
 		for (size_t i = 0; i < param_2->size(); i++) {
 			auto d = sin((static_cast<double>(i) * M_PI) / static_cast<double>(param_1));
-			param_2->m_data[i] = (d * (param_1 * 0.5) + 1.0);
+			(*param_2)[i] = (d * (param_1 * 0.5) + 1.0);
 		}
 	}
 
@@ -193,9 +193,7 @@ namespace snowboy {
 	void Fft::DoBitReversalSorting(const std::vector<unsigned int>& reversal_index, Vector* data) const {
 		for (size_t i = 0; i < data->size(); i++) {
 			if (i < reversal_index[i]) {
-				auto x = data->m_data[i];
-				data->m_data[i] = data->m_data[reversal_index[i]];
-				data->m_data[reversal_index[i]] = x;
+				std::swap((*data)[i], (*data)[reversal_index[i]]);
 			}
 		}
 	}
@@ -242,7 +240,7 @@ namespace snowboy {
 		// TODO: Could someone with any clue about maths explain to me what the fuck happens here ?
 		// I reversed it and it seems to return the correct values, but no clue about why it does....
 		const auto num_pts = m_options.num_fft_points;
-		const auto ptr = param_2->m_data;
+		const auto ptr = param_2->data();
 		auto f = ptr[0];
 		int iVar11 = (-1 < num_pts) ? num_pts : (num_pts + 3);
 		ptr[0] = f + ptr[1];

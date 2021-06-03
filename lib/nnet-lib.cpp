@@ -184,7 +184,7 @@ namespace snowboy {
 		auto uVar10 = m_unprocessed_buffer.m_rows;
 		auto num_effective_input_rows_new = (field_xa ? LeftContext() + RightContext() : 0) + m_unprocessed_buffer.m_rows;
 
-		if (m_pad_input && field_b8.m_size > 0) {
+		if (m_pad_input && field_b8.size() > 0) {
 			auto t = RightContext();
 			num_effective_input_rows_new += t;
 			uVar10 += t;

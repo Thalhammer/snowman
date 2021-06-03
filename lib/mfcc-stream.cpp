@@ -38,7 +38,7 @@ namespace snowboy {
 		SNOWBOY_ASSERT(!m.HasNan() && !m.HasInfinity());
 		if (field_x44 == -1) {
 			SubVector svec{m, 0};
-			field_x44 = svec.m_size;
+			field_x44 = svec.size();
 			InitMelFilterBank(field_x44);
 			field_x48 = logf(static_cast<float>(field_x44) * 0.5f);
 		}
@@ -56,7 +56,7 @@ namespace snowboy {
 			// TODO: Couldn't we skip ComputeMfcc if we overwrite it in the next step ?
 			ComputeMfcc(svec, &svec_out);
 			if (m_options.use_energy) {
-				svec_out.m_data[0] = energy;
+				svec_out[0] = energy;
 			}
 		}
 		return res;
@@ -84,7 +84,7 @@ namespace snowboy {
 	void MfccStream::ComputeMfcc(const VectorBase& param_1, SubVector* param_2) const {
 		// TODO: Instead of using thread_local I'd prefer stack allocation
 		static thread_local Vector v;
-		v.Resize(param_1.m_size);
+		v.Resize(param_1.size());
 		v.CopyFromVec(param_1);
 		ComputePowerSpectrumReal(v);
 		static thread_local Vector vout;

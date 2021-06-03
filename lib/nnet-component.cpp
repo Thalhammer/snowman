@@ -171,11 +171,11 @@ namespace snowboy {
 	}
 
 	int32_t CmvnComponent::InputDim() const {
-		return m_scales.m_size;
+		return m_scales.size();
 	}
 
 	int32_t CmvnComponent::OutputDim() const {
-		return m_scales.m_size;
+		return m_scales.size();
 	}
 
 	void CmvnComponent::Propagate(const ChunkInfo& in_info,

@@ -7,9 +7,11 @@
 namespace snowboy {
 	struct MatrixBase;
 	struct SubVector;
-	struct VectorBase {
+	class VectorBase {
+	protected:
 		size_t m_size{0};
 		float* m_data{nullptr};
+	public:
 
 		float* begin() const noexcept { return m_data; }
 		float* end() const noexcept { return m_data + m_size; }
@@ -59,12 +61,13 @@ namespace snowboy {
 		bool HasNan() const noexcept;
 		bool HasInfinity() const noexcept;
 	};
-	struct Vector : VectorBase {
+	class Vector : public VectorBase {
+	protected:
 		size_t m_cap{0};
-
+	public:
 		Vector() noexcept {}
 		Vector(const VectorBase& other) {
-			Resize(other.m_size, MatrixResizeType::kUndefined);
+			Resize(other.size(), MatrixResizeType::kUndefined);
 			CopyFromVec(other);
 		}
 		Vector(const Vector& other) {
@@ -99,9 +102,13 @@ namespace snowboy {
 		static void PrintAllocStats(std::ostream&);
 		static void ResetAllocStats();
 	};
-	struct SubVector : VectorBase {
+	class SubVector : public VectorBase {
+	public:
 		SubVector(const VectorBase& parent, size_t offset, size_t size) noexcept;
 		SubVector(const MatrixBase& parent, size_t row) noexcept;
-		SubVector(const SubVector& other) noexcept;
+		SubVector(const SubVector& other) noexcept {
+			m_data = other.m_data;
+			m_size = other.m_size;
+		}
 	};
 } // namespace snowboy
