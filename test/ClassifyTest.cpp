@@ -192,9 +192,11 @@ TEST(ClassifyTest, ClassifySamplesReset) {
 		}
 		skipped_all = false;
 		auto data = read_sample_file(root + "audio_samples/" + e.first);
-		int result = detector.RunDetection(data.data(), data.size());
-		EXPECT_EQ(result, e.second) << "Failed to correctly classify sample " << e.first;
-		ASSERT_TRUE(detector.Reset());
+		for (size_t i = 0; i < 20; i++) {
+			int result = detector.RunDetection(data.data(), data.size());
+			EXPECT_EQ(result, e.second) << "Failed to correctly classify sample " << e.first;
+			ASSERT_TRUE(detector.Reset());
+		}
 	}
 	ASSERT_FALSE(skipped_all);
 }

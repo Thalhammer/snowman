@@ -5,6 +5,7 @@
 #include <matrix-wrapper.h>
 #include <vector-wrapper.h>
 #include <vector>
+#include <memory>
 
 namespace snowboy {
 	struct MatrixBase;
@@ -77,8 +78,8 @@ namespace snowboy {
 		virtual Component* Copy() const = 0;
 		virtual ~Component() {}
 
-		static Component* NewComponentOfType(const std::string& type);
-		static Component* ReadNew(bool binary, std::istream* is);
+		static std::unique_ptr<Component> NewComponentOfType(const std::string& type);
+		static std::unique_ptr<Component> ReadNew(bool binary, std::istream* is);
 
 	private:
 		int32_t m_index;

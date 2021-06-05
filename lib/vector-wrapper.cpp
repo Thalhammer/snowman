@@ -220,13 +220,8 @@ namespace snowboy {
 		}
 	}
 
-	SubVector VectorBase::Range(int param_1, int param_2) const noexcept {
-		return SubVector(*this, param_1, param_2);
-	}
-
-	// TODO: Why do we need this one if the result is the same ?
-	SubVector VectorBase::Range(int param_1, int param_2) noexcept {
-		return SubVector(*this, param_1, param_2);
+	SubVector VectorBase::Range(size_t offset, size_t size) const noexcept {
+		return SubVector{*this, offset, size};
 	}
 
 	void VectorBase::Scale(float factor) noexcept {

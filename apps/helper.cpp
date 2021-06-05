@@ -226,6 +226,26 @@ void string_list_option::parse(arg_iterator& it) {
 	value_ptr->push_back(it.take());
 }
 
+void int_option::parse(arg_iterator& it) {
+	if (!it.has_more()) {
+		throw std::runtime_error("missing argument for option " + longname);
+	}
+	*value_ptr = std::stoll(it.take());
+	if(*value_ptr < minimum || *value_ptr > maximum) {
+		throw std::runtime_error("value exceeds range");
+	}
+}
+
+int_option& int_option::set_min(int64_t m) noexcept {
+	this->minimum = m;
+	return *this;
+}
+
+int_option& int_option::set_max(int64_t m) noexcept {
+	this->maximum = m;
+	return *this;
+}
+
 option_parser::~option_parser() {
 	for (auto& e : options)
 		delete e;
@@ -248,6 +268,13 @@ string_option& option_parser::option(std::string longname, std::string* ptr) {
 
 string_list_option& option_parser::option(std::string longname, std::vector<std::string>* ptr) {
 	auto opt = new string_list_option(ptr);
+	opt->longname = longname;
+	options.push_back(opt);
+	return *opt;
+}
+
+int_option& option_parser::option(std::string longname, int64_t* ptr) {
+	auto opt = new int_option(ptr);
 	opt->longname = longname;
 	options.push_back(opt);
 	return *opt;

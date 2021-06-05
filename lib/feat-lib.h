@@ -32,16 +32,24 @@ namespace snowboy {
 	public:
 		MelFilterBank(const MelFilterBankOptions& options);
 		~MelFilterBank() {}
-		void ComputeMelFilterBankEnergy(const VectorBase& input, Vector& output) const;
+		void ComputeMelFilterBankEnergy(const VectorBase& input, const VectorBase& output) const;
+
+		const MelFilterBankOptions& get_options() const noexcept { return m_options; }
 	};
 
-	void ComputeDctMatrixTypeIII(Matrix* mat);
+	void ComputeDctMatrixTypeIII(const MatrixBase& mat);
 	void ComputeCepstralLifterCoeffs(float, Vector*);
-	void ComputePowerSpectrumReal(Vector&);
+	/**
+	 * Compute the Power Spectrum of a vector.
+	 * out is expected to be at least half the size of in and can alias with in.
+	 * \param in Vector to calculate spectrum of
+	 * \param out Vector to place the result in.
+	 */
+	void ComputePowerSpectrumReal(const VectorBase& in, const VectorBase& out);
 
 	struct FftItf {
-		virtual void DoFft(Vector*) const = 0;
-		virtual void DoIfft(Vector*) const = 0;
+		virtual void DoFft(Vector*) const noexcept = 0;
+		virtual void DoIfft(Vector*) const noexcept = 0;
 		virtual ~FftItf();
 	};
 
@@ -50,27 +58,27 @@ namespace snowboy {
 		int num_fft_points;
 	};
 
-	struct Fft : FftItf {
+	class Fft : public FftItf {
 		FftOptions m_options;
-		int field_x10;
 		std::vector<unsigned int> m_bit_reversal_index;
-		std::vector<float> m_twiddle_factors; // twiddle factors ?
+		std::vector<float> m_twiddle_factors;
 
-		Fft(const FftOptions& options);
-		void DoFft(bool inverse, Vector*) const;
-		void DoDanielsonLanczos(bool, Vector*) const;
-		void DoBitReversalSorting(const std::vector<unsigned int>&, Vector*) const;
-		void ComputeTwiddleFactor(int);
-		void ComputeBitReversalIndex(int, std::vector<unsigned int>*) const;
-		void DoProcessingForReal(bool, Vector*) const;
-		unsigned int GetNumBits(unsigned int) const;
-		std::pair<float, float> GetTwiddleFactor(int, int) const;
+		void DoFft(bool inverse, Vector*) const noexcept;
+		void DoDanielsonLanczos(bool inverse, const VectorBase& data) const noexcept;
+		static void DoBitReversalSorting(const std::vector<unsigned int>&, const VectorBase& data) noexcept;
+		void ComputeTwiddleFactor(size_t len);
+		void ComputeBitReversalIndex(size_t len);
+		void DoProcessingForReal(bool, Vector*) const noexcept;
+		static size_t GetNumBits(size_t) noexcept;
+		std::pair<float, float> GetTwiddleFactor(int, int) const noexcept;
 		void Init();
-		unsigned int ReverseBit(unsigned int, unsigned int) const;
+		static size_t ReverseBit(size_t value, size_t num_bits) noexcept;
 		void SetOptions(const FftOptions& opts);
 
-		virtual void DoFft(Vector*) const override;
-		virtual void DoIfft(Vector*) const override;
+	public:
+		Fft(const FftOptions& options);
+		virtual void DoFft(Vector* data) const noexcept override;
+		virtual void DoIfft(Vector* data) const noexcept override;
 		virtual ~Fft();
 	};
 

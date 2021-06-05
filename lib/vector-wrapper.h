@@ -3,6 +3,7 @@
 #include <matrix-types.h>
 #include <snowboy-debug.h>
 #include <string>
+#include <stdexcept>
 
 namespace snowboy {
 	struct MatrixBase;
@@ -49,8 +50,7 @@ namespace snowboy {
 		float Min(int* e) const noexcept;
 		void MulElements(const VectorBase&) noexcept;
 		float Norm(float) const noexcept;
-		SubVector Range(int, int) const noexcept;
-		SubVector Range(int, int) noexcept;
+		SubVector Range(size_t offset, size_t size) const noexcept;
 		void Scale(float) noexcept;
 		void Set(float) noexcept;
 		void SetRandomGaussian();
@@ -109,6 +109,46 @@ namespace snowboy {
 		SubVector(const SubVector& other) noexcept {
 			m_data = other.m_data;
 			m_size = other.m_size;
+		}
+	};
+	template<size_t N>
+	class FixedVector : public VectorBase {
+		float m_storage[N];
+	public:
+		FixedVector() noexcept {
+			m_data = m_storage;
+		}
+		FixedVector(const VectorBase& other) {
+			m_data = m_storage;
+			Resize(other.size(), MatrixResizeType::kUndefined);
+			CopyFromVec(other);
+		}
+		FixedVector(const FixedVector& other) {
+			m_data = m_storage;
+			Resize(other.m_size, MatrixResizeType::kUndefined);
+			CopyFromVec(other);
+		}
+		FixedVector(size_t size, MatrixResizeType resize = MatrixResizeType::kSetZero) {
+			m_data = m_storage;
+			Resize(size, resize);
+		}
+
+		constexpr size_t capacity() const noexcept { return N; }
+		void Resize(size_t size, MatrixResizeType resize = MatrixResizeType::kSetZero) {
+			if(size > N) throw std::invalid_argument("new size exceeds fixed capacity");
+			m_size = size;
+			if(resize == MatrixResizeType::kSetZero) Set(0.0f);
+		}
+
+		FixedVector& operator=(const FixedVector& other) {
+			Resize(other.m_size, MatrixResizeType::kUndefined);
+			CopyFromVec(other);
+			return *this;
+		}
+		FixedVector& operator=(const VectorBase& other) {
+			Resize(other.m_size, MatrixResizeType::kUndefined);
+			CopyFromVec(other);
+			return *this;
 		}
 	};
 } // namespace snowboy

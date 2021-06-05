@@ -9,7 +9,14 @@ endif()
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
 
-option(SNOWMAN_CXX11_COMPAT "Build library with C++11 strings disabled to be binary compatible with the original release." ON)
+# Enable Link-Time Optimization
+if(NOT ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug"))
+    include(CheckIPOSupported)
+    check_ipo_supported(RESULT LTOAvailable)
+endif()
+if(LTOAvailable)
+    message("Link-time optimization enabled")
+endif()
 option(SNOWMAN_BUILD_APPS "Build helper applications like enroll or cut" ON)
 option(SNOWMAN_BUILD_APPS_STATIC "Build apps statically" OFF)
 option(SNOWMAN_BUILD_TESTS "Build unit tests (requires gtest and openssl)" ON)

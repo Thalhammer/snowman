@@ -90,10 +90,10 @@ namespace snowboy {
 		}
 	}
 
-	void MelFilterBank::ComputeMelFilterBankEnergy(const VectorBase& input, Vector& param_2) const {
-		if (m_options.num_bins != param_2.size()) param_2.Resize(m_options.num_bins);
-		for (size_t b = 0; b < param_2.size(); b++) {
-			param_2[b] = field_x40[b].DotVec(input.Range(field_x28[b], field_x40[b].size()));
+	void MelFilterBank::ComputeMelFilterBankEnergy(const VectorBase& input, const VectorBase& output) const {
+		SNOWBOY_ASSERT(m_options.num_bins == param_2.size());
+		for (size_t b = 0; b < output.size(); b++) {
+			output[b] = field_x40[b].DotVec(input.Range(field_x28[b], field_x40[b].size()));
 		}
 	}
 
@@ -101,17 +101,16 @@ namespace snowboy {
 		return;
 	}
 
-	void ComputeDctMatrixTypeIII(Matrix* mat) {
-		if (mat->empty()) return;
-		auto fVar12 = sqrtf(1.0 / (float)mat->rows());
-		for (size_t c = 0; c < mat->cols(); c++)
-			mat->m_data[c] = fVar12;
-		for (size_t r = 1; r < mat->rows(); r++) {
-			auto sq = sqrtf(2.0 / mat->rows());
-			for (size_t c = 0; c < mat->cols(); c++) {
-				// TODO: In the name of performance we might wanna use cosf here.
-				// It does cause minor value differences but it should not impact anything
-				mat->m_data[r * mat->m_stride + c] = cos((c + 0.5) * (M_PI / mat->m_rows) * r) * sq;
+	void ComputeDctMatrixTypeIII(const MatrixBase& mat) {
+		if (mat.empty()) return;
+		auto fVar12 = sqrtf(1.0 / (float)mat.rows());
+		for (size_t c = 0; c < mat.cols(); c++)
+			mat(0, c) = fVar12;
+		const auto pi_div_rows = M_PI / mat.rows();
+		for (size_t r = 1; r < mat.rows(); r++) {
+			auto sq = sqrtf(2.0f / mat.rows());
+			for (size_t c = 0; c < mat.cols(); c++) {
+				mat(r,c) = cosf((c + 0.5) * pi_div_rows * r) * sq;
 			}
 		}
 	}
@@ -123,13 +122,14 @@ namespace snowboy {
 		}
 	}
 
-	void ComputePowerSpectrumReal(Vector& data) {
-		if (data.empty()) return;
-		data[0] = data[0] * data[0];
-		for (size_t i = 0; i < data.size() / 2 - 1; i++) {
-			data[i + 1] = data[i * 2 + 3] * data[i * 2 + 3] + data[i * 2 + 2] * data[i * 2 + 2];
+	void ComputePowerSpectrumReal(const VectorBase& in, const VectorBase& out) {
+		if (in.empty()) return;
+		SNOWBOY_ASSERT(out.size() >= in.size()/2);
+		out[0] = in[0] * in[0];
+		for (size_t i = 0; i < in.size() / 2 - 1; i++) {
+			out[i + 1] = in[i * 2 + 3] * in[i * 2 + 3] + in[i * 2 + 2] * in[i * 2 + 2];
 		}
-		data.Resize(data.size() / 2, MatrixResizeType::kCopyData);
+		//data.Resize(data.size() / 2, MatrixResizeType::kCopyData);
 	}
 
 	FftItf::~FftItf() {}
@@ -139,43 +139,40 @@ namespace snowboy {
 		Init();
 	}
 
-	void Fft::DoFft(bool inverse, Vector* data) const {
+	void Fft::DoFft(bool inverse, Vector* data) const noexcept {
 		SNOWBOY_ASSERT(!data->HasNan());
 		if (m_options.field_x00) {
 			if (m_options.num_fft_points == 1) return;
 			if (inverse) {
-				DoProcessingForReal(true, data);
-				DoBitReversalSorting(m_bit_reversal_index, data);
-				DoDanielsonLanczos(true, data);
+				DoProcessingForReal(inverse, data);
+				DoBitReversalSorting(m_bit_reversal_index, *data);
+				DoDanielsonLanczos(true, *data);
 				SNOWBOY_ASSERT(!data->HasNan() && !data->HasInfinity());
 				return;
 			}
 		}
-		DoBitReversalSorting(m_bit_reversal_index, data);
+		DoBitReversalSorting(m_bit_reversal_index, *data);
 		SNOWBOY_ASSERT(!data->HasNan() && !data->HasInfinity());
-		DoDanielsonLanczos(inverse, data);
+		DoDanielsonLanczos(inverse, *data);
 		SNOWBOY_ASSERT(!data->HasNan() && !data->HasInfinity());
 		if (m_options.field_x00 <= inverse) return;
 		DoProcessingForReal(inverse, data);
 	}
 
-	void Fft::DoDanielsonLanczos(bool inverse, Vector* pdata) const {
-		auto& data = *pdata;
-		const auto iVar7 = snowboy::Fft::GetNumBits(data.size() / 2);
-		for (size_t local_54 = 1; local_54 <= iVar7; local_54 += 1) {
-			const auto iVar9 = 1 << (local_54 & 0x1f);
-			for (size_t local_68 = 0; local_68 < data.size() / 2; local_68 += iVar9) {
-				long lVar14 = local_68 * 2 + 1 + iVar9;
+	void Fft::DoDanielsonLanczos(bool inverse, const VectorBase& data) const noexcept {
+		const auto num_bits = GetNumBits(data.size() / 2);
+		for (size_t bit_idx = 1; bit_idx <= num_bits; bit_idx += 1) {
+			const auto bit_value = 1 << (bit_idx & 0x1f);
+			for (size_t local_68 = 0; local_68 < data.size() / 2; local_68 += bit_value) {
+				long lVar14 = local_68 * 2 + 1 + bit_value;
 				long lVar15 = (local_68 * 2);
-				for (auto iVar11 = 0; iVar11 != iVar9 / 2; iVar11++) {
-					auto twiddle = snowboy::Fft::GetTwiddleFactor(iVar9, iVar11);
+				for (auto iVar11 = 0; iVar11 != bit_value / 2; iVar11++) {
+					auto twiddle = GetTwiddleFactor(bit_value, iVar11);
 					if (inverse) twiddle.second *= -1;
-					auto fVar16 = data[lVar15 + iVar9];
+					auto fVar16 = data[lVar15 + bit_value];
 					auto fVar18 = fVar16 * twiddle.first - twiddle.second * data[lVar14];
 					fVar16 = data[lVar14] * twiddle.first + fVar16 * twiddle.second;
-					data[lVar15 + iVar9] = data[lVar15] - fVar18;
-					auto x = data[lVar15 + 1];
-					x = x - fVar16;
+					data[lVar15 + bit_value] = data[lVar15] - fVar18;
 					data[lVar14] = data[lVar15 + 1] - fVar16;
 					data[lVar15] += fVar18;
 					data[lVar15 + 1] += fVar16;
@@ -185,20 +182,22 @@ namespace snowboy {
 			}
 		}
 		if (inverse) {
+			const auto f = 1.0f / static_cast<float>(data.size() / 2);
 			for (size_t i = 0; i < data.size(); i++)
-				data[i] = data[i] / static_cast<float>(data.size() / 2);
+				data[i] = data[i] * f;
 		}
 	}
 
-	void Fft::DoBitReversalSorting(const std::vector<unsigned int>& reversal_index, Vector* data) const {
-		for (size_t i = 0; i < data->size(); i++) {
-			if (i < reversal_index[i]) {
-				std::swap((*data)[i], (*data)[reversal_index[i]]);
+	void Fft::DoBitReversalSorting(const std::vector<unsigned int>& reversal_index, const VectorBase& data) noexcept {
+		for (size_t i = 0; i < data.size(); i++) {
+			auto idx = reversal_index[i % reversal_index.size()];
+			if (i < idx) {
+				std::swap(data[i], data[idx]);
 			}
 		}
 	}
 
-	void Fft::ComputeTwiddleFactor(int len) {
+	void Fft::ComputeTwiddleFactor(size_t len) {
 		m_twiddle_factors.resize(len);
 		auto ptr = m_twiddle_factors.data();
 		ptr[0] = 1.0;
@@ -208,35 +207,31 @@ namespace snowboy {
 		sincosf((-M_PI * 2) / len, &_sin, &_cos);
 		float tempa = 0;
 		float tempb = 1;
-		for (int i = 2; i < len - 4; i += 4) {
-			float fvar13 = _cos * tempb - tempa * _sin;
-			ptr[i] = fvar13;
+		for (size_t i = 2; i < len - 4; i += 4) {
+			ptr[i] = _cos * tempb - tempa * _sin;
 			ptr[i + 1] = tempa = tempb * _sin + tempa * _cos;
-			ptr[i + 2] = tempb = _cos * fvar13 - _sin * tempa;
-			ptr[i + 3] = tempa = fvar13 * _sin + tempa * _cos;
+			ptr[i + 2] = tempb = _cos * ptr[i] - _sin * tempa;
+			ptr[i + 3] = tempa = ptr[i] * _sin + tempa * _cos;
 		}
 		ptr[len - 2] = _cos * tempb - tempa * _sin;
 		ptr[len - 1] = tempa = tempb * _sin + tempa * _cos;
 	}
 
-	void Fft::ComputeBitReversalIndex(int len, std::vector<unsigned int>* index) const {
+	void Fft::ComputeBitReversalIndex(size_t len) {
 		if (len == 0) {
-			index->clear();
+			m_bit_reversal_index.clear();
 			return;
 		}
-		index->resize(len * 2, -1);
+		m_bit_reversal_index.resize(len * 2, -1);
 		auto num_bits = GetNumBits(len);
-		auto ptr = index->data();
-		for (int i = 0; i < len; i++) {
+		for (size_t i = 0; i < len; i++) {
 			auto x = ReverseBit(i, num_bits) * 2;
-			*ptr = x;
-			ptr++;
-			*ptr = x + 1;
-			ptr++;
+			m_bit_reversal_index[i * 2] = x;
+			m_bit_reversal_index[i * 2 + 1] = x + 1;
 		}
 	}
 
-	void Fft::DoProcessingForReal(bool param_1, Vector* param_2) const {
+	void Fft::DoProcessingForReal(bool inverse, Vector* param_2) const noexcept {
 		// TODO: Could someone with any clue about maths explain to me what the fuck happens here ?
 		// I reversed it and it seems to return the correct values, but no clue about why it does....
 		const auto num_pts = m_options.num_fft_points;
@@ -245,36 +240,32 @@ namespace snowboy {
 		int iVar11 = (-1 < num_pts) ? num_pts : (num_pts + 3);
 		ptr[0] = f + ptr[1];
 		ptr[1] = f - ptr[1];
-		if (0 < iVar11 / 4) {
-			auto lVar12 = 2;
-			auto lVar9 = num_pts;
-			for (auto iVar13 = 1; iVar13 <= iVar11 / 4; iVar13 += 1) {
-				const auto twiddle = snowboy::Fft::GetTwiddleFactor(num_pts, param_1 ? (static_cast<double>(num_pts) * 0.5 - iVar13) : iVar13);
-				const auto fVar4 = ptr[lVar9 - 1];
-				const auto fVar5 = ptr[lVar9 - 2];
-				const auto fVar6 = ptr[lVar12];
-				const auto fVar7 = ptr[lVar12 + 1];
-				ptr[lVar12] = (twiddle.first * fVar7 + (twiddle.second + 1.0) * fVar6 + (1.0 - twiddle.second) * fVar5 + fVar4 * twiddle.first) * 0.5;
-				ptr[lVar12 + 1] = ((twiddle.second + 1.0) * fVar7 + ((fVar5 * twiddle.first - (1.0 - twiddle.second) * fVar4) - twiddle.first * fVar6)) * 0.5;
-				if (iVar13 * 2 != lVar9 - 2) {
-					ptr[lVar9 - 2] = ((((twiddle.second + 1.0) * fVar5 - fVar4 * twiddle.first) + (1.0 - twiddle.second) * fVar6) - twiddle.first * fVar7) * 0.5;
-					ptr[lVar9 - 1] = (((fVar5 * twiddle.first + fVar4 * (twiddle.second + 1.0)) - fVar6 * twiddle.first) - fVar7 * (1.0 - twiddle.second)) * 0.5;
-				}
-				lVar12 += 2;
-				lVar9 -= 2;
+
+		for (auto iVar13 = 1; iVar13 <= iVar11 / 4; iVar13 += 1) {
+			const auto lVar9 = num_pts - (iVar13 - 1) * 2;
+			const auto twiddle = GetTwiddleFactor(num_pts, inverse ? (static_cast<float>(num_pts) * 0.5f - iVar13) : iVar13);
+			const auto fVar4 = ptr[lVar9 - 1];
+			const auto fVar5 = ptr[lVar9 - 2];
+			const auto fVar6 = ptr[iVar13 * 2];
+			const auto fVar7 = ptr[iVar13 * 2 + 1];
+			ptr[iVar13 * 2] = (twiddle.first * fVar7 + (twiddle.second + 1.0f) * fVar6 + (1.0f - twiddle.second) * fVar5 + fVar4 * twiddle.first) * 0.5f;
+			ptr[iVar13 * 2 + 1] = ((twiddle.second + 1.0f) * fVar7 + ((fVar5 * twiddle.first - (1.0f - twiddle.second) * fVar4) - twiddle.first * fVar6)) * 0.5f;
+			if (iVar13 * 2 != lVar9 - 2) {
+				ptr[lVar9 - 2] = ((((twiddle.second + 1.0f) * fVar5 - fVar4 * twiddle.first) + (1.0f - twiddle.second) * fVar6) - twiddle.first * fVar7) * 0.5f;
+				ptr[lVar9 - 1] = (((fVar5 * twiddle.first + fVar4 * (twiddle.second + 1.0f)) - fVar6 * twiddle.first) - fVar7 * (1.0f - twiddle.second)) * 0.5f;
 			}
 		}
-		if (param_1 != false) {
-			*ptr = *ptr * 0.5;
-			ptr[1] = ptr[1] * 0.5;
+		if (inverse) {
+			*ptr *= 0.5f;
+			ptr[1] *= 0.5f;
 		}
 	}
 
-	unsigned int Fft::GetNumBits(unsigned int param_1) const {
+	size_t Fft::GetNumBits(size_t param_1) noexcept {
 		return param_1 == 0 ? 0 : (31 - __builtin_clz(param_1));
 	}
 
-	std::pair<float, float> Fft::GetTwiddleFactor(int param_1, int param_2) const {
+	std::pair<float, float> Fft::GetTwiddleFactor(int param_1, int param_2) const noexcept {
 		auto size = m_twiddle_factors.size();
 		auto idx = (size / param_1) * param_2 * 2;
 		if (idx < size) {
@@ -285,24 +276,21 @@ namespace snowboy {
 	}
 
 	void Fft::Init() {
-		if (!m_options.field_x00)
-			field_x10 = m_options.num_fft_points;
-		else
-			field_x10 = m_options.num_fft_points / 2;
-		ComputeBitReversalIndex(field_x10, &m_bit_reversal_index);
+		auto reversal_idx_len = m_options.num_fft_points;
+		if (m_options.field_x00) reversal_idx_len /= 2;
+		ComputeBitReversalIndex(reversal_idx_len);
 		ComputeTwiddleFactor(m_options.num_fft_points);
 	}
 
-	unsigned int Fft::ReverseBit(unsigned int a, unsigned int b) const {
-		// TODO: Can we optimize this ?
-		if (a == 0) return 0;
+	size_t Fft::ReverseBit(size_t val, size_t num_bits) noexcept {
+		if (val == 0) return 0;
 		unsigned int res = 0;
-		while (a != 0) {
-			b -= 1;
-			res = (res * 2) | (a & 1);
-			a >>= 1;
+		while (val != 0) {
+			num_bits -= 1;
+			res = (res * 2) | (val & 1);
+			val >>= 1;
 		}
-		return res << (b & 0x1f);
+		return res << (num_bits & 0x1f);
 	}
 
 	void Fft::SetOptions(const FftOptions& opts) {
@@ -310,11 +298,11 @@ namespace snowboy {
 		Init();
 	}
 
-	void Fft::DoFft(Vector* data) const {
+	void Fft::DoFft(Vector* data) const noexcept {
 		DoFft(false, data);
 	}
 
-	void Fft::DoIfft(Vector* data) const {
+	void Fft::DoIfft(Vector* data) const noexcept {
 		DoFft(true, data);
 	}
 

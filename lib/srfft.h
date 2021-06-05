@@ -21,8 +21,8 @@ namespace snowboy {
 		void Init();
 		void SetOptions(const FftOptions& options);
 
-		virtual void DoFft(Vector*) const override;
-		virtual void DoIfft(Vector*) const override;
+		virtual void DoFft(Vector*) const noexcept override;
+		virtual void DoIfft(Vector*) const noexcept override;
 		virtual ~SplitRadixFft();
 	};
 	//static_assert(sizeof(SplitRadixFft) == 0x48);

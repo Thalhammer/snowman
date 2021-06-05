@@ -81,25 +81,25 @@ namespace snowboy {
 		return false;
 	}
 
-	Component* Component::NewComponentOfType(const std::string& type) {
+	std::unique_ptr<Component> Component::NewComponentOfType(const std::string& type) {
 		if (type == "SoftmaxComponent")
-			return new SoftmaxComponent();
+			return std::unique_ptr<Component>(new SoftmaxComponent());
 		if (type == "RectifiedLinearComponent")
-			return new RectifiedLinearComponent();
+			return std::unique_ptr<Component>(new RectifiedLinearComponent());
 		if (type == "NormalizeComponent")
-			return new NormalizeComponent();
+			return std::unique_ptr<Component>(new NormalizeComponent());
 		if (type == "AffineComponent")
-			return new AffineComponent();
+			return std::unique_ptr<Component>(new AffineComponent());
 		if (type == "CmvnComponent")
-			return new CmvnComponent();
+			return std::unique_ptr<Component>(new CmvnComponent());
 		if (type == "PosteriorMapComponent")
-			return new PosteriorMapComponent();
+			return std::unique_ptr<Component>(new PosteriorMapComponent());
 		if (type == "SpliceComponent")
-			return new SpliceComponent();
+			return std::unique_ptr<Component>(new SpliceComponent());
 		return nullptr;
 	}
 
-	Component* Component::ReadNew(bool binary, std::istream* is) {
+	std::unique_ptr<Component> Component::ReadNew(bool binary, std::istream* is) {
 		std::string token;
 		ReadToken(binary, &token, is);
 		if (token.size() <= 2)

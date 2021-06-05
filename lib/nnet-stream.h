@@ -11,10 +11,10 @@ namespace snowboy {
 		bool pad_context;
 		void Register(const std::string&, OptionsItf*);
 	};
-	struct NnetStream : StreamItf {
+	class NnetStream : public StreamItf {
 		NnetStreamOptions m_options;
 		std::unique_ptr<Nnet> m_nnet;
-
+	public:
 		NnetStream(const NnetStreamOptions& options);
 		virtual int Read(Matrix* mat, std::vector<FrameInfo>* info) override;
 		virtual bool Reset() override;

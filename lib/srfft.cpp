@@ -105,11 +105,11 @@ namespace snowboy {
 		Init();
 	}
 
-	void SplitRadixFft::DoFft(Vector* data) const {
+	void SplitRadixFft::DoFft(Vector* data) const noexcept {
 		DoFft(false, data);
 	}
 
-	void SplitRadixFft::DoIfft(Vector* data) const {
+	void SplitRadixFft::DoIfft(Vector* data) const noexcept {
 		DoFft(true, data);
 	}
 

@@ -18,9 +18,9 @@ namespace snowboy {
 
 	FramerStream::FramerStream(const FramerStreamOptions& options)
 		: m_options{options} {
-		const auto frames_per_ms = static_cast<double>(m_options.sample_rate) * 0.001;
-		m_frame_length_samples = m_options.frame_length_ms * frames_per_ms;
-		m_frame_shift_samples = m_options.frame_shift_ms * frames_per_ms;
+		const auto samples_per_ms = static_cast<double>(m_options.sample_rate) * 0.001;
+		m_frame_length_samples = m_options.frame_length_ms * samples_per_ms;
+		m_frame_shift_samples = m_options.frame_shift_ms * samples_per_ms;
 		CreateWindow();
 		this->field_x38 = 1;
 	}

@@ -61,6 +61,16 @@ struct string_list_option : basic_option<std::vector<std::string>> {
 	void parse(arg_iterator& it);
 };
 
+struct int_option : basic_option<int64_t> {
+	int64_t minimum = INT64_MIN;
+	int64_t maximum = INT64_MAX;
+	using basic_option::basic_option;
+	void parse(arg_iterator& it);
+
+	int_option& set_min(int64_t minimum) noexcept;
+	int_option& set_max(int64_t maximum) noexcept;
+};
+
 struct option_parser {
 	std::vector<option_base*> options;
 
@@ -73,6 +83,7 @@ struct option_parser {
 	bool_option& option(std::string longname, bool* ptr);
 	string_option& option(std::string longname, std::string* ptr);
 	string_list_option& option(std::string longname, std::vector<std::string>* ptr);
+	int_option& option(std::string longname, int64_t* ptr);
 	std::vector<std::string> parse(std::vector<std::string> a);
 	std::vector<std::string> parse(int argc, const char** argv);
 	std::vector<std::string> parse(const std::string& str);

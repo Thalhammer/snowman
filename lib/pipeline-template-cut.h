@@ -28,7 +28,7 @@ namespace snowboy {
 
 		void Register(const std::string& prefix, OptionsItf* opts);
 	};
-	struct PipelineTemplateCut : PipelineItf {
+	class PipelineTemplateCut : public PipelineItf {
 		std::unique_ptr<InterceptStream> m_interceptStream;
 		std::unique_ptr<FramerStream> m_framerStream;
 		std::unique_ptr<EavesdropStream> m_eavesdropStream;
@@ -43,6 +43,7 @@ namespace snowboy {
 		std::unique_ptr<RawNnetVadStreamOptions> m_rawNnetVadStreamOptions;
 		Matrix m_eavesdropMatrix;
 
+	public:
 		virtual void RegisterOptions(const std::string& prefix, OptionsItf* opts) override;
 		virtual int GetPipelineSampleRate() const override;
 		virtual bool Init() override;
