@@ -30,7 +30,7 @@ TEST(EnrollTest, PersonalEnroll) {
 	}
 	ASSERT_TRUE(file_exists("temp_enroll_model.pmdl"));
 	auto stream = snowboy::testing::Inspector::PipelinePersonalEnroll_GetTemplateEnrollStream(
-			snowboy::testing::Inspector::SnowboyPersonalEnroll_GetEnrollPipeline(enroll));
+		snowboy::testing::Inspector::SnowboyPersonalEnroll_GetEnrollPipeline(enroll));
 	int64_t h = hash(stream->field_x38.m_templates.front());
 	ASSERT_LE(abs(h - 928553), 2);
 }
@@ -55,7 +55,7 @@ TEST(EnrollTest, PersonalEnroll2) {
 	}
 	ASSERT_TRUE(file_exists("temp_enroll_model.pmdl"));
 	auto stream = snowboy::testing::Inspector::PipelinePersonalEnroll_GetTemplateEnrollStream(
-			snowboy::testing::Inspector::SnowboyPersonalEnroll_GetEnrollPipeline(enroll));
+		snowboy::testing::Inspector::SnowboyPersonalEnroll_GetEnrollPipeline(enroll));
 	int64_t h = hash(stream->field_x38.m_templates.front());
 	ASSERT_LE(abs(h - 928522), 2);
 }

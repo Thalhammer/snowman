@@ -3,9 +3,9 @@
 #include <deque>
 #include <iosfwd>
 #include <matrix-wrapper.h>
+#include <memory>
 #include <vector-wrapper.h>
 #include <vector>
-#include <memory>
 
 namespace snowboy {
 	struct FrameInfo;

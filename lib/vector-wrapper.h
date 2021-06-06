@@ -2,8 +2,8 @@
 #include <cstdint>
 #include <matrix-types.h>
 #include <snowboy-debug.h>
-#include <string>
 #include <stdexcept>
+#include <string>
 
 namespace snowboy {
 	struct MatrixBase;
@@ -12,8 +12,8 @@ namespace snowboy {
 	protected:
 		size_t m_size{0};
 		float* m_data{nullptr};
-	public:
 
+	public:
 		float* begin() const noexcept { return m_data; }
 		float* end() const noexcept { return m_data + m_size; }
 		size_t size() const noexcept { return m_size; }
@@ -64,6 +64,7 @@ namespace snowboy {
 	class Vector : public VectorBase {
 	protected:
 		size_t m_cap{0};
+
 	public:
 		Vector() noexcept {}
 		Vector(const VectorBase& other) {
@@ -111,9 +112,10 @@ namespace snowboy {
 			m_size = other.m_size;
 		}
 	};
-	template<size_t N>
+	template <size_t N>
 	class FixedVector : public VectorBase {
 		float m_storage[N];
+
 	public:
 		FixedVector() noexcept {
 			m_data = m_storage;
@@ -135,9 +137,9 @@ namespace snowboy {
 
 		constexpr size_t capacity() const noexcept { return N; }
 		void Resize(size_t size, MatrixResizeType resize = MatrixResizeType::kSetZero) {
-			if(size > N) throw std::invalid_argument("new size exceeds fixed capacity");
+			if (size > N) throw std::invalid_argument("new size exceeds fixed capacity");
 			m_size = size;
-			if(resize == MatrixResizeType::kSetZero) Set(0.0f);
+			if (resize == MatrixResizeType::kSetZero) Set(0.0f);
 		}
 
 		FixedVector& operator=(const FixedVector& other) {

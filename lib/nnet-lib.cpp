@@ -46,7 +46,7 @@ namespace snowboy {
 		m_input_data = other.m_input_data;
 		m_output_data = other.m_output_data;
 		m_components.resize(other.m_components.size());
-		for (size_t i=0; i<m_components.size(); i++)
+		for (size_t i = 0; i < m_components.size(); i++)
 			m_components[i].reset(other.m_components[i]->Copy());
 	}
 

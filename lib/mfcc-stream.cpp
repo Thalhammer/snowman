@@ -1,10 +1,10 @@
 #include <cmath>
 #include <frame-info.h>
+#include <iostream>
 #include <limits>
 #include <mfcc-stream.h>
 #include <snowboy-options.h>
 #include <vector-wrapper.h>
-#include <iostream>
 
 namespace snowboy {
 	void MfccStreamOptions::Register(const std::string& prefix, OptionsItf* opts) {
@@ -84,10 +84,10 @@ namespace snowboy {
 
 	void MfccStream::ComputeMfcc(const VectorBase& param_1, SubVector* param_2) const {
 		// Note: We reuse the space inside param_1 as the result, which means the vector is clobbered afterwards.
-		auto power_spectrum = param_1.Range(0, param_1.size()/2);
+		auto power_spectrum = param_1.Range(0, param_1.size() / 2);
 		ComputePowerSpectrumReal(param_1, power_spectrum);
 		// We normaly have 40 bins, but lets set the size to 128 in case some models use more (highly doubt it)
-		FixedVector<128> vout{ m_melfilterbank->get_options().num_bins, MatrixResizeType::kUndefined };
+		FixedVector<128> vout{m_melfilterbank->get_options().num_bins, MatrixResizeType::kUndefined};
 		m_melfilterbank->ComputeMelFilterBankEnergy(power_spectrum, vout);
 		vout.ApplyFloor(std::numeric_limits<float>::min());
 		vout.ApplyLog();

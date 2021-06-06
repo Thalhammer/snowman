@@ -10,6 +10,7 @@ namespace snowboy {
 	class GainControlStream : public StreamItf {
 		float m_audioGain;
 		float m_maxAudioAmplitude;
+
 	public:
 		GainControlStream(const GainControlStreamOptions& options);
 		virtual int Read(Matrix* mat, std::vector<FrameInfo>* info) override;

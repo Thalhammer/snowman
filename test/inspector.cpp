@@ -1,6 +1,6 @@
 #include "inspector.h"
-#include <snowboy-detect.h>
 #include <pipeline-personal-enroll.h>
+#include <snowboy-detect.h>
 
 namespace snowboy {
 	namespace testing {

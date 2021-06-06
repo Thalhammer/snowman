@@ -110,7 +110,7 @@ namespace snowboy {
 		for (size_t r = 1; r < mat.rows(); r++) {
 			auto sq = sqrtf(2.0f / mat.rows());
 			for (size_t c = 0; c < mat.cols(); c++) {
-				mat(r,c) = cosf((c + 0.5) * pi_div_rows * r) * sq;
+				mat(r, c) = cosf((c + 0.5) * pi_div_rows * r) * sq;
 			}
 		}
 	}
@@ -124,7 +124,7 @@ namespace snowboy {
 
 	void ComputePowerSpectrumReal(const VectorBase& in, const VectorBase& out) {
 		if (in.empty()) return;
-		SNOWBOY_ASSERT(out.size() >= in.size()/2);
+		SNOWBOY_ASSERT(out.size() >= in.size() / 2);
 		out[0] = in[0] * in[0];
 		for (size_t i = 0; i < in.size() / 2 - 1; i++) {
 			out[i + 1] = in[i * 2 + 3] * in[i * 2 + 3] + in[i * 2 + 2] * in[i * 2 + 2];

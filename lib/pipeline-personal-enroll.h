@@ -4,7 +4,9 @@
 #include <vector>
 
 namespace snowboy {
-	namespace testing { class Inspector; }
+	namespace testing {
+		class Inspector;
+	}
 	struct MatrixBase;
 	struct FrameInfo;
 
@@ -41,6 +43,7 @@ namespace snowboy {
 		std::unique_ptr<MfccStreamOptions> m_mfccStreamOptions;
 		std::unique_ptr<NnetStreamOptions> m_nnetStreamOptions;
 		std::unique_ptr<TemplateEnrollStreamOptions> m_templateEnrollStreamOptions;
+
 	public:
 		virtual void RegisterOptions(const std::string& prefix, OptionsItf* opts) override;
 		virtual int GetPipelineSampleRate() const override;

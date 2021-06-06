@@ -16,6 +16,7 @@ namespace snowboy {
 		int num_fft_points;
 
 		void InitFft(int num_points);
+
 	public:
 		FftStream(const FftStreamOptions& options);
 		virtual int Read(Matrix* mat, std::vector<FrameInfo>* info) override;
