@@ -313,9 +313,9 @@ namespace snowboy {
 			ExpectToken(binary, "<SearchFloor>", is);
 			Vector tvec;
 			tvec.Read(binary, is);
-			search_floor.resize(tvec.m_size);
-			for (size_t i = 0; i < tvec.m_size; i++)
-				search_floor[i] = tvec.m_data[i];
+			search_floor.resize(tvec.size());
+			for (size_t i = 0; i < tvec.size(); i++)
+				search_floor[i] = tvec[i];
 		} else {
 			search_mask.resize(field_x88.size());
 			for (size_t i = 0; i < search_mask.size(); i++) {
@@ -525,8 +525,8 @@ namespace snowboy {
 		Vector tvec;
 		tvec.Resize(search_floor.size());
 		// TODO: This could be a memcpy, or even better implement writing for vector
-		for (size_t i = 0; i < tvec.m_size; i++) {
-			tvec.m_data[i] = search_floor[i];
+		for (size_t i = 0; i < tvec.size(); i++) {
+			tvec[i] = search_floor[i];
 		}
 		tvec.Write(binary, os);
 		WriteToken(binary, "<SearchMax>", os);

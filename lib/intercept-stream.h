@@ -5,11 +5,12 @@
 #include <vector>
 
 namespace snowboy {
-	struct InterceptStream : StreamItf {
+	class InterceptStream : public StreamItf {
 		std::deque<Matrix> m_matrix_queue;
 		std::deque<std::vector<FrameInfo>> m_frame_info_queue;
 		std::deque<SnowboySignal> m_signal_queue;
 
+	public:
 		InterceptStream();
 		virtual int Read(Matrix* mat, std::vector<FrameInfo>* info) override;
 		virtual bool Reset() override;

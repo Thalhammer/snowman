@@ -220,13 +220,8 @@ namespace snowboy {
 		}
 	}
 
-	SubVector VectorBase::Range(int param_1, int param_2) const noexcept {
-		return SubVector(*this, param_1, param_2);
-	}
-
-	// TODO: Why do we need this one if the result is the same ?
-	SubVector VectorBase::Range(int param_1, int param_2) noexcept {
-		return SubVector(*this, param_1, param_2);
+	SubVector VectorBase::Range(size_t offset, size_t size) const noexcept {
+		return SubVector{*this, offset, size};
 	}
 
 	void VectorBase::Scale(float factor) noexcept {
@@ -333,7 +328,7 @@ namespace snowboy {
 	}
 
 	Vector& Vector::operator=(const VectorBase& other) {
-		Resize(other.m_size, MatrixResizeType::kUndefined);
+		Resize(other.size(), MatrixResizeType::kUndefined);
 		CopyFromVec(other);
 		return *this;
 	}
@@ -419,18 +414,14 @@ namespace snowboy {
 	}
 
 	SubVector::SubVector(const VectorBase& parent, size_t offset, size_t size) noexcept {
-		m_data = parent.m_data + offset;
-		m_size = std::min(parent.m_size - offset, size);
+		offset = std::min(offset, parent.size());
+		m_data = parent.data() + offset;
+		m_size = std::min(parent.size() - offset, size);
 	}
 
 	SubVector::SubVector(const MatrixBase& parent, size_t row) noexcept {
-		m_data = parent.m_data + (row * parent.m_stride);
+		m_data = parent.data(row);
 		m_size = parent.m_cols;
-	}
-
-	SubVector::SubVector(const SubVector& other) noexcept {
-		m_data = other.m_data;
-		m_size = other.m_size;
 	}
 
 } // namespace snowboy

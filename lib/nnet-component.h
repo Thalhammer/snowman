@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <iosfwd>
 #include <matrix-wrapper.h>
+#include <memory>
 #include <vector-wrapper.h>
 #include <vector>
 
@@ -77,8 +78,8 @@ namespace snowboy {
 		virtual Component* Copy() const = 0;
 		virtual ~Component() {}
 
-		static Component* NewComponentOfType(const std::string& type);
-		static Component* ReadNew(bool binary, std::istream* is);
+		static std::unique_ptr<Component> NewComponentOfType(const std::string& type);
+		static std::unique_ptr<Component> ReadNew(bool binary, std::istream* is);
 
 	private:
 		int32_t m_index;

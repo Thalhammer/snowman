@@ -18,9 +18,9 @@ namespace snowboy {
 
 	FramerStream::FramerStream(const FramerStreamOptions& options)
 		: m_options{options} {
-		const auto frames_per_ms = static_cast<double>(m_options.sample_rate) * 0.001;
-		m_frame_length_samples = m_options.frame_length_ms * frames_per_ms;
-		m_frame_shift_samples = m_options.frame_shift_ms * frames_per_ms;
+		const auto samples_per_ms = static_cast<double>(m_options.sample_rate) * 0.001;
+		m_frame_length_samples = m_options.frame_length_ms * samples_per_ms;
+		m_frame_shift_samples = m_options.frame_shift_ms * samples_per_ms;
 		CreateWindow();
 		this->field_x38 = 1;
 	}
@@ -53,7 +53,7 @@ namespace snowboy {
 	}
 
 	void FramerStream::CreateFrames(const VectorBase& data, Matrix* mat) {
-		const auto nframes = NumFrames(data.m_size);
+		const auto nframes = NumFrames(data.size());
 		mat->Resize(nframes, m_frame_length_samples);
 		std::mt19937 gen;
 		// This might have a different mean
@@ -61,9 +61,9 @@ namespace snowboy {
 		for (size_t currentFrame = 0; currentFrame < nframes; currentFrame++) {
 			SubVector sub{*mat, currentFrame};
 			sub.CopyFromVec(data.Range(this->m_frame_shift_samples * currentFrame, this->m_frame_length_samples));
-			if (this->m_options.dither_coeff != 0.0 && sub.m_size > 0) {
-				auto data = sub.m_data;
-				for (size_t i = 0; i < sub.m_size; i++) {
+			if (this->m_options.dither_coeff != 0.0 && sub.size() > 0) {
+				auto data = sub.data();
+				for (size_t i = 0; i < sub.size(); i++) {
 					// Kaldi RandGauss
 					float r = sqrt(-2 * std::log(dist(gen))) * cos(2 * M_PI * dist(gen));
 					data[i] += r * this->m_options.dither_coeff;
@@ -71,11 +71,11 @@ namespace snowboy {
 			}
 			if (this->m_options.subtract_mean) {
 				auto sum = sub.Sum();
-				sub.Add(-sum / sub.m_size);
+				sub.Add(-sum / sub.size());
 			}
 			if (this->m_options.preemphasis_coeff != 0.0) {
-				auto data = sub.m_data;
-				for (size_t i = sub.m_size - 1; i > 0; i--) {
+				auto data = sub.data();
+				for (size_t i = sub.size() - 1; i > 0; i--) {
 					data[i] -= this->m_options.preemphasis_coeff * data[i - 1];
 				}
 				data[0] -= this->m_options.preemphasis_coeff * data[0];
@@ -83,7 +83,7 @@ namespace snowboy {
 			sub.MulElements(this->m_window);
 		}
 		// Cache remaining samples in our temp buffer
-		auto remain = data.m_size - (nframes * this->m_frame_shift_samples);
+		auto remain = data.size() - (nframes * this->m_frame_shift_samples);
 		this->field_x40.Resize(remain);
 		if (remain > 0) {
 			this->field_x40.CopyFromVec(data.Range(nframes * this->m_frame_shift_samples, remain));
@@ -106,9 +106,9 @@ namespace snowboy {
 		}
 
 		Vector temp_vector;
-		temp_vector.Resize(matrix_in.m_cols + field_x40.m_size);
-		temp_vector.Range(0, field_x40.m_size).CopyFromVec(field_x40);
-		temp_vector.Range(field_x40.m_size, matrix_in.m_cols).CopyFromVec(SubVector{matrix_in, 0});
+		temp_vector.Resize(matrix_in.m_cols + field_x40.size());
+		temp_vector.Range(0, field_x40.size()).CopyFromVec(field_x40);
+		temp_vector.Range(field_x40.size(), matrix_in.m_cols).CopyFromVec(SubVector{matrix_in, 0});
 		field_x40.Resize(0);
 
 		CreateFrames(temp_vector, mat);

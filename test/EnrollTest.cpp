@@ -29,11 +29,10 @@ TEST(EnrollTest, PersonalEnroll) {
 		ASSERT_EQ(res, 0);
 	}
 	ASSERT_TRUE(file_exists("temp_enroll_model.pmdl"));
-	auto pipeline = snowboy::testing::Inspector::SnowboyPersonalEnroll_GetEnrollPipeline(enroll);
-	ASSERT_EQ(hash(pipeline->m_templateEnrollStream->field_x38.m_templates.front()), 928553);
-	// TODO: I would really like to do a md5 of the file instead but due to rounding errors (and dithering) thats not an option
-	// auto hash = md5sum_file("temp_enroll_model.pmdl");
-	// ASSERT_EQ(hash, "55:F2:DA:B4:E7:6E:B2:68:6F:DA:6E:0E:0D:13:39:F1");
+	auto stream = snowboy::testing::Inspector::PipelinePersonalEnroll_GetTemplateEnrollStream(
+		snowboy::testing::Inspector::SnowboyPersonalEnroll_GetEnrollPipeline(enroll));
+	int64_t h = hash(stream->field_x38.m_templates.front());
+	ASSERT_LE(abs(h - 928553), 2);
 }
 
 TEST(EnrollTest, PersonalEnroll2) {
@@ -55,9 +54,8 @@ TEST(EnrollTest, PersonalEnroll2) {
 		ASSERT_EQ(res, 0);
 	}
 	ASSERT_TRUE(file_exists("temp_enroll_model.pmdl"));
-	auto pipeline = snowboy::testing::Inspector::SnowboyPersonalEnroll_GetEnrollPipeline(enroll);
-	ASSERT_EQ(hash(pipeline->m_templateEnrollStream->field_x38.m_templates.front()), 928522);
-	// TODO: I would really like to do a md5 of the file instead but due to rounding errors (and dithering) thats not an option
-	// auto hash = md5sum_file("temp_enroll_model.pmdl");
-	// ASSERT_EQ(hash, "44:F9:AE:8E:CB:4A:E0:36:C6:FC:7D:9A:DA:C3:67:0F");
+	auto stream = snowboy::testing::Inspector::PipelinePersonalEnroll_GetTemplateEnrollStream(
+		snowboy::testing::Inspector::SnowboyPersonalEnroll_GetEnrollPipeline(enroll));
+	int64_t h = hash(stream->field_x38.m_templates.front());
+	ASSERT_LE(abs(h - 928522), 2);
 }

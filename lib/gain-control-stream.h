@@ -7,10 +7,11 @@ namespace snowboy {
 		float m_audioGain;
 		void Register(const std::string&, OptionsItf*);
 	};
-	struct GainControlStream : StreamItf {
+	class GainControlStream : public StreamItf {
 		float m_audioGain;
 		float m_maxAudioAmplitude;
 
+	public:
 		GainControlStream(const GainControlStreamOptions& options);
 		virtual int Read(Matrix* mat, std::vector<FrameInfo>* info) override;
 		virtual bool Reset() override;

@@ -311,7 +311,7 @@ namespace snowboy {
 			&& !m_universalDetectStream->m_model_info.back().keywords.empty()) {
 			num_universal = m_universalDetectStream->m_model_info.back().keywords.back().hotword_id;
 		}
-		if (num_universal + num_personal < parts.size()) {
+		if (num_universal + num_personal > parts.size()) {
 			std::stringstream ss;
 			ss << "number of hotwords and number of sensitivities mismatch, expecting sensitivities for "
 			   << num_personal << " personal hotwords, and " << num_universal << " universal hotwords, got "

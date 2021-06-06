@@ -40,7 +40,7 @@ bool parse_args(int argc, const char** argv, std::string& output, std::vector<st
 	bool no_cut = false;
 	parser.option("--no-cut-recordings", &no_cut).set_shortname("-nc").set_description("Do not cut recordings before running enrollment");
 	parser.option("--output", &output).set_shortname("-o").set_description("Output filename for the model");
-	parser.option("--language", &output).set_shortname("-l").set_description("Language of the enrolled word");
+	parser.option("--language", &lang).set_shortname("-l").set_description("Language of the enrolled word");
 	parser.option("--recording", &recordings).set_shortname("-r").set_required(true).set_description("Recording to enroll");
 	bool print_help = false;
 	parser.option("--help", &print_help).set_shortname("-h").set_description("Print help");

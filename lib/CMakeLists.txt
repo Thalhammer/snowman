@@ -76,3 +76,6 @@ endif()
 
 add_library(snowboy ALIAS snowman)
 
+if(LTOAvailable)
+    set_property(TARGET snowman PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+endif()

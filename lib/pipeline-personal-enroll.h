@@ -4,6 +4,9 @@
 #include <vector>
 
 namespace snowboy {
+	namespace testing {
+		class Inspector;
+	}
 	struct MatrixBase;
 	struct FrameInfo;
 
@@ -25,7 +28,8 @@ namespace snowboy {
 
 		void Register(const std::string& prefix, OptionsItf* opts);
 	};
-	struct PipelinePersonalEnroll : PipelineItf {
+	class PipelinePersonalEnroll : public PipelineItf {
+		friend struct testing::Inspector;
 		std::unique_ptr<InterceptStream> m_interceptStream;
 		std::unique_ptr<FramerStream> m_framerStream;
 		std::unique_ptr<FftStream> m_fftStream;
@@ -40,6 +44,7 @@ namespace snowboy {
 		std::unique_ptr<NnetStreamOptions> m_nnetStreamOptions;
 		std::unique_ptr<TemplateEnrollStreamOptions> m_templateEnrollStreamOptions;
 
+	public:
 		virtual void RegisterOptions(const std::string& prefix, OptionsItf* opts) override;
 		virtual int GetPipelineSampleRate() const override;
 		virtual bool Init() override;

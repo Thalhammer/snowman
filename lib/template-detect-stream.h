@@ -24,6 +24,7 @@ namespace snowboy {
 		size_t field_x70;
 		Matrix field_x78;
 		int field_x90;
+		void InitDtw();
 
 		TemplateDetectStream(const TemplateDetectStreamOptions& options);
 		virtual int Read(Matrix* mat, std::vector<FrameInfo>* info) override;
@@ -33,7 +34,6 @@ namespace snowboy {
 
 		void SetSensitivity(const std::string& sensitivities);
 		std::string GetSensitivity() const;
-		void InitDtw();
 		size_t NumHotwords(size_t model_id) const;
 		void UpdateModel() const;
 	};

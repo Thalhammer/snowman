@@ -45,9 +45,9 @@ namespace snowboy {
 		m_unprocessed_buffer = other.m_unprocessed_buffer;
 		m_input_data = other.m_input_data;
 		m_output_data = other.m_output_data;
-		m_components = other.m_components;
-		for (auto& e : m_components)
-			e = e->Copy();
+		m_components.resize(other.m_components.size());
+		for (size_t i = 0; i < m_components.size(); i++)
+			m_components[i].reset(other.m_components[i]->Copy());
 	}
 
 	Nnet::~Nnet() {
@@ -170,8 +170,6 @@ namespace snowboy {
 	}
 
 	void Nnet::Destroy() {
-		for (auto e : m_components)
-			delete e;
 		m_components.clear();
 	}
 
@@ -184,7 +182,7 @@ namespace snowboy {
 		auto uVar10 = m_unprocessed_buffer.m_rows;
 		auto num_effective_input_rows_new = (field_xa ? LeftContext() + RightContext() : 0) + m_unprocessed_buffer.m_rows;
 
-		if (m_pad_input && field_b8.m_size > 0) {
+		if (m_pad_input && field_b8.size() > 0) {
 			auto t = RightContext();
 			num_effective_input_rows_new += t;
 			uVar10 += t;
@@ -313,7 +311,7 @@ namespace snowboy {
 		if (!m_components.empty()) {
 			// Note: This used to be two loops, one summing m_left_context and one summing m_right_context
 			// Since neither have crossreferences I collapsed them into one.
-			for (auto e : m_components) {
+			for (auto& e : m_components) {
 				auto ctx = e->Context();
 				m_left_context += ctx.front();
 				m_right_context += ctx.back();
@@ -330,7 +328,7 @@ namespace snowboy {
 		WriteToken(binary, "<NumComponents>", os);
 		WriteBasicType<int32_t>(binary, m_components.size(), os);
 		WriteToken(binary, "<Components>", os);
-		for (auto e : m_components) {
+		for (auto& e : m_components) {
 			e->Write(binary, os);
 		}
 		WriteToken(binary, "</Components>", os);

@@ -4,8 +4,6 @@
 #include <vector>
 
 namespace snowboy {
-	struct OptionsItf;
-	struct Nnet;
 	struct VectorBase;
 	struct MatrixBase;
 

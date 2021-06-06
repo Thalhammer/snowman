@@ -48,10 +48,10 @@ namespace snowboy {
 		if (num_fft_points == -1) {
 			SubVector svec{m, 0};
 			// Check if size is a power of two
-			if (svec.m_size == 0 || (svec.m_size & (svec.m_size - 1)) != 0) {
-				num_fft_points = NearestPowerOfTwoCeil(svec.m_size);
+			if (svec.size() == 0 || (svec.size() & (svec.size() - 1)) != 0) {
+				num_fft_points = NearestPowerOfTwoCeil(svec.size());
 			} else
-				num_fft_points = svec.m_size;
+				num_fft_points = svec.size();
 			InitFft(num_fft_points);
 		}
 		mat->Resize(m.rows(), num_fft_points);
