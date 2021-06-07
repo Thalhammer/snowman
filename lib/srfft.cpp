@@ -60,14 +60,14 @@ namespace snowboy {
 		auto uVar9 = field_x10 - 1;
 		if (-1 < (int)uVar9) {
 			auto lVar8 = field_x10 * sizeof(float) - 4;
-			ulong lVar3 = 0;
+			unsigned long lVar3 = 0;
 			auto pfVar6 = ptr + (int)(uVar9 * 2);
 			do {
 				*pfVar6 = ptr[(lVar3 + lVar8) / 4];
 				lVar3 += -4;
 				pfVar6[1] = temp[(lVar3 + lVar8) / 4];
 				pfVar6 = pfVar6 + -2;
-			} while (lVar3 != ~(ulong)uVar9 * 4);
+			} while (lVar3 != ~(unsigned long)uVar9 * 4);
 		}
 	}
 

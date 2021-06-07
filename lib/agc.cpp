@@ -14,7 +14,7 @@ extern "C"
 		short unknown2;
 		unsigned char unknown3[0x28e];
 	};
-	static_assert(sizeof(TAgc_Instance) == 0x298);
+	//static_assert(sizeof(TAgc_Instance) == 0x298);
 	// TODO: Can we just copy the WebRtc implementation ?
 	// https://chromium.googlesource.com/external/webrtc/+/refs/heads/master/modules/audio_processing/agc/legacy/gain_control.h
 	extern void TAgc_Create(TAgc_Instance** ptr);
@@ -35,7 +35,7 @@ extern "C"
 		uint32_t unknown3;
 		// 4 more bytes, probably padding
 	};
-	static_assert(sizeof(AGC_Instance) == 0x18);
+	//static_assert(sizeof(AGC_Instance) == 0x18);
 
 	AGC_Instance* AGC_Init(int sample_rate /* probably */, int param_2, short param_3, int* param_4 /* status? */) {
 		if ((sample_rate == 8000 || sample_rate == 16000 || sample_rate == 32000 || sample_rate == 48000)

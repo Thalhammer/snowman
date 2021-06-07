@@ -15,7 +15,7 @@ extern "C"
 		void* m_tnrx_instance;
 		short m_unknown;
 	};
-	static_assert(sizeof(NS3_Instance) == 0x10);
+	//static_assert(sizeof(NS3_Instance) == 0x10);
 
 	NS3_Instance* NS3_Init(int sample_rate /* probably */, int unknown1, int* unknown2 /* status? */) {
 		if ((sample_rate == 8000 || sample_rate == 16000 || sample_rate == 32000 || sample_rate == 48000)

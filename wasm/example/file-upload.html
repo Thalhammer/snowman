@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <title>Audio input to wav file</title>
+    <script type="application/javascript" src="snowboy_wasm.js"></script>
+  </head>
+
+  <body>
+    <input type="file" disabled />
+    <span id="result">Loading...</span>
+    <script>
+      // https://github.com/chromium/chromium/blob/77578ccb4082ae20a9326d9e673225f1189ebb63/third_party/blink/web_tests/webaudio/resources/audio-file-utils.js
+      // Utilities for creating a 16-bit PCM WAV file from an AudioBuffer
+      // when using Chrome testRunner, and for downloading an AudioBuffer as
+      // a float WAV file when running in a browser.
+      function writeString(s, a, offset) {
+        for (let i = 0; i < s.length; ++i) {
+          a[offset + i] = s.charCodeAt(i);
+        }
+      }
+
+      function writeInt16(n, a, offset) {
+        n = Math.floor(n);
+
+        let b1 = n & 255;
+        let b2 = (n >> 8) & 255;
+
+        a[offset + 0] = b1;
+        a[offset + 1] = b2;
+      }
+
+      function writeInt32(n, a, offset) {
+        n = Math.floor(n);
+        let b1 = n & 255;
+        let b2 = (n >> 8) & 255;
+        let b3 = (n >> 16) & 255;
+        let b4 = (n >> 24) & 255;
+
+        a[offset + 0] = b1;
+        a[offset + 1] = b2;
+        a[offset + 2] = b3;
+        a[offset + 3] = b4;
+      }
+
+      // Return the bits of the float as a 32-bit integer value.  This
+      // produces the raw bits; no intepretation of the value is done.
+      function floatBits(f) {
+        let buf = new ArrayBuffer(4);
+        new Float32Array(buf)[0] = f;
+        let bits = new Uint32Array(buf)[0];
+        // Return as a signed integer.
+        return bits | 0;
+      }
+
+      function writeAudioBuffer(audioBuffer, a, offset, asFloat) {
+        // let n = audioBuffer.length;
+        let n = audioBuffer.reduce((a, b) => a + b.length, 0);
+        // let channels = audioBuffer.numberOfChannels;
+        let channels = audioBuffer.length;
+
+        for (let i = 0; i < n; ++i) {
+          for (let k = 0; k < channels; ++k) {
+            // let buffer = audioBuffer.getChannelData(k);
+            let buffer = audioBuffer[k];
+            if (asFloat) {
+              let sample = floatBits(buffer[i]);
+              writeInt32(sample, a, offset);
+              offset += 4;
+            } else {
+              let sample = buffer[i] * 32768.0;
+
+              // Clip samples to the limitations of 16-bit.
+              // If we don't do this then we'll get nasty wrap-around distortion.
+              if (sample < -32768) sample = -32768;
+              if (sample > 32767) sample = 32767;
+
+              writeInt16(sample, a, offset);
+              offset += 2;
+            }
+          }
+        }
+      }
+
+      // See http://soundfile.sapp.org/doc/WaveFormat/ and
+      // http://www-mmsp.ece.mcgill.ca/Documents/AudioFormats/WAVE/WAVE.html
+      // for a quick introduction to the WAVE PCM format.
+      function createWaveFileData(audioBuffer, asFloat, sampleRate) {
+        let bytesPerSample = asFloat ? 4 : 2;
+        let frameLength = audioBuffer[0].length; //audioBuffer.length;
+        let numberOfChannels = audioBuffer.length; // audioBuffer.numberOfChannels;
+        // let sampleRate = audioBuffer.sampleRate;
+        let bitsPerSample = 8 * bytesPerSample;
+        let byteRate = (sampleRate * numberOfChannels * bitsPerSample) / 8;
+        let blockAlign = (numberOfChannels * bitsPerSample) / 8;
+        let wavDataByteLength = frameLength * numberOfChannels * bytesPerSample;
+        let headerByteLength = 44;
+        let totalLength = headerByteLength + wavDataByteLength;
+        let waveFileData = new Uint8Array(totalLength);
+        let subChunk1Size = 16; // for linear PCM
+        let subChunk2Size = wavDataByteLength;
+        let chunkSize = 4 + (8 + subChunk1Size) + (8 + subChunk2Size);
+        writeString("RIFF", waveFileData, 0);
+        writeInt32(chunkSize, waveFileData, 4);
+        writeString("WAVE", waveFileData, 8);
+        writeString("fmt ", waveFileData, 12);
+        writeInt32(subChunk1Size, waveFileData, 16); // SubChunk1Size (4)
+        // The format tag value is 1 for integer PCM data and 3 for IEEE
+        // float data.
+        writeInt16(asFloat ? 3 : 1, waveFileData, 20); // AudioFormat (2)
+        writeInt16(numberOfChannels, waveFileData, 22); // NumChannels (2)
+        writeInt32(sampleRate, waveFileData, 24); // SampleRate (4)
+        writeInt32(byteRate, waveFileData, 28); // ByteRate (4)
+        writeInt16(blockAlign, waveFileData, 32); // BlockAlign (2)
+        writeInt32(bitsPerSample, waveFileData, 34); // BitsPerSample (4)
+        writeString("data", waveFileData, 36);
+        writeInt32(subChunk2Size, waveFileData, 40); // SubChunk2Size (4)
+        // Write actual audio data starting at offset 44.
+        writeAudioBuffer(audioBuffer, waveFileData, 44, asFloat);
+
+        return waveFileData;
+      }
+
+      const inputContainer = document.querySelector("input[type=file]");
+      const resultContainer = document.getElementById("result");
+
+      let Snowman;
+      let detector;
+      let _bufferAddr;
+      let _bufferSize;
+
+      async function load(resUrl, modelUrl) {
+        const storagePath = "/snowman";
+        const resPath = storagePath + "/" + resUrl.replace(/[\W]/g, "_");
+        const modelPath = storagePath + "/" + modelUrl.replace(/[\W]/g, "_");
+        return new Promise((resolve, reject) =>
+          LoadSnowman().then((loaded) => {
+            Snowman = loaded;
+            resolve(true);
+          })
+        )
+          .then(() => {
+            console.debug("Setting up persistent storage at " + storagePath);
+            Snowman.FS.mkdir(storagePath);
+            Snowman.FS.mount(Snowman.IDBFS, {}, storagePath);
+            return Snowman.syncFilesystem(true);
+          })
+          .then(() => {
+            const fullModelUrl = new URL(
+              modelUrl,
+              location.href.replace(/^blob:/, "")
+            );
+            console.debug(`Downloading ${fullModelUrl} to ${modelPath}`);
+            return Snowman.download(fullModelUrl, modelPath);
+          })
+          .then(() => {
+            const fullResUrl = new URL(
+              resUrl,
+              location.href.replace(/^blob:/, "")
+            );
+            console.debug(`Downloading ${fullResUrl} to ${resPath}`);
+            return Snowman.download(fullResUrl, resPath);
+          })
+          .then(() => {
+            console.debug(`Syncing filesystem`);
+
+            return Snowman.syncFilesystem(false);
+          })
+          .then(() => {
+            console.debug(`Creating detector`);
+            detector = new Snowman.SnowboyDetect(resPath, modelPath);
+            console.log(
+              `Detector created! sampleRate: ${detector.SampleRate()} numChannels: ${detector.NumChannels()} bitsPerSample: ${detector.BitsPerSample()}`
+            );
+            console.log(
+              `Detector created! sensitivity: ${detector.GetSensitivity()} numHotwords: ${detector.NumHotwords()}`
+            );
+            detector.ApplyFrontend(false);
+            // vad = new Snowman.SnowboyVad(resPath);
+          })
+          .then(() => {
+            postMessage({ action: "load", result: true });
+            return true;
+          });
+      }
+
+      load("common.res", "snowboy.umdl").then(() => {
+        resultContainer.textContent = "Ready";
+        inputContainer.disabled = false;
+      });
+
+      function _allocateBuffer(size) {
+        if (_bufferAddr !== null && _bufferSize === size) {
+          return;
+        }
+        _freeBuffer();
+        _bufferAddr = Snowman._malloc(size);
+        console.debug(
+          `DetectionWorker: allocated buffer with address ${_bufferAddr}`
+        );
+        _bufferSize = size;
+        console.debug(
+          `DetectionWorker: allocated buffer of ${_bufferSize} bytes`
+        );
+      }
+
+      function _freeBuffer() {
+        if (_bufferAddr === null) {
+          return;
+        }
+        Snowman._free(_bufferAddr);
+        console.debug(`DetectionWorker: freed buffer of ${_bufferSize} bytes`);
+        _bufferAddr = null;
+        _bufferSize = null;
+      }
+
+      function processAudioChunk(data) {
+        const requiredSize = data.length * data.BYTES_PER_ELEMENT;
+        _allocateBuffer(requiredSize);
+        Snowman.HEAPU8.set(data, _bufferAddr / data.BYTES_PER_ELEMENT);
+
+        const result = detector.RunDetection(_bufferAddr, data.length, false);
+
+        return result;
+      }
+
+      function printResult(result) {
+        if (result == null || result < -2) {
+          resultContainer.textContent = "Error";
+          return;
+        }
+
+        switch (result) {
+          case -2:
+            resultContainer.textContent = "Silence";
+            return;
+          case -1:
+            resultContainer.textContent = "Snowboy Error";
+            return;
+          case 0:
+            resultContainer.textContent = "No Hotword";
+            return;
+          default:
+            resultContainer.textContent = `Hotword ${result} detected!`;
+        }
+      }
+
+      inputContainer.onchange = async (e) => {
+        const [file] = e.target.files;
+        const ac = new AudioContext({ latencyHint: 0, sampleRate: 16000 });
+        let ab = await ac.decodeAudioData(await file.arrayBuffer());
+        let { sampleRate } = ab;
+        ab = Array.from({ length: ab.numberOfChannels }, (_, i) =>
+          ab.getChannelData(i)
+        );
+        const wavData = createWaveFileData(ab, false, sampleRate);
+        detector.Reset();
+        const result = processAudioChunk(wavData);
+        printResult(result);
+        console.log(`Result: ${result}`);
+      };
+    </script>
+  </body>
+</html>

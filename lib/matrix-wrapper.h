@@ -6,7 +6,7 @@
 #include <vector>
 
 namespace snowboy {
-	struct VectorBase;
+	class VectorBase;
 	struct SubMatrix;
 	struct MatrixBase {
 		size_t m_rows{0};
