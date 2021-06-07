@@ -52,7 +52,6 @@ async function load(resUrl, modelUrl) {
                 `Detector created! sensitivity: ${detector.GetSensitivity()} numHotwords: ${detector.NumHotwords()}`
             );
             detector.ApplyFrontend(false);
-            // vad = new Snowman.SnowboyVad(resPath);
         })
         .then(() => {
             postMessage({
@@ -95,11 +94,16 @@ function _freeBuffer() {
 function processAudioChunk(data) {
     const requiredSize = data.length * data.BYTES_PER_ELEMENT;
     _allocateBuffer(requiredSize);
-    Snowman.HEAP16.set(data, _bufferAddr / data.BYTES_PER_ELEMENT);
-
-    const result = detector.RunDetection(_bufferAddr, data.length, false);
-
-    return result;
+    if(data instanceof Int16Array) {
+        Snowman.HEAP16.set(data, _bufferAddr / data.BYTES_PER_ELEMENT);
+        return detector.RunDetectionI16(_bufferAddr, data.length, false);
+    } else if(data instanceof Int32Array) {
+        Snowman.HEAP32.set(data, _bufferAddr / data.BYTES_PER_ELEMENT);
+        return detector.RunDetectionI32(_bufferAddr, data.length, false);
+    } else if(data instanceof Float32Array) {
+        Snowman.HEAPF32.set(data, _bufferAddr / data.BYTES_PER_ELEMENT);
+        return detector.RunDetectionF32(_bufferAddr, data.length, false);
+    } else throw new Error("Invalid datatype passed to processAudioChunk");
 }
 
 async function init() {

@@ -14,11 +14,19 @@ static snowboy::SnowboyDetect* makeDetector(const std::string& resource_filename
 	}
 }
 
-static int SnowboyDetect_RunDetection(snowboy::SnowboyDetect& self, long jsHeapAddr, int len, bool is_end = false) {
-	const int16_t* fdata = (const int16_t*)jsHeapAddr;
-	//std::printf("RunDetection received len=%d 0=%d %d=%d\n", len, fdata[0], len - 1, fdata[len - 1]);
+static int SnowboyDetect_RunDetectionI16(snowboy::SnowboyDetect& self, long jsHeapAddr, int len, bool is_end = false) {
+	const int16_t* data = (const int16_t*)jsHeapAddr;
+	return self.SnowboyDetect::RunDetection(data, len, false);
+}
 
-	return self.SnowboyDetect::RunDetection(fdata, len, false);
+static int SnowboyDetect_RunDetectionI32(snowboy::SnowboyDetect& self, long jsHeapAddr, int len, bool is_end = false) {
+	const int32_t* data = (const int32_t*)jsHeapAddr;
+	return self.SnowboyDetect::RunDetection(data, len, false);
+}
+
+static int SnowboyDetect_RunDetectionF32(snowboy::SnowboyDetect& self, long jsHeapAddr, int len, bool is_end = false) {
+	const float* data = (const float*)jsHeapAddr;
+	return self.SnowboyDetect::RunDetection(data, len, false);
 }
 
 static snowboy::SnowboyVad* makeVad(const std::string& res_filename) {
@@ -30,11 +38,19 @@ static snowboy::SnowboyVad* makeVad(const std::string& res_filename) {
 	}
 }
 
-static int SnowboyVad_RunVad(snowboy::SnowboyVad& self, long jsHeapAddr, int len, bool is_end = false) {
-	const int32_t* fdata = (const int32_t*)jsHeapAddr;
-	std::printf("RunVad received len=%d 0=%d %d=%d\n", len, fdata[0], len - 1, fdata[len - 1]);
+static int SnowboyVad_RunVadI16(snowboy::SnowboyVad& self, long jsHeapAddr, int len, bool is_end = false) {
+	const int16_t* data = (const int16_t*)jsHeapAddr;
+	return self.SnowboyVad::RunVad(data, len, false);
+}
 
-	return self.SnowboyVad::RunVad(fdata, len, false);
+static int SnowboyVad_RunVadI32(snowboy::SnowboyVad& self, long jsHeapAddr, int len, bool is_end = false) {
+	const int32_t* data = (const int32_t*)jsHeapAddr;
+	return self.SnowboyVad::RunVad(data, len, false);
+}
+
+static int SnowboyVad_RunVadF32(snowboy::SnowboyVad& self, long jsHeapAddr, int len, bool is_end = false) {
+	const float* data = (const float*)jsHeapAddr;
+	return self.SnowboyVad::RunVad(data, len, false);
 }
 
 EMSCRIPTEN_BINDINGS(snowman) {
@@ -48,7 +64,9 @@ EMSCRIPTEN_BINDINGS(snowman) {
 		.function("SetAudioGain", &snowboy::SnowboyDetect::SetAudioGain)
 		.function("ApplyFrontend", &snowboy::SnowboyDetect::ApplyFrontend)
 		.function("Reset", &snowboy::SnowboyDetect::Reset)
-		.function("RunDetection", &SnowboyDetect_RunDetection);
+		.function("RunDetectionI16", &SnowboyDetect_RunDetectionI16)
+		.function("RunDetectionI32", &SnowboyDetect_RunDetectionI32)
+		.function("RunDetectionF32", &SnowboyDetect_RunDetectionF32);
 
 	class_<snowboy::SnowboyVad>("SnowboyVad")
 		.constructor(&makeVad, allow_raw_pointers())
@@ -57,5 +75,7 @@ EMSCRIPTEN_BINDINGS(snowman) {
 		.function("BitsPerSample", &snowboy::SnowboyVad::BitsPerSample)
 		.function("SetAudioGain", &snowboy::SnowboyVad::SetAudioGain)
 		.function("ApplyFrontend", &snowboy::SnowboyVad::ApplyFrontend)
-		.function("RunVad", &SnowboyVad_RunVad);
+		.function("RunVadI16", &SnowboyVad_RunVadI16)
+		.function("RunVadI32", &SnowboyVad_RunVadI32)
+		.function("RunVadF32", &SnowboyVad_RunVadF32);
 }

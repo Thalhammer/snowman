@@ -30,7 +30,6 @@ set(LINK_FLAGS
 	-s ERROR_ON_UNDEFINED_SYMBOLS=0
 	-s MODULARIZE=1
 	-s EXPORT_NAME=LoadSnowman
-	-s ENVIRONMENT=worker
 )
 
 add_custom_command(TARGET snowboy_wasm POST_BUILD
