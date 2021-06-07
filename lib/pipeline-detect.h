@@ -7,18 +7,17 @@ namespace snowboy {
 	struct MatrixBase;
 	struct FrameInfo;
 
-	struct InterceptStream;
-	struct GainControlStream;
+	class InterceptStream;
+	class GainControlStream;
 	struct FrontendStream;
 	struct FramerStream;
 	struct RawEnergyVadStream;
 	struct VadStateStream;
-	struct FftStream;
-	struct MfccStream;
+	class FftStream;
+	class MfccStream;
 	struct RawNnetVadStream;
-	struct EavesdropStream;
-	struct InterceptStream;
-	struct NnetStream;
+	class EavesdropStream;
+	class NnetStream;
 	struct TemplateDetectStream;
 	struct UniversalDetectStream;
 

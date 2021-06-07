@@ -10,11 +10,11 @@ namespace snowboy {
 	struct MatrixBase;
 	struct FrameInfo;
 
-	struct InterceptStream;
+	class InterceptStream;
 	struct FramerStream;
-	struct FftStream;
-	struct MfccStream;
-	struct NnetStream;
+	class FftStream;
+	class MfccStream;
+	class NnetStream;
 	struct TemplateEnrollStream;
 
 	struct FramerStreamOptions;
@@ -29,7 +29,7 @@ namespace snowboy {
 		void Register(const std::string& prefix, OptionsItf* opts);
 	};
 	class PipelinePersonalEnroll : public PipelineItf {
-		friend struct testing::Inspector;
+		friend class testing::Inspector;
 		std::unique_ptr<InterceptStream> m_interceptStream;
 		std::unique_ptr<FramerStream> m_framerStream;
 		std::unique_ptr<FftStream> m_fftStream;

@@ -11,7 +11,7 @@ namespace snowboy {
 		if (m_matrix_queue.empty()) {
 			mat->Resize(0, 0);
 			info->clear();
-			return {0x100}; // End of stream ?
+			return 0x100; // End of stream ?
 		}
 		*mat = m_matrix_queue.front();
 		*info = m_frame_info_queue.front();

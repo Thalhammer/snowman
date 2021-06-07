@@ -8,7 +8,7 @@ struct AGC_Instance;
 struct NS3_Instance;
 namespace snowboy {
 	struct OptionsItf;
-	struct Nnet;
+	class Nnet;
 	struct RawNnetVadStreamOptions {
 		int non_voice_index;
 		float non_voice_threshold;

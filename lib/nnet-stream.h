@@ -5,7 +5,7 @@
 
 namespace snowboy {
 	struct OptionsItf;
-	struct Nnet;
+	class Nnet;
 	struct NnetStreamOptions {
 		std::string model_filename;
 		bool pad_context;

@@ -9,8 +9,8 @@
 
 namespace snowboy {
 	struct FrameInfo;
-	struct ChunkInfo;
-	struct Component;
+	class ChunkInfo;
+	class Component;
 	class Nnet {
 		// TODO: Figure out names for remaining data fields...
 		bool m_pad_input;
