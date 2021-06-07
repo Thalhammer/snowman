@@ -1,8 +1,8 @@
 #include <cstdlib>
 #include <cstring>
+#include <errno.h>
 #include <snowboy-detect-c.h>
 #include <snowboy-detect.h>
-#include <errno.h>
 
 extern "C"
 {

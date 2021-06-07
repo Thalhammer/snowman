@@ -1,9 +1,9 @@
+#include <cmath>
 #include <dtw-lib.h>
 #include <limits>
 #include <matrix-wrapper.h>
 #include <snowboy-error.h>
 #include <vector-wrapper.h>
-#include <cmath>
 
 namespace snowboy {
 
