@@ -5,7 +5,6 @@
 namespace snowboy {
 	std::string Basename(const std::string& file);
 	std::string CharToString(const char& c);
-	bool CheckStdinNonBlocking();
 	template <typename T>
 	T ConvertStringTo(const std::string&);
 	template <>
@@ -16,7 +15,7 @@ namespace snowboy {
 	template <typename T>
 	inline T ConvertStringToIntegerOrFloat(const std::string& s) { return ConvertStringTo<T>(s); }
 	void FilterConfigString(bool, const std::string& prefix, std::string* config_str);
-	void* SnowboyMemalign(ulong align, ulong size);
+	void* SnowboyMemalign(size_t align, size_t size);
 	void SnowboyMemalignFree(void* ptr);
 	template <typename T>
 	void SplitStringToIntegers(const std::string& s1, const std::string& s2, std::vector<T>* out);

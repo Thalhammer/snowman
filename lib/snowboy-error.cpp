@@ -1,12 +1,19 @@
-#include <execinfo.h>
 #include <memory>
+#include <string>
 #include <snowboy-error.h>
+#ifdef __GLIBC__
+#include <execinfo.h>
+#endif
 
 namespace snowboy {
 	void snowboy_exception::capture_backtrace() noexcept {
+		#ifdef __GLIBC__
 		auto res = backtrace(m_backtrace.data(), m_backtrace.size());
 		for (size_t i = res; i < m_backtrace.size(); i++)
 			m_backtrace[i] = nullptr;
+		#else
+		m_backtrace.fill(nullptr);
+		#endif
 	}
 
 	snowboy_exception::snowboy_exception(const char* what_arg)
@@ -29,6 +36,7 @@ namespace snowboy {
 	}
 
 	std::vector<std::string> snowboy_exception::backtrace_symbols() const {
+		#ifdef __GLIBC__
 		size_t nptrs = 0;
 		for (; nptrs < m_backtrace.size() && m_backtrace[nptrs] != nullptr; nptrs++)
 			;
@@ -46,6 +54,9 @@ namespace snowboy {
 			throw;
 		}
 		return res;
+		#else
+		return {};
+		#endif
 	}
 
 } // namespace snowboy

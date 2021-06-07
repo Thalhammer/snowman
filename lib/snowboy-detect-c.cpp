@@ -2,6 +2,7 @@
 #include <cstring>
 #include <snowboy-detect-c.h>
 #include <snowboy-detect.h>
+#include <errno.h>
 
 extern "C"
 {

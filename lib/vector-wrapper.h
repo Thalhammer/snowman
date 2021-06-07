@@ -7,7 +7,7 @@
 
 namespace snowboy {
 	struct MatrixBase;
-	struct SubVector;
+	class SubVector;
 	class VectorBase {
 	protected:
 		size_t m_size{0};
@@ -148,7 +148,7 @@ namespace snowboy {
 			return *this;
 		}
 		FixedVector& operator=(const VectorBase& other) {
-			Resize(other.m_size, MatrixResizeType::kUndefined);
+			Resize(other.size(), MatrixResizeType::kUndefined);
 			CopyFromVec(other);
 			return *this;
 		}

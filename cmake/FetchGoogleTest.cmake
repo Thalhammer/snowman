@@ -1,4 +1,3 @@
-
 include(FetchContent)
 FetchContent_Declare(
   googletest

@@ -3,6 +3,7 @@
 #include <matrix-wrapper.h>
 #include <snowboy-error.h>
 #include <vector-wrapper.h>
+#include <cmath>
 
 namespace snowboy {
 
@@ -217,9 +218,9 @@ namespace snowboy {
 					continue;
 				}
 				auto fVar18 = local_1d8(iVar11, min_index) - distances(iVar11, min_index);
-				auto pfVar8_0 = std::abs(fVar18 - local_1d8(iVar11 - 1, min_index - 1));
-				auto pfVar8_1 = std::abs(fVar18 - local_1d8(iVar11, min_index - 1));
-				auto pfVar8_2 = std::abs(fVar18 - local_1d8(iVar11 - 1, min_index));
+				auto pfVar8_0 = fabs(fVar18 - local_1d8(iVar11 - 1, min_index - 1));
+				auto pfVar8_1 = fabs(fVar18 - local_1d8(iVar11, min_index - 1));
+				auto pfVar8_2 = fabs(fVar18 - local_1d8(iVar11 - 1, min_index));
 				if (pfVar8_0 <= pfVar8_1) {
 					if (pfVar8_2 >= pfVar8_0) {
 						min_index -= 1;

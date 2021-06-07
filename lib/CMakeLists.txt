@@ -44,6 +44,10 @@ set(SNOWMAN_SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/vad-state-stream.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/vector-wrapper.cpp
 )
+set(SNOWMAN_PRIVATE_OPTIONS
+    -Wall -Wextra -Winit-self -rdynamic
+    -DHAVE_POSIX_MEMALIGN -fno-omit-frame-pointer
+)
 if(SNOWMAN_BUILD_SHARED)
     add_library(snowman SHARED ${SNOWMAN_SRC})
     set_target_properties(snowman PROPERTIES VERSION ${PROJECT_VERSION})
@@ -52,11 +56,19 @@ else()
     add_library(snowman STATIC ${SNOWMAN_SRC})
 endif()
 target_compile_features(snowman PRIVATE cxx_std_11)
-target_compile_options(snowman PRIVATE -Wall -Wextra -Winit-self -rdynamic)
-target_compile_options(snowman PRIVATE -DHAVE_POSIX_MEMALIGN -fno-omit-frame-pointer)
+target_compile_options(snowman PRIVATE ${SNOWMAN_PRIVATE_OPTIONS})
 target_include_directories(snowman PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_directories(snowman PRIVATE /usr/lib/atlas-base)
 target_link_libraries(snowman m pthread f77blas cblas lapack_atlas atlas)
+
+if(SNOWMAN_BUILD_WASM)
+    add_library(snowman_wasm_lib STATIC ${SNOWMAN_SRC})
+    target_compile_features(snowman_wasm_lib PRIVATE cxx_std_11)
+    target_compile_options(snowman_wasm_lib PRIVATE ${SNOWMAN_PRIVATE_OPTIONS})
+    target_include_directories(snowman_wasm_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+    target_include_directories(snowman_wasm_lib PRIVATE /opt/kaldi/tools/CLAPACK)
+    target_link_libraries(snowman_wasm_lib dl m rt pthread)
+endif()
 
 if(SNOWMAN_BUILD_WITH_SSE3)
 target_compile_options(snowman PRIVATE -msse -msse2 -msse3 -mssse3)

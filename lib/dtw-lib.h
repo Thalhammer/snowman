@@ -4,7 +4,7 @@
 #include <vector>
 
 namespace snowboy {
-	struct VectorBase;
+	class VectorBase;
 	struct MatrixBase;
 
 	enum DistanceType { cosine = 1,

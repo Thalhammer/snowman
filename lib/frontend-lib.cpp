@@ -921,7 +921,7 @@ extern "C"
 		int maximum = 0;
 		for (size_t i = 0; i < length; i++)
 		{
-			auto absolute = abs(vector[i]);
+			auto absolute = fabs(vector[i]);
 			if (absolute > maximum)
 				maximum = absolute;
 		}

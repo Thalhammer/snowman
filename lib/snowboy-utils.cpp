@@ -22,17 +22,6 @@ namespace snowboy {
 		return res;
 	}
 
-	bool CheckStdinNonBlocking() {
-		fd_set set{};
-		struct timeval timeout {};
-		FD_ZERO(&set);
-		FD_SET(0, &set);
-		timeout.tv_sec = 0;
-		timeout.tv_usec = 1;
-		select(1, &set, nullptr, nullptr, &timeout);
-		return FD_ISSET(0, &set);
-	}
-
 	bool ConvertStringToBoolean(const std::string& val) {
 		return ConvertStringTo<bool>(val);
 	}
@@ -94,7 +83,7 @@ namespace snowboy {
 		}
 	}
 
-	void* SnowboyMemalign(ulong align, ulong size) {
+	void* SnowboyMemalign(size_t align, size_t size) {
 		void* ptr = nullptr;
 		if (posix_memalign(&ptr, align, size) == 0)
 			return ptr;
