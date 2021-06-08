@@ -27,19 +27,15 @@ async function load(resUrl, modelUrl) {
                 location.href.replace(/^blob:/, "")
             );
             console.debug(`Downloading ${fullModelUrl} to ${modelPath}`);
-            return Snowman.download(fullModelUrl, modelPath);
-        })
-        .then(() => {
             const fullResUrl = new URL(
                 resUrl,
                 location.href.replace(/^blob:/, "")
             );
             console.debug(`Downloading ${fullResUrl} to ${resPath}`);
-            return Snowman.download(fullResUrl, resPath);
+            return Promise.all([Snowman.download(fullModelUrl, modelPath), Snowman.download(fullResUrl, resPath)]);
         })
         .then(() => {
             console.debug(`Syncing filesystem`);
-
             return Snowman.syncFilesystem(false);
         })
         .then(() => {
@@ -107,8 +103,6 @@ function processAudioChunk(data) {
 }
 
 async function init() {
-    resultsContainer.textContent = "Loading...";
-
     const sampleRate = 16000;
     const mediaStream = await navigator.mediaDevices.getUserMedia({
         video: false,

@@ -1,6 +1,5 @@
 #include <cassert>
 #include <frame-info.h>
-#include <iostream>
 #include <nnet-component.h>
 #include <nnet-lib.h>
 #include <set>

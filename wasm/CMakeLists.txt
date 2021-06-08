@@ -1,6 +1,6 @@
 add_definitions(
     -r 
-	-std=c++17 
+	-std=c++11
 	-Wno-unused-function
     )
 include_directories(include ${CMAKE_SOURCE_DIR}/lib)
@@ -24,7 +24,7 @@ set(LINK_FLAGS
 	--pre-js ${CMAKE_SOURCE_DIR}/wasm/snowman.pre.js
 	--post-js ${CMAKE_SOURCE_DIR}/wasm/snowman.post.js
 	--bind
-	-std=c++17
+	-std=c++11
 	-O3
 	-s ALLOW_MEMORY_GROWTH=1
 	-s ERROR_ON_UNDEFINED_SYMBOLS=0

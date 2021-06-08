@@ -1,6 +1,5 @@
 #include <cmath>
 #include <frame-info.h>
-#include <iostream>
 #include <limits>
 #include <mfcc-stream.h>
 #include <snowboy-options.h>

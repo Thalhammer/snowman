@@ -1,4 +1,4 @@
-#include <iostream>
+#include <cstdio>
 #include <string>
 #ifdef __GLIBC__
 #include <execinfo.h>
@@ -24,10 +24,9 @@ namespace snowboy {
 #endif
 
 	void SnowboyAssertFailure(int line, const std::string& file, const std::string& func, const std::string& cond) {
-		std::cerr << "ASSERT_FAILURE (" << func << "():" << file << ":" << line << ")\n"
-				  << cond;
+		fprintf(stderr, "ASSERT_FAILURE (%s(): %s:%d)\n%s", func.c_str(), file.c_str(), line, cond.c_str());
 #ifdef __GLIBC__
-		std::cerr << GetStackTrace();
+		fprintf(stderr, "%s", GetStackTrace().c_str());
 #endif
 		std::abort();
 	}
