@@ -8,7 +8,7 @@
 
 namespace snowboy {
 	struct OptionsItf;
-	struct Nnet;
+	class Nnet;
 
 	struct UniversalDetectStreamOptions {
 		int slide_step;

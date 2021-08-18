@@ -5,7 +5,6 @@
 #include <fft-stream.h>
 #include <framer-stream.h>
 #include <intercept-stream.h>
-#include <iostream>
 #include <limits>
 #include <mfcc-stream.h>
 #include <nnet-stream.h>

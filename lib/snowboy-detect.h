@@ -4,13 +4,13 @@
 
 namespace snowboy {
 	namespace testing {
-		struct Inspector;
+		class Inspector;
 	}
 	struct WaveHeader;
-	struct PipelineDetect;
+	class PipelineDetect;
 	struct PipelineVad;
-	struct PipelinePersonalEnroll;
-	struct PipelineTemplateCut;
+	class PipelinePersonalEnroll;
+	class PipelineTemplateCut;
 	struct MatrixBase;
 
 	/**
@@ -20,7 +20,7 @@ namespace snowboy {
 	 * voice activity detection.
 	 */
 	class SnowboyDetect {
-		friend struct testing::Inspector;
+		friend class testing::Inspector;
 
 	public:
 		/**
@@ -264,7 +264,7 @@ namespace snowboy {
 	 * a VAD pipeline as well.
 	 */
 	class SnowboyVad {
-		friend struct testing::Inspector;
+		friend class testing::Inspector;
 
 	public:
 		/**
@@ -422,7 +422,7 @@ namespace snowboy {
 	 * Class that allows enrolling new personal hotwords.
 	 */
 	class SnowboyPersonalEnroll {
-		friend struct testing::Inspector;
+		friend class testing::Inspector;
 
 	public:
 		/**
@@ -559,7 +559,7 @@ namespace snowboy {
 	 * by removing all leading and trailing silence.
 	 */
 	class SnowboyTemplateCut {
-		friend struct testing::Inspector;
+		friend class testing::Inspector;
 
 	public:
 		/**

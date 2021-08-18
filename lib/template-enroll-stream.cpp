@@ -1,5 +1,4 @@
 #include <frame-info.h>
-#include <iostream>
 #include <snowboy-error.h>
 #include <snowboy-options.h>
 #include <template-enroll-stream.h>

@@ -8,11 +8,11 @@ namespace snowboy {
 	struct MatrixBase;
 	struct FrameInfo;
 
-	struct InterceptStream;
+	class InterceptStream;
 	struct FramerStream;
-	struct EavesdropStream;
-	struct FftStream;
-	struct MfccStream;
+	class EavesdropStream;
+	class FftStream;
+	class MfccStream;
 	struct RawNnetVadStream;
 
 	struct FramerStreamOptions;
