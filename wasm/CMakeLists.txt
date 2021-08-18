@@ -1,6 +1,6 @@
 add_definitions(
     -r 
-	-std=c++11
+	-std=c++17 
 	-Wno-unused-function
     )
 include_directories(include ${CMAKE_SOURCE_DIR}/lib)
@@ -24,12 +24,13 @@ set(LINK_FLAGS
 	--pre-js ${CMAKE_SOURCE_DIR}/wasm/snowman.pre.js
 	--post-js ${CMAKE_SOURCE_DIR}/wasm/snowman.post.js
 	--bind
-	-std=c++11
+	-std=c++17
 	-O3
 	-s ALLOW_MEMORY_GROWTH=1
 	-s ERROR_ON_UNDEFINED_SYMBOLS=0
 	-s MODULARIZE=1
 	-s EXPORT_NAME=LoadSnowman
+	-s ENVIRONMENT=worker
 )
 
 add_custom_command(TARGET snowboy_wasm POST_BUILD
