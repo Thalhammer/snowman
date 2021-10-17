@@ -44,7 +44,7 @@ namespace snowboy {
 					v = -1.0;
 				else
 					v = v * 1.5 - v * v * 0.5 * v;
-				ptr[i] = v;
+				ptr[i] = v * m_maxAudioAmplitude;
 			}
 		}
 		return res;
