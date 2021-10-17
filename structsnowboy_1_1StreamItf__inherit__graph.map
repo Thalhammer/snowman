@@ -1,0 +1,17 @@
+<map id="snowboy::StreamItf" name="snowboy::StreamItf">
+<area shape="rect" id="node1" title=" " alt="" coords="5,335,139,361"/>
+<area shape="rect" id="node2" href="$classsnowboy_1_1EavesdropStream.html" title=" " alt="" coords="202,5,385,32"/>
+<area shape="rect" id="node3" href="$classsnowboy_1_1FftStream.html" title=" " alt="" coords="225,56,362,83"/>
+<area shape="rect" id="node4" href="$structsnowboy_1_1FramerStream.html" title=" " alt="" coords="212,107,375,133"/>
+<area shape="rect" id="node5" href="$structsnowboy_1_1FrontendStream.html" title=" " alt="" coords="207,157,379,184"/>
+<area shape="rect" id="node6" href="$classsnowboy_1_1GainControlStream.html" title=" " alt="" coords="199,208,388,235"/>
+<area shape="rect" id="node7" href="$classsnowboy_1_1InterceptStream.html" title=" " alt="" coords="207,259,379,285"/>
+<area shape="rect" id="node8" href="$classsnowboy_1_1MfccStream.html" title=" " alt="" coords="218,309,369,336"/>
+<area shape="rect" id="node9" href="$classsnowboy_1_1NnetStream.html" title=" " alt="" coords="219,360,368,387"/>
+<area shape="rect" id="node10" href="$structsnowboy_1_1RawEnergyVadStream.html" title=" " alt="" coords="189,411,398,437"/>
+<area shape="rect" id="node11" href="$structsnowboy_1_1RawNnetVadStream.html" title=" " alt="" coords="194,461,393,488"/>
+<area shape="rect" id="node12" href="$structsnowboy_1_1TemplateDetectStream.html" title=" " alt="" coords="187,512,400,539"/>
+<area shape="rect" id="node13" href="$structsnowboy_1_1TemplateEnrollStream.html" title=" " alt="" coords="190,563,397,589"/>
+<area shape="rect" id="node14" href="$structsnowboy_1_1UniversalDetectStream.html" title=" " alt="" coords="207,614,379,655"/>
+<area shape="rect" id="node15" href="$structsnowboy_1_1VadStateStream.html" title=" " alt="" coords="206,680,381,707"/>
+</map>

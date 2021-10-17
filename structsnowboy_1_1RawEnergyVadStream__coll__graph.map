@@ -1,0 +1,11 @@
+<map id="snowboy::RawEnergyVadStream" name="snowboy::RawEnergyVadStream">
+<area shape="rect" id="node1" title=" " alt="" coords="601,175,811,201"/>
+<area shape="rect" id="node2" href="$structsnowboy_1_1StreamItf.html" title=" " alt="" coords="293,44,426,71"/>
+<area shape="rect" id="node3" title=" " alt="" coords="296,95,423,121"/>
+<area shape="rect" id="node4" href="$structsnowboy_1_1Matrix.html" title=" " alt="" coords="302,145,417,172"/>
+<area shape="rect" id="node5" href="$structsnowboy_1_1MatrixBase.html" title=" " alt="" coords="5,145,149,172"/>
+<area shape="rect" id="node6" title=" " alt="" coords="282,197,437,238"/>
+<area shape="rect" id="node7" title=" " alt="" coords="287,262,431,303"/>
+<area shape="rect" id="node8" href="$structsnowboy_1_1FrameInfo.html" title=" " alt="" coords="8,269,147,296"/>
+<area shape="rect" id="node9" href="$structsnowboy_1_1RawEnergyVadStreamOptions.html" title=" " alt="" coords="255,327,464,369"/>
+</map>

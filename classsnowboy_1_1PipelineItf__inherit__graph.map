@@ -1,0 +1,7 @@
+<map id="snowboy::PipelineItf" name="snowboy::PipelineItf">
+<area shape="rect" id="node1" title=" " alt="" coords="5,93,143,120"/>
+<area shape="rect" id="node2" href="$classsnowboy_1_1PipelineDetect.html" title=" " alt="" coords="209,5,371,32"/>
+<area shape="rect" id="node3" href="$classsnowboy_1_1PipelinePersonalEnroll.html" title=" " alt="" coords="202,57,378,98"/>
+<area shape="rect" id="node4" href="$classsnowboy_1_1PipelineTemplateCut.html" title=" " alt="" coords="191,123,389,149"/>
+<area shape="rect" id="node5" href="$structsnowboy_1_1PipelineVad.html" title=" " alt="" coords="216,173,364,200"/>
+</map>

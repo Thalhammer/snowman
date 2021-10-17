@@ -1,0 +1,20 @@
+var searchData=
+[
+  ['slidingdtw_162',['SlidingDtw',['../structsnowboy_1_1SlidingDtw.html',1,'snowboy']]],
+  ['slidingdtwoptions_163',['SlidingDtwOptions',['../structsnowboy_1_1SlidingDtwOptions.html',1,'snowboy']]],
+  ['snowboy_5fexception_164',['snowboy_exception',['../classsnowboy_1_1snowboy__exception.html',1,'snowboy']]],
+  ['snowboydetect_165',['SnowboyDetect',['../classsnowboy_1_1SnowboyDetect.html',1,'snowboy']]],
+  ['snowboypersonalenroll_166',['SnowboyPersonalEnroll',['../classsnowboy_1_1SnowboyPersonalEnroll.html',1,'snowboy']]],
+  ['snowboytemplatecut_167',['SnowboyTemplateCut',['../classsnowboy_1_1SnowboyTemplateCut.html',1,'snowboy']]],
+  ['snowboyvad_168',['SnowboyVad',['../classsnowboy_1_1SnowboyVad.html',1,'snowboy']]],
+  ['snowman_5fdetect_169',['SNOWMAN_Detect',['../structSNOWMAN__Detect.html',1,'']]],
+  ['snowman_5fpersonalenroll_170',['SNOWMAN_PersonalEnroll',['../structSNOWMAN__PersonalEnroll.html',1,'']]],
+  ['snowman_5ftemplatecut_171',['SNOWMAN_TemplateCut',['../structSNOWMAN__TemplateCut.html',1,'']]],
+  ['snowman_5fvad_172',['SNOWMAN_Vad',['../structSNOWMAN__Vad.html',1,'']]],
+  ['softmaxcomponent_173',['SoftmaxComponent',['../classsnowboy_1_1SoftmaxComponent.html',1,'snowboy']]],
+  ['splicecomponent_174',['SpliceComponent',['../classsnowboy_1_1SpliceComponent.html',1,'snowboy']]],
+  ['splitradixfft_175',['SplitRadixFft',['../structsnowboy_1_1SplitRadixFft.html',1,'snowboy']]],
+  ['streamitf_176',['StreamItf',['../structsnowboy_1_1StreamItf.html',1,'snowboy']]],
+  ['submatrix_177',['SubMatrix',['../structsnowboy_1_1SubMatrix.html',1,'snowboy']]],
+  ['subvector_178',['SubVector',['../classsnowboy_1_1SubVector.html',1,'snowboy']]]
+];

@@ -1,0 +1,10 @@
+<map id="snowboy::VadStateStream" name="snowboy::VadStateStream">
+<area shape="rect" id="node1" title=" " alt="" coords="640,145,815,172"/>
+<area shape="rect" id="node2" href="$structsnowboy_1_1StreamItf.html" title=" " alt="" coords="298,44,431,71"/>
+<area shape="rect" id="node3" href="$structsnowboy_1_1Matrix.html" title=" " alt="" coords="307,95,422,121"/>
+<area shape="rect" id="node4" href="$structsnowboy_1_1MatrixBase.html" title=" " alt="" coords="5,95,149,121"/>
+<area shape="rect" id="node5" href="$structsnowboy_1_1VadStateStreamOptions.html" title=" " alt="" coords="255,145,475,172"/>
+<area shape="rect" id="node6" title=" " alt="" coords="281,197,449,238"/>
+<area shape="rect" id="node7" title=" " alt="" coords="293,262,437,303"/>
+<area shape="rect" id="node8" href="$structsnowboy_1_1FrameInfo.html" title=" " alt="" coords="8,269,147,296"/>
+</map>
